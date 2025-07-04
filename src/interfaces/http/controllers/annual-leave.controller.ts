@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query, HttpStatus, ParseUUIDPipe } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Param,
+    Put,
+    Delete,
+    Query,
+    HttpStatus,
+    ParseUUIDPipe,
+} from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
@@ -60,7 +71,9 @@ export class AnnualLeaveController {
         description: 'Internal server error',
         type: ErrorResponseDto,
     })
-    async createAnnualLeave(@Body() dto: CreateAnnualLeaveDto): Promise<AnnualLeaveResponseDto> {
+    async createAnnualLeave(
+        @Body() dto: CreateAnnualLeaveDto,
+    ): Promise<AnnualLeaveResponseDto> {
         // TODO: Implement use case
         throw new Error('Not implemented');
     }
@@ -68,7 +81,8 @@ export class AnnualLeaveController {
     @Get(':id')
     @ApiOperation({
         summary: 'Get annual leave by ID',
-        description: 'Retrieves a specific annual leave record by its unique identifier',
+        description:
+            'Retrieves a specific annual leave record by its unique identifier',
     })
     @ApiParam({
         name: 'id',
@@ -93,7 +107,9 @@ export class AnnualLeaveController {
         description: 'Annual leave not found',
         type: ErrorResponseDto,
     })
-    async getAnnualLeaveById(@Param('id', ParseUUIDPipe) id: string): Promise<AnnualLeaveResponseDto> {
+    async getAnnualLeaveById(
+        @Param('id', ParseUUIDPipe) id: string,
+    ): Promise<AnnualLeaveResponseDto> {
         // TODO: Implement use case
         throw new Error('Not implemented');
     }
@@ -101,7 +117,8 @@ export class AnnualLeaveController {
     @Get()
     @ApiOperation({
         summary: 'Get annual leaves list',
-        description: 'Retrieves a paginated list of annual leaves with optional filtering',
+        description:
+            'Retrieves a paginated list of annual leaves with optional filtering',
     })
     @ApiQuery({
         name: 'page',
@@ -137,7 +154,9 @@ export class AnnualLeaveController {
             properties: {
                 data: {
                     type: 'array',
-                    items: { $ref: '#/components/schemas/AnnualLeaveResponseDto' },
+                    items: {
+                        $ref: '#/components/schemas/AnnualLeaveResponseDto',
+                    },
                 },
                 meta: {
                     type: 'object',
@@ -243,7 +262,9 @@ export class AnnualLeaveController {
         description: 'Annual leave not found',
         type: ErrorResponseDto,
     })
-    async deleteAnnualLeave(@Param('id', ParseUUIDPipe) id: string): Promise<{ message: string }> {
+    async deleteAnnualLeave(
+        @Param('id', ParseUUIDPipe) id: string,
+    ): Promise<{ message: string }> {
         // TODO: Implement use case
         throw new Error('Not implemented');
     }

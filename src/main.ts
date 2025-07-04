@@ -12,7 +12,7 @@ async function bootstrap() {
     app.useGlobalInterceptors(new ResponseInterceptor());
     app.useGlobalFilters(new GlobalExceptionFilter());
 
-    app.setGlobalPrefix('api/attendance');
+    app.setGlobalPrefix('api');
 
     const options = new DocumentBuilder()
         .setTitle('Attendance Management Service API')
