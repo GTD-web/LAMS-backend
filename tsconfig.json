@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "declaration": true,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "target": "ES2021",
+        "sourceMap": true,
+        "outDir": "./dist",
+        "skipLibCheck": true,
+        "baseUrl": "./",
+        "paths": {
+            "*": ["./node_modules/*"],
+            "@src/*": ["./src/*"],
+            "@libs/*": ["./libs/*"],
+            "@files/*": ["./files/*"]
+        },
+        "incremental": true
+    }
+}
