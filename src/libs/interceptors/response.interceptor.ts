@@ -1,4 +1,3 @@
-
 export interface ResponseFormat<T> {
     result: boolean;
     status: number;
@@ -16,7 +15,7 @@ export class PaginationDto<T> {
 
 // response.interceptor.ts
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
-import { CustomResponse } from '@src/shared/dtos/common/custom-response.dto';
+import { CustomResponse } from '@src/libs/dtos/common/custom-response.dto';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
