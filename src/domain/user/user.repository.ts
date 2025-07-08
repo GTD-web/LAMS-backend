@@ -4,7 +4,7 @@ import { LamsUserEntity } from './entities/lams-user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IUserDomainRepository } from './interfaces/user-repository.interface';
-import { PaginationQueryDto } from '@src/libs/dtos/pagination/pagination-query.dto';
+import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 
 /**
  * 사용자 도메인 리포지토리 구현체

@@ -4,7 +4,7 @@ import { LamsUserEntity } from './entities/lams-user.entity';
 import { IUserDomainRepository } from './interfaces/user-repository.interface';
 import { UserRole } from './entities/user.entity';
 import { LamsUserRole } from './entities/lams-user.entity';
-import { PaginationQueryDto } from '@src/libs/dtos/pagination/pagination-query.dto';
+import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { SignUpDto } from '@src/interfaces/http/dtos/user/requests/create-lams-user.dto';
 import { UpdateUserDto } from '@src/interfaces/http/dtos/user/requests/update-lams-user.dto';
 

@@ -1,6 +1,6 @@
 import { UserEntity } from '../entities/user.entity';
 import { LamsUserEntity } from '../entities/lams-user.entity';
-import { PaginationQueryDto } from '@src/libs/dtos/pagination/pagination-query.dto';
+import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 
 /**
  * 사용자 도메인 리포지토리 인터페이스

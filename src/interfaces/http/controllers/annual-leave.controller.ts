@@ -19,7 +19,7 @@ import {
 import { CreateAnnualLeaveDto } from '../dtos/annual-leave/requests/create-annual-leave.dto';
 import { UpdateAnnualLeaveDto } from '../dtos/annual-leave/requests/update-annual-leave.dto';
 import { AnnualLeaveResponseDto } from '../dtos/annual-leave/responses/annual-leave.response.dto';
-import { ErrorResponseDto } from '@src/libs/dtos/common/error-response.dto';
+import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
 
 @ApiTags('annual-leave')
 @Controller({ path: 'annual-leave', version: '1' })

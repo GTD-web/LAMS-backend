@@ -9,7 +9,6 @@ import {
     Query,
     UseGuards,
     ParseUUIDPipe,
-    HttpStatus,
     HttpCode,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
@@ -17,12 +16,12 @@ import { UserDomainService } from '@src/domain/user/user.service';
 import { UserMapper } from '@src/domain/user/mappers/user.mapper';
 import { SignUpDto } from '@src/interfaces/http/dtos/user/requests/create-lams-user.dto';
 import { UpdateUserDto, ChangePasswordDto } from '@src/interfaces/http/dtos/user/requests/update-lams-user.dto';
-import { PaginationQueryDto } from '@src/libs/dtos/pagination/pagination-query.dto';
-import { CustomResponse } from '@src/libs/dtos/common/custom-response.dto';
-import { AuthGuard } from '@src/libs/guards/auth.guard';
-import { RolesGuard } from '@src/libs/guards/roles.guard';
-import { Roles } from '@src/libs/decorators/roles.decorator';
-import { GetUser } from '@src/libs/decorators/get-user.decorator';
+import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
+import { CustomResponse } from '@src/common/dtos/common/custom-response.dto';
+import { AuthGuard } from '@src/common/guards/auth.guard';
+import { RolesGuard } from '@src/common/guards/roles.guard';
+import { Roles } from '@src/common/decorators/roles.decorator';
+import { GetUser } from '@src/common/decorators/get-user.decorator';
 import { UserRole } from '@src/domain/user/entities/user.entity';
 
 @ApiTags('users')
