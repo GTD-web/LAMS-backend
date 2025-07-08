@@ -9,11 +9,12 @@ import { AuthDomainModule } from '@src/domain/auth/auth.module';
 @Module({
     imports: [AuthDomainModule],
     providers: [
+        AuthBusinessService,
         {
             provide: 'IAuthBusinessService',
             useClass: AuthBusinessService,
         },
     ],
-    exports: ['IAuthBusinessService'],
+    exports: [AuthBusinessService, 'IAuthBusinessService'],
 })
 export class AuthBusinessModule {}

@@ -5,6 +5,7 @@ import { LamsUserEntity } from './entities/lams-user.entity';
 import { LrimUserEntity } from './entities/lrim-user.entity';
 import { UserDomainService } from './user.service';
 import { UserDomainRepository } from './user.repository';
+import { UserController } from '@src/interfaces/http/controllers/user.controller';
 
 /**
  * 사용자 도메인 모듈
@@ -19,6 +20,7 @@ import { UserDomainRepository } from './user.repository';
             useClass: UserDomainRepository,
         },
     ],
+    controllers: [UserController],
     exports: [UserDomainService, 'IUserDomainRepository'],
 })
 export class UserDomainModule {}
