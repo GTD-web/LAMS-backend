@@ -10,7 +10,7 @@ export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOption
         username: configService.get('database.username'),
         password: configService.get('database.password'),
         database: configService.get('database.database'),
-        entities: [join(__dirname, '**/*.entity.{js,ts}')],
+        entities: [join(__dirname, '../../domain/**/*.entity.{js,ts}'), join(__dirname, '../../**/*.entity.{js,ts}')],
         schema: 'public',
         synchronize: configService.get('NODE_ENV') !== 'production',
         // logging: configService.get('NODE_ENV') === 'local',

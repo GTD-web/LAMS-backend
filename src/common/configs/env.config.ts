@@ -3,8 +3,6 @@ import { registerAs } from '@nestjs/config';
 
 config();
 
-export const ENV = process.env;
-
 export default registerAs('database', () => {
     return {
         host: process.env.POSTGRES_HOST || 'localhost',

@@ -1,50 +1,32 @@
-export interface ResponseFormat<T> {
-    result: boolean;
-    status: number;
-    message: string;
-    data?: T;
-}
-
-export class PaginationDto<T> {
-    items: T[];
-    page: number;
-    total: number;
-    totalPages: number;
-    hasNext: boolean;
-}
-
-// response.interceptor.ts
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
-import { CustomResponse } from '@src/common/dtos/common/custom-response.dto';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ApiResponse } from '../interfaces/api-response.interface';
 
 @Injectable()
-export class ResponseInterceptor<T> implements NestInterceptor<T, ResponseFormat<T>> {
-    intercept(context: ExecutionContext, next: CallHandler): Observable<ResponseFormat<T>> {
-        const ctx = context.switchToHttp();
-        const response = ctx.getResponse();
-
+export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
+    intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
         return next.handle().pipe(
-            map((data) => {
-                const status = response.statusCode;
-                const result = status >= 200 && status < 300;
-                let message = 'Success';
-                let responseData = data;
-
-                if (data instanceof CustomResponse) {
-                    message = data.message;
-                    responseData = data.data;
+            map((result): ApiResponse<T> => {
+                // void나 undefined인 경우 처리
+                if (result === undefined || result === null) {
+                    return {
+                        success: true,
+                        message: '요청이 성공적으로 처리되었습니다.',
+                        data: null as T,
+                    };
                 }
 
+                // 객체이고 data 프로퍼티가 있는지 확인
+                const hasDataProperty = result && typeof result === 'object' && 'data' in result;
+
                 return {
-                    result,
-                    status,
-                    message,
-                    data: responseData || undefined,
+                    success: true,
+                    message: '요청이 성공적으로 처리되었습니다.',
+                    data: hasDataProperty ? result.data : result,
+                    ...(result && typeof result === 'object' && 'meta' in result && { meta: result.meta }),
                 };
             }),
         );
     }
 }
-export { CustomResponse };

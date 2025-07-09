@@ -1,7 +1,7 @@
 import { UserEntity } from '../entities/user.entity';
 import { LamsUserEntity } from '../entities/lams-user.entity';
-import { SignUpDto } from '@src/interfaces/http/dtos/user/requests/create-lams-user.dto';
-import { UpdateUserDto, ChangePasswordDto } from '@src/interfaces/http/dtos/user/requests/update-lams-user.dto';
+import { SignUpDto } from '@src/business/user/dto/requests/create-lams-user.dto';
+import { UpdateUserDto, ChangePasswordDto } from '@src/business/user/dto/requests/update-lams-user.dto';
 
 /**
  * 사용자 매퍼 클래스
@@ -30,7 +30,6 @@ export class UserMapper {
     static fromUpdateUserDto(dto: UpdateUserDto) {
         return {
             username: dto.username,
-            password: dto.password,
         };
     }
 
@@ -41,7 +40,8 @@ export class UserMapper {
      */
     static fromChangePasswordDto(dto: ChangePasswordDto) {
         return {
-            newPassword: dto.password,
+            currentPassword: dto.currentPassword,
+            newPassword: dto.newPassword,
         };
     }
 

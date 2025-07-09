@@ -1,45 +1,82 @@
-import { Injectable } from '@nestjs/common';
-import { AuthDomainService } from '@src/domain/auth/auth.service';
-import { AuthPayloadEntity } from '@src/domain/auth/entities/auth-payload.entity';
-import { IAuthBusinessService } from './interfaces/auth-business.interface';
-import { AuthMapper } from './mappers/auth.mapper';
+import { Injectable, Inject, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UserRole } from '@src/domain/user/entities/user.entity';
+
+import { UserDomainService } from '@src/domain/user/user.service';
+import { LoginResponseDto } from '../user/dto/responses/login-response.dto';
+import { AuthPayloadDto } from './dto/responses/auth-payload.dto';
 
 /**
- * 인증 비즈니스 서비스
- * - 인증 관련 비즈니스 로직을 처리
- * - 도메인 서비스와 인터페이스 계층 간의 중재 역할
+ * 인증 도메인 서비스
+ * - 인증 관련 핵심 비즈니스 로직을 처리
+ * - JWT 토큰 생성 및 검증 담당
  */
 @Injectable()
-export class AuthBusinessService implements IAuthBusinessService {
-    constructor(private readonly authDomainService: AuthDomainService) {}
+export class AuthBusinessService {
+    constructor(private readonly userService: UserDomainService, private readonly jwtService: JwtService) {}
 
     /**
-     * 사용자 로그인
-     * @param username 사용자명
+     * 사용자 인증
+     * @param email 사용자명
      * @param password 비밀번호
-     * @returns 인증 토큰
+     * @returns 인증 성공 시 사용자 정보, 실패 시 null
      */
-    async login(username: string, password: string): Promise<string> {
-        return await this.authDomainService.login(username, password);
+    async validateUser(email: string, password: string): Promise<AuthPayloadDto | null> {
+        if (!email || !password || email.trim().length === 0 || password.trim().length === 0) {
+            throw new BadRequestException('유효하지 않은 로그인 정보입니다.');
+        }
+
+        const user = await this.userService.findUserByEmail(email);
+
+        if (!user) {
+            return null;
+        }
+
+        if (!user.isActive) {
+            throw new UnauthorizedException('비활성화된 사용자입니다.');
+        }
+
+        const isPasswordValid = user.validatePassword(password);
+        if (!isPasswordValid) {
+            return null;
+        }
+
+        return new AuthPayloadDto(user.userId, user.roles as UserRole[]);
     }
 
     /**
-     * 토큰 검증
+     * JWT 토큰 생성
+     * @param payload 토큰에 포함될 페이로드
+     * @returns JWT 토큰
+     */
+    generateToken(payload: AuthPayloadDto): string {
+        const tokenPayload = {
+            sub: payload.sub,
+            roles: payload.roles,
+        };
+
+        return this.jwtService.sign(tokenPayload);
+    }
+
+    /**
+     * JWT 토큰 검증
      * @param token JWT 토큰
-     * @returns 검증된 사용자 정보 또는 null
+     * @returns 검증 성공 시 페이로드, 실패 시 null
      */
-    validateToken(token: string): AuthPayloadEntity | null {
-        return this.authDomainService.verifyToken(token);
-    }
+    verifyToken(token: string): AuthPayloadDto | null {
+        try {
+            if (!token || token.trim().length === 0) {
+                return null;
+            }
 
-    /**
-     * 사용자 인증 검증
-     * @param username 사용자명
-     * @param password 비밀번호
-     * @returns 인증된 사용자 정보 또는 null
-     */
-    async validateUser(username: string, password: string): Promise<AuthPayloadEntity | null> {
-        return await this.authDomainService.validateUser(username, password);
+            // Bearer 토큰에서 실제 토큰 추출
+            const cleanToken = token.startsWith('Bearer ') ? token.substring(7) : token;
+            const decoded = this.jwtService.verify(cleanToken);
+
+            return new AuthPayloadDto(decoded.sub, decoded.roles as UserRole[], decoded.exp);
+        } catch (error) {
+            return null;
+        }
     }
 
     /**
@@ -47,8 +84,8 @@ export class AuthBusinessService implements IAuthBusinessService {
      * @param token JWT 토큰
      * @returns 사용자 정보 또는 null
      */
-    extractUserFromToken(token: string): AuthPayloadEntity | null {
-        return this.authDomainService.extractUserFromToken(token);
+    extractUserFromToken(token: string): AuthPayloadDto | null {
+        return this.verifyToken(token);
     }
 
     /**
@@ -57,6 +94,34 @@ export class AuthBusinessService implements IAuthBusinessService {
      * @returns 만료 여부
      */
     isTokenExpired(token: string): boolean {
-        return this.authDomainService.isTokenExpired(token);
+        const payload = this.verifyToken(token);
+        if (!payload) {
+            return true;
+        }
+
+        return payload.isExpired();
+    }
+
+    /**
+     * 로그인 처리
+     * @param email 이메일
+     * @param password 비밀번호
+     * @returns 인증 토큰
+     */
+    async login(email: string, password: string): Promise<LoginResponseDto> {
+        if (!email || !password || email.trim().length === 0 || password.trim().length === 0) {
+            throw new BadRequestException('유효하지 않은 로그인 정보입니다.');
+        }
+
+        const user = await this.validateUser(email, password);
+
+        if (!user) {
+            throw new UnauthorizedException('잘못된 사용자명 또는 비밀번호입니다.');
+        }
+
+        const token = this.generateToken(user);
+        return {
+            token,
+        };
     }
 }

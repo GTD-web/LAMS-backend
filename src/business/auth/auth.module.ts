@@ -1,20 +1,18 @@
 import { Module } from '@nestjs/common';
 import { AuthBusinessService } from './auth.service';
-import { AuthDomainModule } from '@src/domain/auth/auth.module';
+import { UserDomainModule } from '@src/domain/user/user.module';
+import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
+import { AuthController } from '@src/business/auth/auth.controller';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 /**
  * 인증 비즈니스 모듈
  * - 인증 비즈니스 계층의 컴포넌트들을 관리
  */
 @Module({
-    imports: [AuthDomainModule],
-    providers: [
-        AuthBusinessService,
-        {
-            provide: 'IAuthBusinessService',
-            useClass: AuthBusinessService,
-        },
-    ],
-    exports: [AuthBusinessService, 'IAuthBusinessService'],
+    imports: [UserDomainModule],
+    providers: [AuthBusinessService, JwtAuthGuard, JwtStrategy],
+    controllers: [AuthController],
+    exports: [AuthBusinessService],
 })
-export class AuthBusinessModule {}
+export class AuthModule {}

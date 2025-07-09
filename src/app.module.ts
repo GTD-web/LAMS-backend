@@ -6,10 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './common/configs/typeorm.config';
 import { JwtModule } from '@nestjs/jwt';
 import databaseConfig, { JWT_CONFIG } from './common/configs/env.config';
+import { AuthModule } from './business/auth/auth.module';
 import { jwtConfig } from './common/configs/jwt.config';
-import { UserDomainModule } from './domain/user/user.module';
-import { AuthController } from './interfaces/http/controllers/auth.controller';
-import { AuthBusinessModule } from './business/auth/auth.module';
+import { SeedModule } from './common/seeds/seed.module';
+import { UserModule } from './business/user/user.module';
 
 @Module({
     imports: [
@@ -17,19 +17,20 @@ import { AuthBusinessModule } from './business/auth/auth.module';
             isGlobal: true,
             load: [databaseConfig, JWT_CONFIG],
         }),
+        TypeOrmModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: typeOrmConfig,
+        }),
         JwtModule.registerAsync({
             global: true,
             useFactory: jwtConfig,
             inject: [ConfigService],
         }),
-        TypeOrmModule.forRootAsync({
-            inject: [ConfigService],
-            useFactory: typeOrmConfig,
-        }),
-        UserDomainModule,
-        AuthBusinessModule,
+        UserModule,
+        AuthModule,
+        SeedModule,
     ],
-    controllers: [AppController, AuthController],
+    controllers: [AppController],
     providers: [AppService],
 })
 export class AppModule {}
