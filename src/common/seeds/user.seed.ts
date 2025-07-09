@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
-import { UserRole } from '@src/domain/user/entities/user.entity';
+import { UserRole } from '@src/domain/user/enum/user.enum';
 
 /**
  * 사용자 시드 데이터 서비스

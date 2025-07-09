@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AuthBusinessService } from './auth.service';
+import { AuthBusinessService } from './auth.business';
 import { UserDomainModule } from '@src/domain/user/user.module';
 import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
 import { AuthController } from '@src/business/auth/auth.controller';
@@ -15,4 +15,4 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     controllers: [AuthController],
     exports: [AuthBusinessService],
 })
-export class AuthModule {}
+export class AuthBusinessModule {}

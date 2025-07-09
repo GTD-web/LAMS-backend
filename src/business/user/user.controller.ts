@@ -15,12 +15,12 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth }
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { Roles } from '@src/common/decorators/roles.decorator';
 import { GetUser } from '@src/common/decorators/get-user.decorator';
-import { UserRole } from '@src/domain/user/entities/user.entity';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { UserBusinessService } from '@src/business/user/user-business.service';
+import { UserBusinessService } from '@src/business/user/user.business';
 import { SignUpDto } from './dto/requests/create-lams-user.dto';
 import { UpdateUserDto, ChangePasswordDto } from './dto/requests/update-lams-user.dto';
 import { UserResponseDto } from './dto/responses/user-response.dto';
+import { UserRole } from '@src/domain/user/enum/user.enum';
 
 @ApiTags('users')
 @Controller('users')

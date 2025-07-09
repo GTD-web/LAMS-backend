@@ -1,10 +1,10 @@
 import { Injectable, Inject, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserRole } from '@src/domain/user/entities/user.entity';
 
 import { UserDomainService } from '@src/domain/user/user.service';
 import { LoginResponseDto } from '../user/dto/responses/login-response.dto';
 import { AuthPayloadDto } from './dto/responses/auth-payload.dto';
+import { UserRole } from '@src/domain/user/enum/user.enum';
 
 /**
  * 인증 도메인 서비스

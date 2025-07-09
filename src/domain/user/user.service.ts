@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException, Inject } from '@nestjs/common';
-import { UserEntity, UserRole } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { UserDomainRepository } from './user.repository';
 import { BaseService } from '@src/common/services/base.service';
 import { LamsUserEntity } from './entities/lams-user.entity';
 import { UpdateUserDto } from '@src/business/user/dto/requests/update-lams-user.dto';
+import { UserRole } from './enum/user.enum';
 
 /**
  * 사용자 도메인 서비스

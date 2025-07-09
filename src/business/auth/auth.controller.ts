@@ -1,7 +1,7 @@
 import { GetUser } from '@src/common/decorators/get-user.decorator';
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthBusinessService } from '@src/business/auth/auth.service';
+import { AuthBusinessService } from '@src/business/auth/auth.business';
 import { Public } from '@src/common/decorators/public.decorator';
 import { UserEntity } from '@src/domain/user/entities/user.entity';
 import { LoginDto } from '../user/dto/requests/login-lams-user.dto';

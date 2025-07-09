@@ -6,10 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './common/configs/typeorm.config';
 import { JwtModule } from '@nestjs/jwt';
 import databaseConfig, { JWT_CONFIG } from './common/configs/env.config';
-import { AuthModule } from './business/auth/auth.module';
+import { AuthBusinessModule } from './business/auth/auth-business.module';
 import { jwtConfig } from './common/configs/jwt.config';
 import { SeedModule } from './common/seeds/seed.module';
-import { UserModule } from './business/user/user.module';
+import { UserBusinessModule } from './business/user/user-business.module';
+import { EmployeeBusinessModule } from './business/employee/employee-business.module';
 
 @Module({
     imports: [
@@ -26,9 +27,10 @@ import { UserModule } from './business/user/user.module';
             useFactory: jwtConfig,
             inject: [ConfigService],
         }),
-        UserModule,
-        AuthModule,
+        UserBusinessModule,
+        AuthBusinessModule,
         SeedModule,
+        EmployeeBusinessModule,
     ],
     controllers: [AppController],
     providers: [AppService],

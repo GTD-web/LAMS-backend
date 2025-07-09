@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '@src/domain/user/entities/user.entity';
+import { UserRole } from '@src/domain/user/enum/user.enum';
 import { IsArray, IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
 export class UserResponseDto {

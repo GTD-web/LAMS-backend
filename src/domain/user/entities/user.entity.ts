@@ -1,5 +1,4 @@
 import * as bcrypt from 'bcrypt';
-import { Exclude } from 'class-transformer';
 import {
     AfterLoad,
     BeforeInsert,
@@ -11,22 +10,7 @@ import {
     TableInheritance,
     UpdateDateColumn,
 } from 'typeorm';
-
-export enum UserRole {
-    SYSTEM_ADMIN = 'SYSTEM_ADMIN',
-    ATTENDANCE_ADMIN = 'ATTENDANCE_ADMIN',
-    ATTENDANCE_USER = 'ATTENDANCE_USER',
-    PROJECT_ADMIN = 'PROJECT_ADMIN',
-    PROJECT_USER = 'PROJECT_USER',
-    SYSTEM_USER = 'SYSTEM_USER',
-    LRIM_USER = 'LRIM_USER',
-    LRIM_ADMIN = 'LRIM_ADMIN',
-}
-
-export enum SystemRole {
-    SYSTEM_ADMIN = 'SYSTEM_ADMIN',
-    SYSTEM_USER = 'SYSTEM_USER',
-}
+import { SystemRole, UserRole } from '../enum/user.enum';
 
 @Entity()
 @TableInheritance({ column: { type: 'varchar', name: 'type' } })
@@ -120,9 +104,4 @@ export class UserEntity {
 
         this.roles.sort((a, b) => roleOrder.indexOf(a as UserRole) - roleOrder.indexOf(b as UserRole));
     }
-
-    // @AfterLoad()
-    // deleteProps() {
-    //     delete this.password;
-    // }
 }

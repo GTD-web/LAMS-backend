@@ -2,11 +2,12 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { GetUser } from '@src/common/decorators/get-user.decorator';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { UserEntity, UserRole } from '@src/domain/user/entities/user.entity';
+import { UserEntity } from '@src/domain/user/entities/user.entity';
 import { UserDomainService } from '@src/domain/user/user.service';
 import { plainToInstance } from 'class-transformer';
 import { UpdateUserDto } from './dto/requests/update-lams-user.dto';
 import { UserResponseDto } from './dto/responses/user-response.dto';
+import { UserRole } from '@src/domain/user/enum/user.enum';
 
 /**
  * 사용자 비즈니스 서비스
