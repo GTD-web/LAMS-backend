@@ -61,8 +61,8 @@ export class UserEntity {
         return bcrypt.compareSync(password, this.password);
     }
 
-    updatePassword(password: string) {
-        this.password = bcrypt.hashSync(password, 10);
+    updateHashedPassword(password: string) {
+        return bcrypt.hashSync(password, 10);
     }
 
     setSystemRole(role: SystemRole) {

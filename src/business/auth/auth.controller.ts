@@ -3,9 +3,9 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthBusinessService } from '@src/business/auth/auth-business.service';
 import { Public } from '@src/common/decorators/public.decorator';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
 import { LoginDto } from '../user/dto/requests/login-lams-user.dto';
 import { LoginResponseDto } from '../user/dto/responses/login-response.dto';
+import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 
 @Controller('admin/auth')
 @ApiTags('인증')
@@ -27,7 +27,7 @@ export class AuthController {
     @ApiOperation({ summary: '토큰 검증 테스트 #사용자' })
     @ApiResponse({ status: 200, description: '토큰 검증 성공' })
     @ApiResponse({ status: 401, description: '토큰 검증 실패' })
-    async validateToken(@GetUser() user: UserEntity) {
+    async validateToken(@GetUser() user: LamsUserEntity) {
         return user;
     }
 }

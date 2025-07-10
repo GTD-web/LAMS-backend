@@ -27,10 +27,6 @@ export class EmployeeBusinessService {
         employeeId: string,
         dto: UpdateEmployeeQuitedAtDto,
     ): Promise<{ employeeInfoEntity: EmployeeInfoEntity; beforeEmployee: EmployeeInfoEntity }> {
-        if (!employeeId) {
-            throw new BadRequestException('직원 ID는 필수입니다.');
-        }
-
         const employee = await this.employeeDomainService.findEmployeeById(employeeId);
         if (!employee) {
             throw new NotFoundException('직원을 찾을 수 없습니다.');
@@ -55,10 +51,6 @@ export class EmployeeBusinessService {
         employeeId: string,
         dto: UpdateEmployeeEntryAtDto,
     ): Promise<{ employeeInfoEntity: EmployeeInfoEntity; beforeEmployee: EmployeeInfoEntity }> {
-        if (!employeeId) {
-            throw new BadRequestException('직원 ID는 필수입니다.');
-        }
-
         const employee = await this.employeeDomainService.findEmployeeById(employeeId);
         if (!employee) {
             throw new NotFoundException('직원을 찾을 수 없습니다.');
@@ -80,16 +72,12 @@ export class EmployeeBusinessService {
      * 직원 제외 토글 - 비즈니스 크리티컬: 로그 필요
      */
     async excludeEmployeeToggle(employeeId: string): Promise<EmployeeInfoEntity> {
-        if (!employeeId) {
-            throw new BadRequestException('직원 ID는 필수입니다.');
-        }
-
         const employee = await this.employeeDomainService.findEmployeeById(employeeId);
         if (!employee) {
             throw new NotFoundException('직원을 찾을 수 없습니다.');
         }
 
-        const result = await this.employeeDomainService.toggleExcludeEmployee(employeeId);
+        const result = await this.employeeDomainService.toggleExcludeEmployee(employee);
         this.logger.log(
             `직원 제외 토글 완료: ${employee.employeeName}(${employee.employeeNumber}) - 제외 여부: ${result.isExcludedFromCalculation}`,
         );
@@ -100,14 +88,6 @@ export class EmployeeBusinessService {
      * 생일 입력 - 비즈니스 크리티컬: 로그 필요
      */
     async inputBirthday(employeeId: string, birthDate: string): Promise<EmployeeInfoEntity> {
-        if (!employeeId) {
-            throw new BadRequestException('직원 ID는 필수입니다.');
-        }
-
-        if (!birthDate) {
-            throw new BadRequestException('생년월일은 필수입니다.');
-        }
-
         // 날짜 형식 검증
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(birthDate)) {
@@ -128,10 +108,6 @@ export class EmployeeBusinessService {
      * 직원 삭제 - 비즈니스 크리티컬: 로그 필요
      */
     async deleteEmployee(employeeId: string): Promise<boolean> {
-        if (!employeeId) {
-            throw new BadRequestException('직원 ID는 필수입니다.');
-        }
-
         const employee = await this.employeeDomainService.findEmployeeById(employeeId);
         if (!employee) {
             throw new NotFoundException('직원을 찾을 수 없습니다.');
@@ -146,10 +122,6 @@ export class EmployeeBusinessService {
      * 사번으로 직원 조회 - 단순 조회: 로그 불필요
      */
     async getEmployeeByEmployeeNumber(employeeNumber: string): Promise<EmployeeInfoEntity> {
-        if (!employeeNumber) {
-            throw new BadRequestException('사번은 필수입니다.');
-        }
-
         const employee = await this.employeeDomainService.findEmployeeByEmployeeNumber(employeeNumber);
         if (!employee) {
             throw new NotFoundException('직원을 찾을 수 없습니다.');
@@ -166,19 +138,19 @@ export class EmployeeBusinessService {
         return result;
     }
 
-    /**
-     * 연차 생성 또는 업데이트
-     */
-    private async createOrUpdateAnnualLeave(employeeId: string, year: number): Promise<void> {
-        return new Promise((resolve) => {
-            this.eventEmitter.emit('annual-leave.create', { employeeId, year });
+    // /**
+    //  * 연차 생성 또는 업데이트
+    //  */
+    // private async createOrUpdateAnnualLeave(employeeId: string, year: number): Promise<void> {
+    //     return new Promise((resolve) => {
+    //         this.eventEmitter.emit('annual-leave.create', { employeeId, year });
 
-            // 이벤트 핸들러가 작업을 완료했음을 알리는 이벤트를 기다립니다.
-            this.eventEmitter.once(`annual-leave.created.${employeeId}.${year}`, () => {
-                resolve();
-            });
-        });
-    }
+    //         // 이벤트 핸들러가 작업을 완료했음을 알리는 이벤트를 기다립니다.
+    //         this.eventEmitter.once(`annual-leave.created.${employeeId}.${year}`, () => {
+    //             resolve();
+    //         });
+    //     });
+    // }
 
     /**
      * 날짜 범위 생성 유틸리티

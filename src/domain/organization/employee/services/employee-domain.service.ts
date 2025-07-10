@@ -22,8 +22,7 @@ export class EmployeeDomainService {
         try {
             return await this.employeeRepository.findByEmployeeId(employeeId);
         } catch (error) {
-            this.logger.error(`직원 ID로 조회 실패: ${employeeId}`, error.stack);
-            throw new BadRequestException('직원 조회 중 오류가 발생했습니다.');
+            throw new BadRequestException('직원 조회 중 오류가 발생했습니다.', error.message);
         }
     }
 
@@ -34,8 +33,7 @@ export class EmployeeDomainService {
         try {
             return await this.employeeRepository.findByEmployeeNumber(employeeNumber);
         } catch (error) {
-            this.logger.error(`사번으로 직원 조회 실패: ${employeeNumber}`, error.stack);
-            throw new BadRequestException('직원 조회 중 오류가 발생했습니다.');
+            throw new BadRequestException('직원 조회 중 오류가 발생했습니다.', error.message);
         }
     }
 
@@ -44,14 +42,8 @@ export class EmployeeDomainService {
      */
     async updateQuitedAt(employeeId: string, quitedAt: string): Promise<EmployeeInfoEntity> {
         try {
-            const employee = await this.employeeRepository.findByEmployeeId(employeeId);
-            if (!employee) {
-                throw new NotFoundException('해당 직원을 찾을 수 없습니다.');
-            }
-
             return await this.employeeRepository.updateEmployee(employeeId, { quitedAt });
         } catch (error) {
-            this.logger.error(`퇴사일 업데이트 실패: ${employeeId}`, error.stack);
             if (error instanceof NotFoundException) {
                 throw error;
             }
@@ -64,14 +56,8 @@ export class EmployeeDomainService {
      */
     async updateEntryAt(employeeId: string, entryAt: string): Promise<EmployeeInfoEntity> {
         try {
-            const employee = await this.employeeRepository.findByEmployeeId(employeeId);
-            if (!employee) {
-                throw new NotFoundException('해당 직원을 찾을 수 없습니다.');
-            }
-
             return await this.employeeRepository.updateEmployee(employeeId, { entryAt });
         } catch (error) {
-            this.logger.error(`입사일 업데이트 실패: ${employeeId}`, error.stack);
             if (error instanceof NotFoundException) {
                 throw error;
             }
@@ -82,17 +68,11 @@ export class EmployeeDomainService {
     /**
      * 직원 제외 토글
      */
-    async toggleExcludeEmployee(employeeId: string): Promise<EmployeeInfoEntity> {
+    async toggleExcludeEmployee(employee: EmployeeInfoEntity): Promise<EmployeeInfoEntity> {
         try {
-            const employee = await this.employeeRepository.findByEmployeeId(employeeId);
-            if (!employee) {
-                throw new NotFoundException('해당 직원을 찾을 수 없습니다.');
-            }
-
             const isExcludedFromCalculation = !employee.isExcludedFromCalculation;
-            return await this.employeeRepository.updateEmployee(employeeId, { isExcludedFromCalculation });
+            return await this.employeeRepository.updateEmployee(employee.employeeId, { isExcludedFromCalculation });
         } catch (error) {
-            this.logger.error(`직원 제외 토글 실패: ${employeeId}`, error.stack);
             if (error instanceof NotFoundException) {
                 throw error;
             }
@@ -105,14 +85,8 @@ export class EmployeeDomainService {
      */
     async updateBirthDate(employeeId: string, birthDate: string): Promise<EmployeeInfoEntity> {
         try {
-            const employee = await this.employeeRepository.findByEmployeeId(employeeId);
-            if (!employee) {
-                throw new NotFoundException('해당 직원을 찾을 수 없습니다.');
-            }
-
             return await this.employeeRepository.updateEmployee(employeeId, { birthDate });
         } catch (error) {
-            this.logger.error(`생일 업데이트 실패: ${employeeId}`, error.stack);
             if (error instanceof NotFoundException) {
                 throw error;
             }
@@ -125,11 +99,6 @@ export class EmployeeDomainService {
      */
     async deleteEmployee(employeeId: string): Promise<boolean> {
         try {
-            const employee = await this.employeeRepository.findByEmployeeId(employeeId);
-            if (!employee) {
-                throw new NotFoundException('해당 직원을 찾을 수 없습니다.');
-            }
-
             return await this.employeeRepository.deleteEmployee(employeeId);
         } catch (error) {
             this.logger.error(`직원 삭제 실패: ${employeeId}`, error.stack);

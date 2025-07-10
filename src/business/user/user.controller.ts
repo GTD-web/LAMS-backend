@@ -16,7 +16,7 @@ import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query
 import { Roles } from '@src/common/decorators/roles.decorator';
 import { GetUser } from '@src/common/decorators/get-user.decorator';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { UserBusinessService } from '@src/business/user/user-business.service';
+import { UserBusinessService } from '@src/business/user/user.business';
 import { SignUpDto } from './dto/requests/create-lams-user.dto';
 import { UpdateUserDto, ChangePasswordDto } from './dto/requests/update-lams-user.dto';
 import { UserResponseDto } from './dto/responses/user-response.dto';

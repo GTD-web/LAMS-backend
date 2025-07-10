@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { EmployeeBusinessService } from './employee-business';
+import { EmployeeBusinessService } from './employee.business';
 import { EmployeeDomainModule } from '@src/domain/organization/employee/employee-domain.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 

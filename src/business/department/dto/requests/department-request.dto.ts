@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsUUID, IsBoolean, Length } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length, IsUUID, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 /**
@@ -9,54 +9,46 @@ export class CreateDepartmentDto {
     @ApiProperty({
         description: '부서명',
         example: '개발팀',
-        minLength: 1,
+        minLength: 2,
         maxLength: 100,
     })
     @IsString({ message: '부서명은 문자열이어야 합니다.' })
     @IsNotEmpty({ message: '부서명은 필수입니다.' })
-    @Length(1, 100, { message: '부서명은 1자 이상 100자 이하여야 합니다.' })
+    @Length(2, 100, { message: '부서명은 2자 이상 100자 이하여야 합니다.' })
     @Transform(({ value }) => value?.trim())
     readonly departmentName: string;
 
     @ApiPropertyOptional({
         description: '부서 코드',
         example: 'DEV001',
-        maxLength: 50,
+        minLength: 2,
+        maxLength: 20,
     })
     @IsOptional()
     @IsString({ message: '부서 코드는 문자열이어야 합니다.' })
-    @Length(1, 50, { message: '부서 코드는 1자 이상 50자 이하여야 합니다.' })
+    @Length(2, 20, { message: '부서 코드는 2자 이상 20자 이하여야 합니다.' })
     @Transform(({ value }) => value?.trim())
     readonly departmentCode?: string;
 
     @ApiPropertyOptional({
-        description: 'MMS 부서 ID',
-        example: 'mms-dept-001',
-        maxLength: 100,
-    })
-    @IsOptional()
-    @IsString({ message: 'MMS 부서 ID는 문자열이어야 합니다.' })
-    @Length(1, 100, { message: 'MMS 부서 ID는 1자 이상 100자 이하여야 합니다.' })
-    @Transform(({ value }) => value?.trim())
-    readonly mmsDepartmentId?: string;
-
-    @ApiPropertyOptional({
         description: '상위 부서 ID',
-        example: 'parent-uuid-v4-string',
+        example: 'uuid-v4-string',
         format: 'uuid',
     })
     @IsOptional()
-    @IsUUID('4', { message: '상위 부서 ID는 유효한 UUID여야 합니다.' })
+    @IsString({ message: '상위 부서 ID는 문자열이어야 합니다.' })
     readonly parentDepartmentId?: string;
 
     @ApiPropertyOptional({
-        description: '조직도 정보 ID',
-        example: 'org-chart-uuid-v4-string',
-        format: 'uuid',
+        description: '부서 설명',
+        example: '소프트웨어 개발을 담당하는 부서',
+        maxLength: 500,
     })
     @IsOptional()
-    @IsUUID('4', { message: '조직도 정보 ID는 유효한 UUID여야 합니다.' })
-    readonly orgChartInfoId?: string;
+    @IsString({ message: '부서 설명은 문자열이어야 합니다.' })
+    @Length(0, 500, { message: '부서 설명은 500자 이하여야 합니다.' })
+    @Transform(({ value }) => value?.trim())
+    readonly description?: string;
 }
 
 /**
@@ -66,63 +58,46 @@ export class UpdateDepartmentDto {
     @ApiPropertyOptional({
         description: '부서명',
         example: '개발팀',
-        minLength: 1,
+        minLength: 2,
         maxLength: 100,
     })
     @IsOptional()
     @IsString({ message: '부서명은 문자열이어야 합니다.' })
-    @IsNotEmpty({ message: '부서명은 필수입니다.' })
-    @Length(1, 100, { message: '부서명은 1자 이상 100자 이하여야 합니다.' })
+    @Length(2, 100, { message: '부서명은 2자 이상 100자 이하여야 합니다.' })
     @Transform(({ value }) => value?.trim())
     readonly departmentName?: string;
 
     @ApiPropertyOptional({
         description: '부서 코드',
         example: 'DEV001',
-        maxLength: 50,
+        minLength: 2,
+        maxLength: 20,
     })
     @IsOptional()
     @IsString({ message: '부서 코드는 문자열이어야 합니다.' })
-    @Length(1, 50, { message: '부서 코드는 1자 이상 50자 이하여야 합니다.' })
+    @Length(2, 20, { message: '부서 코드는 2자 이상 20자 이하여야 합니다.' })
     @Transform(({ value }) => value?.trim())
     readonly departmentCode?: string;
 
     @ApiPropertyOptional({
-        description: 'MMS 부서 ID',
-        example: 'mms-dept-001',
-        maxLength: 100,
-    })
-    @IsOptional()
-    @IsString({ message: 'MMS 부서 ID는 문자열이어야 합니다.' })
-    @Length(1, 100, { message: 'MMS 부서 ID는 1자 이상 100자 이하여야 합니다.' })
-    @Transform(({ value }) => value?.trim())
-    readonly mmsDepartmentId?: string;
-
-    @ApiPropertyOptional({
         description: '상위 부서 ID',
-        example: 'parent-uuid-v4-string',
+        example: 'uuid-v4-string',
         format: 'uuid',
     })
     @IsOptional()
-    @IsUUID('4', { message: '상위 부서 ID는 유효한 UUID여야 합니다.' })
+    @IsString({ message: '상위 부서 ID는 문자열이어야 합니다.' })
     readonly parentDepartmentId?: string;
 
     @ApiPropertyOptional({
-        description: '조직도 정보 ID',
-        example: 'org-chart-uuid-v4-string',
-        format: 'uuid',
+        description: '부서 설명',
+        example: '소프트웨어 개발을 담당하는 부서',
+        maxLength: 500,
     })
     @IsOptional()
-    @IsUUID('4', { message: '조직도 정보 ID는 유효한 UUID여야 합니다.' })
-    readonly orgChartInfoId?: string;
-
-    @ApiPropertyOptional({
-        description: '제외 여부',
-        example: false,
-    })
-    @IsOptional()
-    @IsBoolean({ message: '제외 여부는 boolean 값이어야 합니다.' })
-    readonly isExclude?: boolean;
+    @IsString({ message: '부서 설명은 문자열이어야 합니다.' })
+    @Length(0, 500, { message: '부서 설명은 500자 이하여야 합니다.' })
+    @Transform(({ value }) => value?.trim())
+    readonly description?: string;
 }
 
 /**

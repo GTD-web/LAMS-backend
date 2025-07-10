@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseBoolPipe, ParseIntPipe, Patc
 import { ApiBearerAuth, ApiOperation, ApiTags, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { EmployeeBusinessService } from '@src/business/employee/employee-business';
+import { EmployeeBusinessService } from '@src/business/employee/employee.business';
 import {
     UpdateEmployeeEntryAtDto,
     UpdateEmployeeQuitedAtDto,
