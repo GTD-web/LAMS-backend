@@ -16,7 +16,7 @@ import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query
 import { Roles } from '@src/common/decorators/roles.decorator';
 import { GetUser } from '@src/common/decorators/get-user.decorator';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { UserBusinessService } from '@src/business/user/user.business';
+import { UserBusinessService } from '@src/business/user/user-business.service';
 import { SignUpDto } from './dto/requests/create-lams-user.dto';
 import { UpdateUserDto, ChangePasswordDto } from './dto/requests/update-lams-user.dto';
 import { UserResponseDto } from './dto/responses/user-response.dto';
@@ -72,17 +72,8 @@ export class UserController {
     @ApiResponse({ status: 201, description: '사용자 생성 성공' })
     async createUser(@Body() signUpDto: SignUpDto): Promise<UserResponseDto> {
         const { username, email, password } = signUpDto;
-        // UserBusinessService.createUser가 UserEntity를 반환하므로 변환 필요
-        const user = await this.userService.createUser(username, email, password);
-        return {
-            userId: user.userId,
-            username: user.username,
-            email: user.email,
-            roles: user.roles,
-            isActive: user.isActive,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-        } as UserResponseDto;
+
+        return this.userService.createUser(username, email, password);
     }
 
     /**

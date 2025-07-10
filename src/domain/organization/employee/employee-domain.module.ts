@@ -15,16 +15,7 @@ import { DepartmentInfoEntity } from '../department/entities/department-info.ent
  * - 필요한 엔티티들과 서비스들을 제공
  */
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([
-            EmployeeInfoEntity,
-            UsedAttendanceEntity,
-            EventInfoEntity,
-            AttendanceTypeEntity,
-            EmployeeAnnualLeaveEntity,
-            DepartmentInfoEntity,
-        ]),
-    ],
+    imports: [TypeOrmModule.forFeature([EmployeeInfoEntity])],
     providers: [EmployeeDomainService, EmployeeDomainRepository],
     exports: [EmployeeDomainService, EmployeeDomainRepository],
 })

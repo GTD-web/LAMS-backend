@@ -91,6 +91,13 @@ export class EmployeeDomainRepository {
     }
 
     /**
+     * 직원 엔티티 저장
+     */
+    async save(employee: EmployeeInfoEntity): Promise<EmployeeInfoEntity> {
+        return this.employeeRepository.save(employee);
+    }
+
+    /**
      * 부서별 직원 조회 (퇴사일 필터링 포함)
      */
     async findEmployeesByDepartmentWithQuitFilter(departmentId: string): Promise<EmployeeInfoEntity[]> {

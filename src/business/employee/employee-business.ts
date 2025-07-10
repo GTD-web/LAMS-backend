@@ -1,11 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { EmployeeDomainService } from '@src/domain/organization/employee/services/employee-domain.service';
 import { EmployeeInfoEntity } from '@src/domain/organization/employee/entities/employee-info.entity';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { UsedAttendanceEntity } from '@src/domain/attendance/used-attendance/entities/used-attendance.entity';
-import { EventInfoEntity } from '@src/domain/event-info/entities/event-info.entity';
-import { EmployeeAnnualLeaveEntity } from '@src/domain/annual-leave/entities/employee-annual-leave.entity';
 import { UpdateEmployeeEntryAtDto, UpdateEmployeeQuitedAtDto } from './dto/requests/employee-request.dto';
 
 /**
@@ -16,13 +13,15 @@ import { UpdateEmployeeEntryAtDto, UpdateEmployeeQuitedAtDto } from './dto/reque
  */
 @Injectable()
 export class EmployeeBusinessService {
+    private readonly logger = new Logger(EmployeeBusinessService.name);
+
     constructor(
         private readonly employeeDomainService: EmployeeDomainService,
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
     /**
-     * 퇴사일 입력
+     * 퇴사일 입력 - 비즈니스 크리티컬: 로그 필요
      */
     async inputQuitedAt(
         employeeId: string,
@@ -42,11 +41,15 @@ export class EmployeeBusinessService {
             throw new BadRequestException('퇴사일은 입사일 이후여야 합니다.');
         }
 
-        return this.employeeDomainService.updateEmployeeDates(employeeId, { quitedAt: dto.quitedAt });
+        const result = await this.employeeDomainService.updateEmployeeDates(employeeId, { quitedAt: dto.quitedAt });
+        this.logger.log(
+            `퇴사일 입력 완료: ${employee.employeeName}(${employee.employeeNumber}) - 퇴사일: ${dto.quitedAt}`,
+        );
+        return result;
     }
 
     /**
-     * 입사일 입력
+     * 입사일 입력 - 비즈니스 크리티컬: 로그 필요
      */
     async inputEntryAt(
         employeeId: string,
@@ -66,11 +69,15 @@ export class EmployeeBusinessService {
             throw new BadRequestException('입사일은 퇴사일 이전이어야 합니다.');
         }
 
-        return this.employeeDomainService.updateEmployeeDates(employeeId, { entryAt: dto.entryAt });
+        const result = await this.employeeDomainService.updateEmployeeDates(employeeId, { entryAt: dto.entryAt });
+        this.logger.log(
+            `입사일 입력 완료: ${employee.employeeName}(${employee.employeeNumber}) - 입사일: ${dto.entryAt}`,
+        );
+        return result;
     }
 
     /**
-     * 직원 제외 토글
+     * 직원 제외 토글 - 비즈니스 크리티컬: 로그 필요
      */
     async excludeEmployeeToggle(employeeId: string): Promise<EmployeeInfoEntity> {
         if (!employeeId) {
@@ -82,11 +89,15 @@ export class EmployeeBusinessService {
             throw new NotFoundException('직원을 찾을 수 없습니다.');
         }
 
-        return this.employeeDomainService.toggleExcludeEmployee(employeeId);
+        const result = await this.employeeDomainService.toggleExcludeEmployee(employeeId);
+        this.logger.log(
+            `직원 제외 토글 완료: ${employee.employeeName}(${employee.employeeNumber}) - 제외 여부: ${result.isExcludedFromCalculation}`,
+        );
+        return result;
     }
 
     /**
-     * 생일 입력
+     * 생일 입력 - 비즈니스 크리티컬: 로그 필요
      */
     async inputBirthday(employeeId: string, birthDate: string): Promise<EmployeeInfoEntity> {
         if (!employeeId) {
@@ -108,11 +119,13 @@ export class EmployeeBusinessService {
             throw new NotFoundException('직원을 찾을 수 없습니다.');
         }
 
-        return this.employeeDomainService.updateBirthDate(employeeId, birthDate);
+        const result = await this.employeeDomainService.updateBirthDate(employeeId, birthDate);
+        this.logger.log(`생일 입력 완료: ${employee.employeeName}(${employee.employeeNumber}) - 생일: ${birthDate}`);
+        return result;
     }
 
     /**
-     * 직원 삭제
+     * 직원 삭제 - 비즈니스 크리티컬: 로그 필요
      */
     async deleteEmployee(employeeId: string): Promise<boolean> {
         if (!employeeId) {
@@ -124,11 +137,13 @@ export class EmployeeBusinessService {
             throw new NotFoundException('직원을 찾을 수 없습니다.');
         }
 
-        return this.employeeDomainService.deleteEmployee(employeeId);
+        const result = await this.employeeDomainService.deleteEmployee(employeeId);
+        this.logger.log(`직원 삭제 완료: ${employee.employeeName}(${employee.employeeNumber})`);
+        return result;
     }
 
     /**
-     * 사번으로 직원 조회
+     * 사번으로 직원 조회 - 단순 조회: 로그 불필요
      */
     async getEmployeeByEmployeeNumber(employeeNumber: string): Promise<EmployeeInfoEntity> {
         if (!employeeNumber) {
@@ -144,10 +159,11 @@ export class EmployeeBusinessService {
     }
 
     /**
-     * 직원 목록 조회 (페이지네이션)
+     * 직원 목록 조회 (페이지네이션) - 단순 조회: 로그 불필요
      */
     async getEmployees(query: PaginationQueryDto): Promise<{ employees: EmployeeInfoEntity[]; total: number }> {
-        return this.employeeDomainService.findAllEmployees(query);
+        const result = await this.employeeDomainService.findAllEmployees(query);
+        return result;
     }
 
     /**

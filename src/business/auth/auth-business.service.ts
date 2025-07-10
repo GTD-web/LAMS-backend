@@ -1,4 +1,4 @@
-import { Injectable, Inject, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { UserDomainService } from '@src/domain/user/user.service';
@@ -13,6 +13,8 @@ import { UserRole } from '@src/domain/user/enum/user.enum';
  */
 @Injectable()
 export class AuthBusinessService {
+    private readonly logger = new Logger(AuthBusinessService.name);
+
     constructor(private readonly userService: UserDomainService, private readonly jwtService: JwtService) {}
 
     /**
@@ -120,6 +122,10 @@ export class AuthBusinessService {
         }
 
         const token = this.generateToken(user);
+
+        // 비즈니스 크리티컬한 작업: 로그인 성공 로그
+        this.logger.log(`로그인 성공: ${email} (사용자 ID: ${user.sub})`);
+
         return {
             token,
         };

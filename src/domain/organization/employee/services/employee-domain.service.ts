@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { EmployeeInfoEntity } from '../entities/employee-info.entity';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { UsedAttendanceEntity } from '@src/domain/attendance/used-attendance/entities/used-attendance.entity';
-import { EventInfoEntity } from '@src/domain/event-info/entities/event-info.entity';
-import { EmployeeAnnualLeaveEntity } from '@src/domain/annual-leave/entities/employee-annual-leave.entity';
 import { EmployeeDomainRepository } from '../repositories/employee-domain.repository';
+import { MergedEmployeeInfo } from '@src/domain/excel/employee-excel-import.domain';
 
 /**
  * 직원 도메인 서비스
@@ -13,95 +11,157 @@ import { EmployeeDomainRepository } from '../repositories/employee-domain.reposi
  */
 @Injectable()
 export class EmployeeDomainService {
+    private readonly logger = new Logger(EmployeeDomainService.name);
+
     constructor(private readonly employeeRepository: EmployeeDomainRepository) {}
 
     /**
      * 직원 ID로 조회
      */
     async findEmployeeById(employeeId: string): Promise<EmployeeInfoEntity | null> {
-        return this.employeeRepository.findByEmployeeId(employeeId);
+        try {
+            return await this.employeeRepository.findByEmployeeId(employeeId);
+        } catch (error) {
+            this.logger.error(`직원 ID로 조회 실패: ${employeeId}`, error.stack);
+            throw new BadRequestException('직원 조회 중 오류가 발생했습니다.');
+        }
     }
 
     /**
      * 사번으로 직원 조회
      */
     async findEmployeeByEmployeeNumber(employeeNumber: string): Promise<EmployeeInfoEntity | null> {
-        return this.employeeRepository.findByEmployeeNumber(employeeNumber);
+        try {
+            return await this.employeeRepository.findByEmployeeNumber(employeeNumber);
+        } catch (error) {
+            this.logger.error(`사번으로 직원 조회 실패: ${employeeNumber}`, error.stack);
+            throw new BadRequestException('직원 조회 중 오류가 발생했습니다.');
+        }
     }
 
     /**
      * 퇴사일 업데이트
      */
     async updateQuitedAt(employeeId: string, quitedAt: string): Promise<EmployeeInfoEntity> {
-        const employee = await this.employeeRepository.findByEmployeeId(employeeId);
-        if (!employee) {
-            throw new Error('해당 직원을 찾을 수 없습니다.');
-        }
+        try {
+            const employee = await this.employeeRepository.findByEmployeeId(employeeId);
+            if (!employee) {
+                throw new NotFoundException('해당 직원을 찾을 수 없습니다.');
+            }
 
-        return this.employeeRepository.updateEmployee(employeeId, { quitedAt });
+            return await this.employeeRepository.updateEmployee(employeeId, { quitedAt });
+        } catch (error) {
+            this.logger.error(`퇴사일 업데이트 실패: ${employeeId}`, error.stack);
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new BadRequestException('퇴사일 업데이트 중 오류가 발생했습니다.');
+        }
     }
 
     /**
      * 입사일 업데이트
      */
     async updateEntryAt(employeeId: string, entryAt: string): Promise<EmployeeInfoEntity> {
-        const employee = await this.employeeRepository.findByEmployeeId(employeeId);
-        if (!employee) {
-            throw new Error('해당 직원을 찾을 수 없습니다.');
-        }
+        try {
+            const employee = await this.employeeRepository.findByEmployeeId(employeeId);
+            if (!employee) {
+                throw new NotFoundException('해당 직원을 찾을 수 없습니다.');
+            }
 
-        return this.employeeRepository.updateEmployee(employeeId, { entryAt });
+            return await this.employeeRepository.updateEmployee(employeeId, { entryAt });
+        } catch (error) {
+            this.logger.error(`입사일 업데이트 실패: ${employeeId}`, error.stack);
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new BadRequestException('입사일 업데이트 중 오류가 발생했습니다.');
+        }
     }
 
     /**
      * 직원 제외 토글
      */
     async toggleExcludeEmployee(employeeId: string): Promise<EmployeeInfoEntity> {
-        const employee = await this.employeeRepository.findByEmployeeId(employeeId);
-        if (!employee) {
-            throw new Error('해당 직원을 찾을 수 없습니다.');
-        }
+        try {
+            const employee = await this.employeeRepository.findByEmployeeId(employeeId);
+            if (!employee) {
+                throw new NotFoundException('해당 직원을 찾을 수 없습니다.');
+            }
 
-        const isExcludedFromCalculation = !employee.isExcludedFromCalculation;
-        return this.employeeRepository.updateEmployee(employeeId, { isExcludedFromCalculation });
+            const isExcludedFromCalculation = !employee.isExcludedFromCalculation;
+            return await this.employeeRepository.updateEmployee(employeeId, { isExcludedFromCalculation });
+        } catch (error) {
+            this.logger.error(`직원 제외 토글 실패: ${employeeId}`, error.stack);
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new BadRequestException('직원 제외 토글 중 오류가 발생했습니다.');
+        }
     }
 
     /**
      * 생일 업데이트
      */
     async updateBirthDate(employeeId: string, birthDate: string): Promise<EmployeeInfoEntity> {
-        const employee = await this.employeeRepository.findByEmployeeId(employeeId);
-        if (!employee) {
-            throw new Error('해당 직원을 찾을 수 없습니다.');
-        }
+        try {
+            const employee = await this.employeeRepository.findByEmployeeId(employeeId);
+            if (!employee) {
+                throw new NotFoundException('해당 직원을 찾을 수 없습니다.');
+            }
 
-        return this.employeeRepository.updateEmployee(employeeId, { birthDate });
+            return await this.employeeRepository.updateEmployee(employeeId, { birthDate });
+        } catch (error) {
+            this.logger.error(`생일 업데이트 실패: ${employeeId}`, error.stack);
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new BadRequestException('생일 업데이트 중 오류가 발생했습니다.');
+        }
     }
 
     /**
      * 직원 삭제
      */
     async deleteEmployee(employeeId: string): Promise<boolean> {
-        const employee = await this.employeeRepository.findByEmployeeId(employeeId);
-        if (!employee) {
-            throw new Error('해당 직원을 찾을 수 없습니다.');
-        }
+        try {
+            const employee = await this.employeeRepository.findByEmployeeId(employeeId);
+            if (!employee) {
+                throw new NotFoundException('해당 직원을 찾을 수 없습니다.');
+            }
 
-        return this.employeeRepository.deleteEmployee(employeeId);
+            return await this.employeeRepository.deleteEmployee(employeeId);
+        } catch (error) {
+            this.logger.error(`직원 삭제 실패: ${employeeId}`, error.stack);
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new BadRequestException('직원 삭제 중 오류가 발생했습니다.');
+        }
     }
 
     /**
      * 모든 직원 조회 (페이지네이션)
      */
     async findAllEmployees(query: PaginationQueryDto): Promise<{ employees: EmployeeInfoEntity[]; total: number }> {
-        return this.employeeRepository.findAndCount(query);
+        try {
+            return await this.employeeRepository.findAndCount(query);
+        } catch (error) {
+            this.logger.error('모든 직원 조회 실패', error.stack);
+            throw new BadRequestException('직원 목록 조회 중 오류가 발생했습니다.');
+        }
     }
 
     /**
      * 부서별 직원 조회 (퇴사일 필터링 포함)
      */
     async findEmployeesByDepartmentWithQuitFilter(departmentId: string): Promise<EmployeeInfoEntity[]> {
-        return this.employeeRepository.findEmployeesByDepartmentWithQuitFilter(departmentId);
+        try {
+            return await this.employeeRepository.findEmployeesByDepartmentWithQuitFilter(departmentId);
+        } catch (error) {
+            this.logger.error(`부서별 직원 조회 실패: ${departmentId}`, error.stack);
+            throw new BadRequestException('부서별 직원 조회 중 오류가 발생했습니다.');
+        }
     }
 
     /**
@@ -111,16 +171,50 @@ export class EmployeeDomainService {
         employeeId: string,
         updateData: { entryAt?: string; quitedAt?: string },
     ): Promise<{ employeeInfoEntity: EmployeeInfoEntity; beforeEmployee: EmployeeInfoEntity }> {
-        const beforeEmployee = await this.employeeRepository.findByEmployeeId(employeeId);
-        if (!beforeEmployee) {
-            throw new Error('해당 직원을 찾을 수 없습니다.');
+        try {
+            const beforeEmployee = await this.employeeRepository.findByEmployeeId(employeeId);
+            if (!beforeEmployee) {
+                throw new NotFoundException('해당 직원을 찾을 수 없습니다.');
+            }
+
+            const employeeInfoEntity = await this.employeeRepository.updateEmployee(employeeId, updateData);
+
+            return {
+                employeeInfoEntity,
+                beforeEmployee,
+            };
+        } catch (error) {
+            this.logger.error(`직원 날짜 업데이트 실패: ${employeeId}`, error.stack);
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new BadRequestException('직원 날짜 업데이트 중 오류가 발생했습니다.');
         }
+    }
 
-        const employeeInfoEntity = await this.employeeRepository.updateEmployee(employeeId, updateData);
+    /**
+     * 직원 정보 업데이트
+     */
+    async updateEmployeeInfo(mergedEmployeeInfo: MergedEmployeeInfo): Promise<EmployeeInfoEntity | null> {
+        try {
+            const employee = await this.employeeRepository.findByEmployeeNumber(mergedEmployeeInfo.employeeNumber);
 
-        return {
-            employeeInfoEntity,
-            beforeEmployee,
-        };
+            if (!employee) {
+                this.logger.warn(`존재하지 않는 직원: ${mergedEmployeeInfo.employeeNumber}`);
+                return null;
+            }
+
+            employee.employeeName = mergedEmployeeInfo.employeeName;
+            employee.birthDate = mergedEmployeeInfo.birthDate;
+            employee.entryAt = mergedEmployeeInfo.entryDate;
+            employee.email = mergedEmployeeInfo.email;
+
+            const savedEmployee = await this.employeeRepository.save(employee);
+            this.logger.log(`직원 정보 업데이트 완료: ${savedEmployee.employeeNumber}`);
+            return savedEmployee;
+        } catch (error) {
+            this.logger.error(`직원 정보 업데이트 실패: ${mergedEmployeeInfo.employeeNumber}`, error.stack);
+            throw new BadRequestException('직원 정보 업데이트 중 오류가 발생했습니다.');
+        }
     }
 }

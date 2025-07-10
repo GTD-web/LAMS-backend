@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AuthBusinessService } from './auth.business';
+import { AuthBusinessService } from './auth-business.service';
 import { UserDomainModule } from '@src/domain/user/user.module';
 import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
 import { AuthController } from '@src/business/auth/auth.controller';
