@@ -7,7 +7,6 @@ import {
     UpdateEmployeeEntryAtDto,
     UpdateEmployeeQuitedAtDto,
 } from '@src/business/employee/dto/requests/employee-request.dto';
-import { CustomResponse } from '@src/common/dtos/common/custom-response.dto';
 
 @Controller('employees')
 @ApiTags('직원')
@@ -105,8 +104,7 @@ export class EmployeeController {
     @ApiParam({ name: 'employeeId', description: '직원 ID' })
     @ApiResponse({ status: 200, description: '직원 제외 토글 성공' })
     async excludeEmployee(@Param('employeeId') employeeId: string) {
-        const result = await this.employeeService.excludeEmployeeToggle(employeeId);
-        return new CustomResponse(result, '성공적으로 직원을 제외하였습니다.');
+        return await this.employeeService.excludeEmployeeToggle(employeeId);
     }
 
     @Patch('/:employeeId/:birthDate')
@@ -115,8 +113,7 @@ export class EmployeeController {
     @ApiParam({ name: 'birthDate', description: '생년월일 (YYYY-MM-DD)' })
     @ApiResponse({ status: 200, description: '생일 입력 성공' })
     async inputBirthday(@Param('employeeId') employeeId: string, @Param('birthDate') birthDate: string) {
-        const result = await this.employeeService.inputBirthday(employeeId, birthDate);
-        return new CustomResponse(result, '성공적으로 직원의 생일을 입력하였습니다.');
+        return await this.employeeService.inputBirthday(employeeId, birthDate);
     }
 
     @Delete('/:employeeId')
@@ -124,8 +121,7 @@ export class EmployeeController {
     @ApiParam({ name: 'employeeId', description: '직원 ID' })
     @ApiResponse({ status: 200, description: '직원 삭제 성공' })
     async deleteEmployee(@Param('employeeId') employeeId: string) {
-        const result = await this.employeeService.deleteEmployee(employeeId);
-        return new CustomResponse(result, '성공적으로 직원을 삭제하였습니다.');
+        return await this.employeeService.deleteEmployee(employeeId);
     }
 
     @Get(':employeeNumber')
@@ -133,8 +129,7 @@ export class EmployeeController {
     @ApiParam({ name: 'employeeNumber', description: '사번' })
     @ApiResponse({ status: 200, description: '직원 조회 성공' })
     async getEmployeeByEmployeeNumber(@Param('employeeNumber') employeeNumber: string) {
-        const result = await this.employeeService.getEmployeeByEmployeeNumber(employeeNumber);
-        return new CustomResponse(result, '성공적으로 직원을 조회하였습니다.');
+        return await this.employeeService.getEmployeeByEmployeeNumber(employeeNumber);
     }
 
     @Get()
@@ -143,7 +138,6 @@ export class EmployeeController {
     @ApiQuery({ name: 'limit', required: false, type: Number, description: '페이지당 항목 수' })
     @ApiResponse({ status: 200, description: '직원 목록 조회 성공' })
     async getEmployees(@Query() query: PaginationQueryDto) {
-        const result = await this.employeeService.getEmployees(query);
-        return new CustomResponse(result, '성공적으로 직원 목록을 조회하였습니다.');
+        return await this.employeeService.getEmployees(query);
     }
 }
