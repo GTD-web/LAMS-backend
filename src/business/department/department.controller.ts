@@ -8,9 +8,11 @@ import {
     ApiOkResponse,
     ApiUnauthorizedResponse,
     ApiForbiddenResponse,
+    ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { DepartmentBusinessService } from './department.business';
 import { DepartmentAdminBusinessService } from './department-admin.business';
+import { DepartmentImportService } from './department-import.service';
 import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@src/common/guards/roles.guard';
 import { CheckDepartmentAccessGuard } from '@src/common/guards/check-department-access.guard';
@@ -31,6 +33,7 @@ export class DepartmentController {
     constructor(
         private readonly departmentBusinessService: DepartmentBusinessService,
         private readonly departmentAdminBusinessService: DepartmentAdminBusinessService,
+        private readonly departmentImportService: DepartmentImportService,
     ) {}
 
     // ========== 일반 사용자 기능 ==========
@@ -160,7 +163,7 @@ export class DepartmentController {
     @Get('mms/sync')
     @ApiOperation({
         summary: 'MMS 부서 동기화 (관리자 전용)',
-        description: 'MMS 시스템과 부서 정보를 동기화합니다.',
+        description: 'MMS 시스템과 부서 정보를 동기화합니다. 부서와 직원 정보를 모두 업데이트합니다.',
     })
     @Roles(UserRole.ATTENDANCE_ADMIN)
     @ApiOkResponse({
@@ -168,7 +171,15 @@ export class DepartmentController {
         schema: {
             type: 'object',
             properties: {
-                data: { type: 'object' },
+                data: { 
+                    type: 'object',
+                    properties: {
+                        message: { type: 'string', example: 'MMS 동기화가 완료되었습니다.' },
+                        syncedDepartments: { type: 'number', example: 15 },
+                        syncedEmployees: { type: 'number', example: 120 },
+                        deletedDepartments: { type: 'number', example: 2 }
+                    }
+                },
                 message: { type: 'string', example: 'MMS 데이터 동기화를 완료하였습니다.' },
             },
         },
@@ -177,9 +188,75 @@ export class DepartmentController {
         description: '관리자 권한 필요',
         type: ErrorResponseDto,
     })
+    @ApiInternalServerErrorResponse({
+        description: '동기화 중 오류 발생',
+        type: ErrorResponseDto,
+    })
     async syncMMS(): Promise<CustomResponseDto<any>> {
-        const data = await this.departmentAdminBusinessService.syncMMS();
-        return new CustomResponseDto(data, 'MMS 데이터 동기화를 완료하였습니다.');
+        try {
+            await this.departmentImportService.syncMMS();
+            return new CustomResponseDto(
+                { 
+                    message: 'MMS 동기화가 완료되었습니다.',
+                    syncedDepartments: '동기화 완료',
+                    syncedEmployees: '동기화 완료',
+                    deletedDepartments: '정리 완료'
+                }, 
+                'MMS 데이터 동기화를 완료하였습니다.'
+            );
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    @Get('mms/departments')
+    @ApiOperation({
+        summary: 'MMS 부서 목록 조회 (관리자 전용)',
+        description: 'MMS 시스템에서 부서 목록을 조회합니다.',
+    })
+    @Roles(UserRole.ATTENDANCE_ADMIN)
+    @ApiOkResponse({
+        description: 'MMS 부서 목록 조회 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                data: { type: 'array', items: { $ref: '#/components/schemas/MMSDepartmentResponseDto' } },
+                message: { type: 'string', example: 'MMS 부서 목록을 조회하였습니다.' },
+            },
+        },
+    })
+    @ApiForbiddenResponse({
+        description: '관리자 권한 필요',
+        type: ErrorResponseDto,
+    })
+    async getMMSDepartments(): Promise<CustomResponseDto<any>> {
+        const data = await this.departmentImportService.getMMSDepartments();
+        return new CustomResponseDto(data, 'MMS 부서 목록을 조회하였습니다.');
+    }
+
+    @Get('mms/employees')
+    @ApiOperation({
+        summary: 'MMS 직원 목록 조회 (관리자 전용)',
+        description: 'MMS 시스템에서 직원 목록을 조회합니다.',
+    })
+    @Roles(UserRole.ATTENDANCE_ADMIN)
+    @ApiOkResponse({
+        description: 'MMS 직원 목록 조회 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                data: { type: 'array', items: { $ref: '#/components/schemas/MMSEmployeeResponseDto' } },
+                message: { type: 'string', example: 'MMS 직원 목록을 조회하였습니다.' },
+            },
+        },
+    })
+    @ApiForbiddenResponse({
+        description: '관리자 권한 필요',
+        type: ErrorResponseDto,
+    })
+    async getMMSEmployees(): Promise<CustomResponseDto<any>> {
+        const data = await this.departmentImportService.getEmployees();
+        return new CustomResponseDto(data, 'MMS 직원 목록을 조회하였습니다.');
     }
 
     // ========== 관리자 전용 기능 ==========
@@ -266,9 +343,9 @@ export class DepartmentController {
         return new CustomResponseDto(data, '부서 정보를 조회하였습니다.');
     }
 
-    @Patch('exclude-from-call-list/:departmentId')
+    @Patch(':departmentId/exclude')
     @ApiOperation({
-        summary: '부서를 호출 목록에서 제외 (관리자 전용)',
+        summary: '부서 제외 토글 (관리자 전용)',
         description: '부서의 제외 상태를 토글합니다.',
     })
     @Roles(UserRole.ATTENDANCE_ADMIN)
@@ -279,12 +356,12 @@ export class DepartmentController {
         format: 'uuid',
     })
     @ApiOkResponse({
-        description: '부서 제외 상태 토글 성공',
+        description: '부서 제외 토글 성공',
         schema: {
             type: 'object',
             properties: {
                 data: { $ref: '#/components/schemas/DepartmentInfoEntity' },
-                message: { type: 'string', example: '부서 제외 목록을 조회하였습니다.' },
+                message: { type: 'string', example: '부서 제외 상태를 변경하였습니다.' },
             },
         },
     })
@@ -293,14 +370,14 @@ export class DepartmentController {
         type: ErrorResponseDto,
     })
     async toggleExclude(@Param('departmentId') departmentId: string): Promise<CustomResponseDto<DepartmentInfoEntity>> {
-        const data = await this.departmentAdminBusinessService.toggleExclude(departmentId);
-        return new CustomResponseDto(data, '부서 호출 제외 토글을 변경 완료하였습니다.');
+        const data = await this.departmentAdminBusinessService.toggleDepartmentExclude(departmentId);
+        return new CustomResponseDto(data, '부서 제외 상태를 변경하였습니다.');
     }
 
-    @Patch('include-access-authority/:departmentId')
+    @Patch(':departmentId/access-authority')
     @ApiOperation({
         summary: '부서 접근 권한 추가 (관리자 전용)',
-        description: '사용자에게 부서 접근 권한을 추가합니다.',
+        description: '특정 사용자에게 부서 접근 권한을 부여합니다.',
     })
     @Roles(UserRole.ATTENDANCE_ADMIN)
     @ApiParam({
@@ -313,7 +390,7 @@ export class DepartmentController {
         name: 'userId',
         description: '사용자 ID',
         type: 'string',
-        required: true,
+        format: 'uuid',
     })
     @ApiOkResponse({
         description: '접근 권한 추가 성공',
@@ -321,7 +398,7 @@ export class DepartmentController {
             type: 'object',
             properties: {
                 data: { type: 'object' },
-                message: { type: 'string', example: '부서 접근 권한을 추가하였습니다.' },
+                message: { type: 'string', example: '접근 권한을 추가하였습니다.' },
             },
         },
     })
@@ -334,13 +411,13 @@ export class DepartmentController {
         @Query('userId') userId: string,
     ): Promise<CustomResponseDto<any>> {
         const data = await this.departmentAdminBusinessService.includeAccessAuthority(departmentId, userId);
-        return new CustomResponseDto(data, '부서 접근 권한을 추가하였습니다.');
+        return new CustomResponseDto(data, '접근 권한을 추가하였습니다.');
     }
 
-    @Patch('include-review-authority/:departmentId')
+    @Patch(':departmentId/review-authority')
     @ApiOperation({
         summary: '부서 검토 권한 추가 (관리자 전용)',
-        description: '사용자에게 부서 검토 권한을 추가합니다.',
+        description: '특정 사용자에게 부서 검토 권한을 부여합니다.',
     })
     @Roles(UserRole.ATTENDANCE_ADMIN)
     @ApiParam({
@@ -353,7 +430,7 @@ export class DepartmentController {
         name: 'userId',
         description: '사용자 ID',
         type: 'string',
-        required: true,
+        format: 'uuid',
     })
     @ApiOkResponse({
         description: '검토 권한 추가 성공',
@@ -361,7 +438,7 @@ export class DepartmentController {
             type: 'object',
             properties: {
                 data: { type: 'object' },
-                message: { type: 'string', example: '부서 검토 권한을 추가하였습니다.' },
+                message: { type: 'string', example: '검토 권한을 추가하였습니다.' },
             },
         },
     })
@@ -374,13 +451,13 @@ export class DepartmentController {
         @Query('userId') userId: string,
     ): Promise<CustomResponseDto<any>> {
         const data = await this.departmentAdminBusinessService.includeReviewAuthority(departmentId, userId);
-        return new CustomResponseDto(data, '부서 검토 권한을 추가하였습니다.');
+        return new CustomResponseDto(data, '검토 권한을 추가하였습니다.');
     }
 
-    @Patch('remove-access-authority/:departmentId')
+    @Patch(':departmentId/access-authority/remove')
     @ApiOperation({
         summary: '부서 접근 권한 제거 (관리자 전용)',
-        description: '사용자의 부서 접근 권한을 제거합니다.',
+        description: '특정 사용자의 부서 접근 권한을 제거합니다.',
     })
     @Roles(UserRole.ATTENDANCE_ADMIN)
     @ApiParam({
@@ -393,7 +470,7 @@ export class DepartmentController {
         name: 'userId',
         description: '사용자 ID',
         type: 'string',
-        required: true,
+        format: 'uuid',
     })
     @ApiOkResponse({
         description: '접근 권한 제거 성공',
@@ -401,7 +478,7 @@ export class DepartmentController {
             type: 'object',
             properties: {
                 data: { type: 'object' },
-                message: { type: 'string', example: '부서 접근 권한을 제거하였습니다.' },
+                message: { type: 'string', example: '접근 권한을 제거하였습니다.' },
             },
         },
     })
@@ -413,14 +490,14 @@ export class DepartmentController {
         @Param('departmentId') departmentId: string,
         @Query('userId') userId: string,
     ): Promise<CustomResponseDto<any>> {
-        const data = await this.departmentAdminBusinessService.excludeAccessAuthority(departmentId, userId);
-        return new CustomResponseDto(data, '부서 접근 권한을 제거하였습니다.');
+        const data = await this.departmentAdminBusinessService.removeAccessAuthority(departmentId, userId);
+        return new CustomResponseDto(data, '접근 권한을 제거하였습니다.');
     }
 
-    @Patch('remove-review-authority/:departmentId')
+    @Patch(':departmentId/review-authority/remove')
     @ApiOperation({
         summary: '부서 검토 권한 제거 (관리자 전용)',
-        description: '사용자의 부서 검토 권한을 제거합니다.',
+        description: '특정 사용자의 부서 검토 권한을 제거합니다.',
     })
     @Roles(UserRole.ATTENDANCE_ADMIN)
     @ApiParam({
@@ -433,7 +510,7 @@ export class DepartmentController {
         name: 'userId',
         description: '사용자 ID',
         type: 'string',
-        required: true,
+        format: 'uuid',
     })
     @ApiOkResponse({
         description: '검토 권한 제거 성공',
@@ -441,7 +518,7 @@ export class DepartmentController {
             type: 'object',
             properties: {
                 data: { type: 'object' },
-                message: { type: 'string', example: '부서 검토 권한을 제거하였습니다.' },
+                message: { type: 'string', example: '검토 권한을 제거하였습니다.' },
             },
         },
     })
@@ -453,15 +530,16 @@ export class DepartmentController {
         @Param('departmentId') departmentId: string,
         @Query('userId') userId: string,
     ): Promise<CustomResponseDto<any>> {
-        const data = await this.departmentAdminBusinessService.excludeReviewAuthority(departmentId, userId);
-        return new CustomResponseDto(data, '부서 검토 권한을 제거하였습니다.');
+        const data = await this.departmentAdminBusinessService.removeReviewAuthority(departmentId, userId);
+        return new CustomResponseDto(data, '검토 권한을 제거하였습니다.');
     }
 
     @Get(':id/employee-count')
     @ApiOperation({
-        summary: '부서 직원 수 조회',
+        summary: '부서 직원 수 조회 (관리자 전용)',
         description: '특정 부서의 직원 수를 조회합니다.',
     })
+    @Roles(UserRole.ATTENDANCE_ADMIN)
     @ApiParam({
         name: 'id',
         description: '부서 ID',
@@ -476,7 +554,7 @@ export class DepartmentController {
                 data: {
                     type: 'object',
                     properties: {
-                        departmentId: { type: 'string' },
+                        departmentId: { type: 'string', format: 'uuid' },
                         employeeCount: { type: 'number' },
                     },
                 },
@@ -484,11 +562,14 @@ export class DepartmentController {
             },
         },
     })
+    @ApiForbiddenResponse({
+        description: '관리자 권한 필요',
+        type: ErrorResponseDto,
+    })
     async getDepartmentEmployeeCount(
         @Param('id') departmentId: string,
     ): Promise<CustomResponseDto<{ departmentId: string; employeeCount: number }>> {
-        const count = await this.departmentBusinessService.getDepartmentEmployeeCount(departmentId);
-        const data = { departmentId, employeeCount: count };
+        const data = await this.departmentAdminBusinessService.getDepartmentEmployeeCount(departmentId);
         return new CustomResponseDto(data, '부서 직원 수를 조회하였습니다.');
     }
 }

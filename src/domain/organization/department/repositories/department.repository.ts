@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { DepartmentInfoEntity } from '../entities/department-info.entity';
 import { DepartmentEmployeeEntity } from '../entities/department-employee.entity';
+import { EmployeeInfoEntity } from '../../employee/entities/employee-info.entity';
 import { IDepartmentRepository } from '../interfaces/department-repository.interface';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 /**
  * 부서 리포지토리 구현체
@@ -15,6 +16,10 @@ export class DepartmentRepository implements IDepartmentRepository {
     constructor(
         @InjectRepository(DepartmentInfoEntity)
         private readonly departmentInfoRepository: Repository<DepartmentInfoEntity>,
+        @InjectRepository(EmployeeInfoEntity)
+        private readonly employeeInfoRepository: Repository<EmployeeInfoEntity>,
+        @InjectRepository(DepartmentEmployeeEntity)
+        private readonly departmentEmployeeRepository: Repository<DepartmentEmployeeEntity>,
     ) {}
 
     /**
@@ -50,6 +55,15 @@ export class DepartmentRepository implements IDepartmentRepository {
     async findByName(departmentName: string): Promise<DepartmentInfoEntity | null> {
         return await this.departmentInfoRepository.findOne({
             where: { departmentName },
+        });
+    }
+
+    /**
+     * MMS 부서 ID로 부서 조회
+     */
+    async findByMMSDepartmentId(mmsDepartmentId: string): Promise<DepartmentInfoEntity | null> {
+        return await this.departmentInfoRepository.findOne({
+            where: { mmsDepartmentId },
         });
     }
 
@@ -210,5 +224,35 @@ export class DepartmentRepository implements IDepartmentRepository {
 
         const count = await queryBuilder.getCount();
         return count > 0;
+    }
+
+    /**
+     * 직원 번호로 직원 조회
+     */
+    async findEmployeeByEmployeeNumber(employeeNumber: string): Promise<EmployeeInfoEntity | null> {
+        return await this.employeeInfoRepository.findOne({
+            where: { employeeNumber },
+        });
+    }
+
+    /**
+     * 직원 저장
+     */
+    async saveEmployee(employee: EmployeeInfoEntity): Promise<EmployeeInfoEntity> {
+        return await this.employeeInfoRepository.save(employee);
+    }
+
+    /**
+     * 직원 ID로 부서 직원 관계 삭제
+     */
+    async deleteDepartmentEmployeeByEmployeeId(employeeId: string): Promise<void> {
+        const result = await this.departmentEmployeeRepository.delete(employeeId);
+    }
+
+    /**
+     * 부서 직원 관계 저장
+     */
+    async saveDepartmentEmployee(departmentEmployee: DepartmentEmployeeEntity): Promise<DepartmentEmployeeEntity> {
+        return await this.departmentEmployeeRepository.save(departmentEmployee);
     }
 }

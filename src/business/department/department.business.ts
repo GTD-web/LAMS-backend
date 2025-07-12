@@ -82,10 +82,10 @@ export class DepartmentBusinessService {
      */
     async getAllDepartments(): Promise<DepartmentInfoEntity[]> {
         try {
-            const result = await this.departmentDomainService.findAllDepartments({ page: 1, limit: 1000 }, false);
-            this.logger.log(`전체 부서 목록 조회 완료: ${result.departments.length}개`);
+            const departments = await this.departmentDomainService.findAllDepartments();
+            this.logger.log(`전체 부서 목록 조회 완료: ${departments.length}개`);
 
-            return result.departments;
+            return departments;
         } catch (error) {
             this.logger.error('전체 부서 목록 조회 실패', error.stack);
             throw error;
@@ -93,13 +93,13 @@ export class DepartmentBusinessService {
     }
 
     /**
-     * 부서 계층 구조 조회 (현재 구현되지 않음)
+     * 부서 계층 구조 조회
      */
     async getDepartmentHierarchy(): Promise<DepartmentInfoEntity[]> {
         try {
-            // TODO: 도메인 서비스에 계층 구조 조회 메서드 추가 필요
-            this.logger.warn('부서 계층 구조 조회 기능이 아직 구현되지 않았습니다.');
-            return await this.getAllDepartments();
+            const departments = await this.departmentDomainService.findHierarchy();
+            this.logger.log(`부서 계층 구조 조회 완료: ${departments.length}개`);
+            return departments;
         } catch (error) {
             this.logger.error('부서 계층 구조 조회 실패', error.stack);
             throw error;
@@ -128,7 +128,7 @@ export class DepartmentBusinessService {
     }
 
     /**
-     * 사용자의 검토 권한 부서 조회 (현재 구현되지 않음)
+     * 사용자의 검토 권한 부서 조회
      */
     async getDepartmentsByReviewAuthority(user: LamsUserEntity): Promise<DepartmentInfoEntity[]> {
         try {
@@ -136,9 +136,9 @@ export class DepartmentBusinessService {
                 throw new BadRequestException('사용자 정보가 필요합니다.');
             }
 
-            // TODO: 도메인 서비스에 검토 권한 부서 조회 메서드 추가 필요
-            this.logger.warn('검토 권한 부서 조회 기능이 아직 구현되지 않았습니다.');
-            return [];
+            const departments = await this.departmentDomainService.findDepartmentsByReviewAuthority(user.userId);
+            this.logger.log(`사용자 ${user.userId}의 검토 권한 부서 조회 완료: ${departments.length}개`);
+            return departments;
         } catch (error) {
             this.logger.error('검토 권한 부서 조회 실패', error.stack);
             throw error;
@@ -146,7 +146,7 @@ export class DepartmentBusinessService {
     }
 
     /**
-     * 부서 검색 (현재 구현되지 않음)
+     * 부서 검색
      */
     async searchDepartments(searchTerm: string): Promise<DepartmentInfoEntity[]> {
         try {
@@ -154,9 +154,9 @@ export class DepartmentBusinessService {
                 throw new BadRequestException('검색어는 최소 2자 이상이어야 합니다.');
             }
 
-            // TODO: 도메인 서비스에 검색 메서드 추가 필요
-            this.logger.warn('부서 검색 기능이 아직 구현되지 않았습니다.');
-            return [];
+            const departments = await this.departmentDomainService.searchDepartments(searchTerm);
+            this.logger.log(`부서 검색 완료: "${searchTerm}" - ${departments.length}개 결과`);
+            return departments;
         } catch (error) {
             this.logger.error('부서 검색 실패', error.stack);
             throw error;
@@ -164,7 +164,7 @@ export class DepartmentBusinessService {
     }
 
     /**
-     * 부서별 직원 수 조회 (현재 구현되지 않음)
+     * 부서별 직원 수 조회
      */
     async getDepartmentEmployeeCount(departmentId: string): Promise<number> {
         try {
@@ -172,9 +172,14 @@ export class DepartmentBusinessService {
                 throw new BadRequestException('부서 ID는 필수입니다.');
             }
 
-            // TODO: 도메인 서비스에 직원 수 조회 메서드 추가 필요
-            this.logger.warn('부서 직원 수 조회 기능이 아직 구현되지 않았습니다.');
-            return 0;
+            const department = await this.departmentDomainService.findDepartmentById(departmentId);
+            if (!department) {
+                throw new NotFoundException('부서를 찾을 수 없습니다.');
+            }
+
+            const employeeCount = department.employees?.length || 0;
+            this.logger.log(`부서 ${departmentId} 직원 수: ${employeeCount}명`);
+            return employeeCount;
         } catch (error) {
             this.logger.error('부서 직원 수 조회 실패', error.stack);
             throw error;
@@ -186,7 +191,7 @@ export class DepartmentBusinessService {
      */
     async getActiveDepartments(): Promise<DepartmentInfoEntity[]> {
         try {
-            const result = await this.departmentDomainService.findAllDepartments({ page: 1, limit: 1000 }, false);
+            const result = await this.departmentDomainService.findAllDepartmentsPaginated({ page: 1, limit: 1000 }, false);
             this.logger.log(`활성 부서 목록 조회 완료: ${result.departments.length}개`);
 
             return result.departments;

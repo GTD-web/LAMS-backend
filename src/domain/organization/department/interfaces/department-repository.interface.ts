@@ -1,4 +1,6 @@
 import { DepartmentInfoEntity } from '../entities/department-info.entity';
+import { DepartmentEmployeeEntity } from '../entities/department-employee.entity';
+import { EmployeeInfoEntity } from '../../employee/entities/employee-info.entity';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 
 /**
@@ -25,6 +27,11 @@ export interface IDepartmentRepository {
      * 부서 이름으로 조회
      */
     findByName(departmentName: string): Promise<DepartmentInfoEntity | null>;
+
+    /**
+     * MMS 부서 ID로 부서 조회
+     */
+    findByMMSDepartmentId(mmsDepartmentId: string): Promise<DepartmentInfoEntity | null>;
 
     /**
      * 모든 부서 조회 (페이지네이션)
@@ -96,4 +103,24 @@ export interface IDepartmentRepository {
      * 부서 이름 중복 확인
      */
     existsByName(departmentName: string, excludeId?: string): Promise<boolean>;
+
+    /**
+     * 직원 번호로 직원 조회
+     */
+    findEmployeeByEmployeeNumber(employeeNumber: string): Promise<EmployeeInfoEntity | null>;
+
+    /**
+     * 직원 저장
+     */
+    saveEmployee(employee: EmployeeInfoEntity): Promise<EmployeeInfoEntity>;
+
+    /**
+     * 직원 ID로 부서 직원 관계 삭제
+     */
+    deleteDepartmentEmployeeByEmployeeId(employeeId: string): Promise<void>;
+
+    /**
+     * 부서 직원 관계 저장
+     */
+    saveDepartmentEmployee(departmentEmployee: DepartmentEmployeeEntity): Promise<DepartmentEmployeeEntity>;
 }

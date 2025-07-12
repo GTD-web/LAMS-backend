@@ -11,6 +11,7 @@ import { jwtConfig } from './common/configs/jwt.config';
 import { SeedModule } from './common/seeds/seed.module';
 import { UserBusinessModule } from './business/user/user-business.module';
 import { EmployeeBusinessModule } from './business/employee/employee-business.module';
+import { DepartmentBusinessModule } from './business/department/department-business.module';
 
 @Module({
     imports: [
@@ -31,6 +32,7 @@ import { EmployeeBusinessModule } from './business/employee/employee-business.mo
         AuthBusinessModule,
         SeedModule,
         EmployeeBusinessModule,
+        DepartmentBusinessModule,
     ],
     controllers: [AppController],
     providers: [AppService],

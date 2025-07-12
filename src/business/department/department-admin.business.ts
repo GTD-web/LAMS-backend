@@ -27,7 +27,7 @@ export class DepartmentAdminBusinessService {
         isExclude: boolean,
     ): Promise<PaginatedResponseDto<DepartmentInfoEntity>> {
         try {
-            const result = await this.departmentDomainService.findAllDepartments(query, isExclude);
+            const result = await this.departmentDomainService.findAllDepartmentsPaginated(query, isExclude);
             return PaginatedResponseDto.create(result.departments, query.page, query.limit, result.total);
         } catch (error) {
             this.logger.error('부서 목록 조회 실패', error.stack);
@@ -41,7 +41,9 @@ export class DepartmentAdminBusinessService {
     async getDepartmentById(departmentId: string): Promise<DepartmentInfoEntity> {
         try {
             const department = await this.departmentDomainService.findDepartmentById(departmentId);
-
+            if (!department) {
+                throw new NotFoundException('부서를 찾을 수 없습니다.');
+            }
             return department;
         } catch (error) {
             this.logger.error('부서 조회 실패', error.stack);
@@ -52,7 +54,7 @@ export class DepartmentAdminBusinessService {
     /**
      * 부서 제외 상태 토글
      */
-    async toggleExclude(departmentId: string): Promise<DepartmentInfoEntity> {
+    async toggleDepartmentExclude(departmentId: string): Promise<DepartmentInfoEntity> {
         const department = await this.departmentDomainService.findDepartmentById(departmentId);
 
         if (!department) {
@@ -131,7 +133,7 @@ export class DepartmentAdminBusinessService {
     /**
      * 부서 접근 권한 제거
      */
-    async excludeAccessAuthority(departmentId: string, userId: string): Promise<any> {
+    async removeAccessAuthority(departmentId: string, userId: string): Promise<any> {
         try {
             const user = await this.userDomainService.findUserById(userId);
             if (!user) {
@@ -160,7 +162,7 @@ export class DepartmentAdminBusinessService {
     /**
      * 부서 검토 권한 제거
      */
-    async excludeReviewAuthority(departmentId: string, userId: string): Promise<any> {
+    async removeReviewAuthority(departmentId: string, userId: string): Promise<any> {
         try {
             const user = await this.userDomainService.findUserById(userId);
             if (!user) {
@@ -181,6 +183,24 @@ export class DepartmentAdminBusinessService {
             return { success: true };
         } catch (error) {
             this.logger.error('검토 권한 제거 실패', error.stack);
+            throw error;
+        }
+    }
+
+    /**
+     * 부서 직원 수 조회
+     */
+    async getDepartmentEmployeeCount(departmentId: string): Promise<{ departmentId: string; employeeCount: number }> {
+        try {
+            const department = await this.departmentDomainService.findDepartmentById(departmentId);
+            if (!department) {
+                throw new NotFoundException('부서를 찾을 수 없습니다.');
+            }
+
+            const employeeCount = department.employees?.length || 0;
+            return { departmentId, employeeCount };
+        } catch (error) {
+            this.logger.error('부서 직원 수 조회 실패', error.stack);
             throw error;
         }
     }
