@@ -171,14 +171,14 @@ export class DepartmentController {
         schema: {
             type: 'object',
             properties: {
-                data: { 
+                data: {
                     type: 'object',
                     properties: {
                         message: { type: 'string', example: 'MMS 동기화가 완료되었습니다.' },
                         syncedDepartments: { type: 'number', example: 15 },
                         syncedEmployees: { type: 'number', example: 120 },
-                        deletedDepartments: { type: 'number', example: 2 }
-                    }
+                        deletedDepartments: { type: 'number', example: 2 },
+                    },
                 },
                 message: { type: 'string', example: 'MMS 데이터 동기화를 완료하였습니다.' },
             },
@@ -196,13 +196,13 @@ export class DepartmentController {
         try {
             await this.departmentImportService.syncMMS();
             return new CustomResponseDto(
-                { 
+                {
                     message: 'MMS 동기화가 완료되었습니다.',
                     syncedDepartments: '동기화 완료',
                     syncedEmployees: '동기화 완료',
-                    deletedDepartments: '정리 완료'
-                }, 
-                'MMS 데이터 동기화를 완료하였습니다.'
+                    deletedDepartments: '정리 완료',
+                },
+                'MMS 데이터 동기화를 완료하였습니다.',
             );
         } catch (error) {
             throw error;
@@ -390,7 +390,6 @@ export class DepartmentController {
         name: 'userId',
         description: '사용자 ID',
         type: 'string',
-        format: 'uuid',
     })
     @ApiOkResponse({
         description: '접근 권한 추가 성공',
@@ -470,7 +469,6 @@ export class DepartmentController {
         name: 'userId',
         description: '사용자 ID',
         type: 'string',
-        format: 'uuid',
     })
     @ApiOkResponse({
         description: '접근 권한 제거 성공',
@@ -510,7 +508,6 @@ export class DepartmentController {
         name: 'userId',
         description: '사용자 ID',
         type: 'string',
-        format: 'uuid',
     })
     @ApiOkResponse({
         description: '검토 권한 제거 성공',
