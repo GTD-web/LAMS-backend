@@ -1,0 +1,112 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { UserRole } from '../../../../domain/user/enum/user.enum';
+
+/**
+ * 사용자 응답 DTO
+ */
+@Exclude()
+export class UserResponseDto {
+    @ApiProperty({
+        description: '사용자 고유 ID',
+        example: 'b520bc5c-d90d-4ec6-aa27-d527e05a2f28',
+        format: 'uuid',
+    })
+    @Expose()
+    readonly userId: string;
+
+    @ApiProperty({
+        description: '사용자명',
+        example: '우무현',
+    })
+    @Expose()
+    readonly username: string;
+
+    @ApiProperty({
+        description: '이메일 주소',
+        example: 'woo.mh@lumir.space',
+        format: 'email',
+    })
+    @Expose()
+    readonly email: string;
+
+    @ApiProperty({
+        description: '사용자 권한 목록',
+        example: ['SYSTEM_USER', 'ATTENDANCE_USER', 'PROJECT_USER', 'LRIM_USER'],
+        type: [String],
+        enum: UserRole,
+    })
+    @Expose()
+    readonly roles: UserRole[];
+
+    @ApiProperty({
+        description: '계정 활성화 상태',
+        example: true,
+    })
+    @Expose()
+    readonly isActive: boolean;
+
+    @ApiProperty({
+        description: '통합 계정 여부',
+        example: true,
+    })
+    @Expose()
+    readonly isIntegrated: boolean;
+
+    @ApiProperty({
+        description: '사용자 타입',
+        example: 'LrimUserEntity',
+    })
+    @Expose()
+    readonly type: string;
+
+    @ApiProperty({
+        description: '계정 생성일',
+        example: '2025-07-11T08:05:22.339Z',
+        format: 'date-time',
+    })
+    @Expose()
+    @Type(() => Date)
+    readonly createdAt: Date;
+
+    @ApiProperty({
+        description: '계정 수정일',
+        example: '2025-07-11T08:05:22.339Z',
+        format: 'date-time',
+    })
+    @Expose()
+    @Type(() => Date)
+    readonly updatedAt: Date;
+
+    @ApiPropertyOptional({
+        description: 'MongoDB ID (레거시 시스템 연동용)',
+        example: '65ba1cc08c17eea428cecb03',
+    })
+    @Expose()
+    readonly mongoId?: string;
+
+    @ApiProperty({
+        description: '평가자 권한 여부',
+        example: true,
+    })
+    @Expose()
+    readonly isEvaluator: boolean;
+
+    @ApiProperty({
+        description: '면접관 권한 여부',
+        example: true,
+    })
+    @Expose()
+    readonly isInterviewer: boolean;
+
+    @ApiProperty({
+        description: '필수 알림 대상 여부',
+        example: false,
+    })
+    @Expose()
+    readonly isRequiredNotifier: boolean;
+
+    constructor(partial: Partial<UserResponseDto>) {
+        Object.assign(this, partial);
+    }
+}

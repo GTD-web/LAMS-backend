@@ -1,0 +1,125 @@
+import { Controller, Get, Put, Param, Query, UseGuards, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { OrganizationManagementService } from '../../business/organization/services/organization-management.service';
+import { OrganizationQueryService } from '../../business/organization/services/organization-query.service';
+import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
+import { UserRole } from '../../domain/user/enum/user.enum';
+import { DepartmentInfoEntity } from '../../domain/organization/department/entities/department-info.entity';
+import { EmployeeInfoEntity } from '../../domain/organization/employee/entities/employee-info.entity';
+
+/**
+ * 부서 관리 컨트롤러
+ * - 부서 조회 및 isExclude 토글 기능만 제공
+ * - 부서 생성/삭제는 MMS 동기화를 통해서만 가능
+ */
+@ApiTags('departments')
+@Controller('departments')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
+export class DepartmentsController {
+    constructor(
+        private readonly organizationManagementService: OrganizationManagementService,
+        private readonly organizationQueryService: OrganizationQueryService,
+    ) {}
+
+    @Get()
+    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @ApiOperation({ summary: '부서 목록 조회' })
+    @ApiQuery({ name: 'page', required: false, type: Number })
+    @ApiQuery({ name: 'limit', required: false, type: Number })
+    @ApiQuery({ name: 'isExclude', required: false, type: Boolean, description: '제외된 부서 포함 여부' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: '부서 목록이 성공적으로 조회되었습니다.',
+    })
+    async getDepartments(
+        @Query() paginationQuery: PaginationQueryDto,
+        @Query('isExclude') isExclude?: boolean,
+    ): Promise<{ departments: DepartmentInfoEntity[]; total: number }> {
+        return await this.organizationQueryService.getDepartments(paginationQuery, isExclude);
+    }
+
+    @Get('search')
+    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @ApiOperation({ summary: '부서 검색' })
+    @ApiQuery({ name: 'searchTerm', required: true, type: String })
+    @ApiQuery({ name: 'userId', required: false, type: String })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: '부서 검색이 성공적으로 완료되었습니다.',
+    })
+    async searchDepartments(
+        @Query('searchTerm') searchTerm: string,
+        @Query('userId') userId?: string,
+    ): Promise<DepartmentInfoEntity[]> {
+        return await this.organizationQueryService.searchDepartments(searchTerm, userId);
+    }
+
+    @Get('hierarchy')
+    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @ApiOperation({ summary: '부서 계층 조회' })
+    @ApiQuery({ name: 'departmentId', required: false, type: String })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: '부서 계층이 성공적으로 조회되었습니다.',
+    })
+    async getDepartmentHierarchy(@Query('departmentId') departmentId?: string): Promise<DepartmentInfoEntity[]> {
+        return await this.organizationQueryService.getDepartmentHierarchy(departmentId);
+    }
+
+    @Get(':departmentId')
+    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @ApiOperation({ summary: '부서 단일 조회' })
+    @ApiParam({ name: 'departmentId', description: '부서 ID' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: '부서가 성공적으로 조회되었습니다.',
+        type: DepartmentInfoEntity,
+    })
+    async getDepartmentById(@Param('departmentId') departmentId: string): Promise<DepartmentInfoEntity | null> {
+        return await this.organizationQueryService.getDepartmentById(departmentId);
+    }
+
+    @Get(':departmentId/employees')
+    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @ApiOperation({ summary: '부서별 직원 조회' })
+    @ApiParam({ name: 'departmentId', description: '부서 ID' })
+    @ApiQuery({ name: 'isExclude', required: false, type: Boolean, description: '제외된 직원 포함 여부' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: '부서별 직원이 성공적으로 조회되었습니다.',
+    })
+    async getEmployeesByDepartment(@Param('departmentId') departmentId: string): Promise<EmployeeInfoEntity[]> {
+        return await this.organizationQueryService.getEmployeesByDepartment(departmentId);
+    }
+
+    @Get(':departmentId/with-employees')
+    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @ApiOperation({ summary: '부서와 소속 직원 함께 조회' })
+    @ApiParam({ name: 'departmentId', description: '부서 ID' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: '부서와 소속 직원이 성공적으로 조회되었습니다.',
+    })
+    async getDepartmentWithEmployees(
+        @Param('departmentId') departmentId: string,
+    ): Promise<{ department: DepartmentInfoEntity | null; employees: EmployeeInfoEntity[] }> {
+        return await this.organizationQueryService.getDepartmentWithEmployees(departmentId);
+    }
+
+    @Put(':departmentId/toggle-exclude')
+    @Roles(UserRole.SYSTEM_ADMIN)
+    @ApiOperation({ summary: '부서 제외 상태 토글' })
+    @ApiParam({ name: 'departmentId', description: '부서 ID' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: '부서 제외 상태가 성공적으로 변경되었습니다.',
+        type: DepartmentInfoEntity,
+    })
+    async toggleDepartmentExclude(@Param('departmentId') departmentId: string): Promise<DepartmentInfoEntity> {
+        return await this.organizationManagementService.toggleDepartmentExclude(departmentId);
+    }
+}

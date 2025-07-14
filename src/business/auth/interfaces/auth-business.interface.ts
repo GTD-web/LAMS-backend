@@ -1,5 +1,5 @@
 import { LoginResponseDto } from '@src/business/user/dto/responses/login-response.dto';
-import { AuthPayloadDto } from '../dto/responses/auth-payload.dto';
+import { AuthPayloadDto } from '../../../interfaces/dto/auth/responses/auth-payload.dto';
 
 /**
  * 인증 비즈니스 서비스 인터페이스

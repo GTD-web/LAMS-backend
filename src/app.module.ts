@@ -9,9 +9,7 @@ import databaseConfig, { JWT_CONFIG } from './common/configs/env.config';
 import { AuthBusinessModule } from './business/auth/auth-business.module';
 import { jwtConfig } from './common/configs/jwt.config';
 import { SeedModule } from './common/seeds/seed.module';
-import { UserBusinessModule } from './business/user/user-business.module';
-import { EmployeeBusinessModule } from './business/employee/employee-business.module';
-import { DepartmentBusinessModule } from './business/department/department-business.module';
+import { OrganizationBusinessModule } from './business/organization/organization-business.module';
 
 @Module({
     imports: [
@@ -28,11 +26,9 @@ import { DepartmentBusinessModule } from './business/department/department-busin
             useFactory: jwtConfig,
             inject: [ConfigService],
         }),
-        UserBusinessModule,
         AuthBusinessModule,
         SeedModule,
-        EmployeeBusinessModule,
-        DepartmentBusinessModule,
+        OrganizationBusinessModule,
     ],
     controllers: [AppController],
     providers: [AppService],

@@ -47,14 +47,6 @@ export class OrganizationDomainService {
     constructor(
         @InjectRepository(DepartmentInfoEntity)
         private readonly departmentRepository: Repository<DepartmentInfoEntity>,
-        @InjectRepository(DepartmentEmployeeEntity)
-        private readonly departmentEmployeeRepository: Repository<DepartmentEmployeeEntity>,
-        @InjectRepository(OrganizationChartInfoEntity)
-        private readonly organizationChartRepository: Repository<OrganizationChartInfoEntity>,
-        @InjectRepository(LamsUserEntity)
-        private readonly lamsUserRepository: Repository<LamsUserEntity>,
-        @InjectRepository(EmployeeInfoEntity)
-        private readonly employeeRepository: Repository<EmployeeInfoEntity>,
         private readonly dataSource: DataSource,
     ) {}
 

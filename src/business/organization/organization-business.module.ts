@@ -1,26 +1,25 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
-import { DepartmentEmployeeEntity } from '@src/domain/organization/department/entities/department-employee.entity';
-import { OrganizationChartInfoEntity } from '@src/domain/organization/entities/organization-chart-info.entity';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
-import { EmployeeInfoEntity } from '@src/domain/organization/employee/entities/employee-info.entity';
-import { OrganizationDomainService } from '@src/domain/organization/organization-domain.service';
-import { OrganizationBusinessService } from './organization.business';
-import { OrganizationController } from './organization.controller';
+import { OrganizationContextModule } from '../../contexts/organization/organization-context.module';
 
+// Services
+import { OrganizationManagementService } from './services/organization-management.service';
+import { OrganizationQueryService } from './services/organization-query.service';
+import { OrganizationSyncService } from './services/organization-sync.service';
+
+// Controllers
+import { UsersController } from '../../interfaces/controllers/users.controller';
+import { DepartmentsController } from '../../interfaces/controllers/departments.controller';
+import { EmployeesController } from '../../interfaces/controllers/employees.controller';
+import { OrganizationController } from '../../interfaces/controllers/organization.controller';
+
+/**
+ * 조직 비즈니스 모듈
+ * - 조직 관련 모든 비즈니스 로직과 컨트롤러를 관리
+ */
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([
-            DepartmentInfoEntity,
-            DepartmentEmployeeEntity,
-            OrganizationChartInfoEntity,
-            LamsUserEntity,
-            EmployeeInfoEntity,
-        ]),
-    ],
-    providers: [OrganizationDomainService, OrganizationBusinessService],
-    controllers: [OrganizationController],
-    exports: [OrganizationBusinessService],
+    imports: [OrganizationContextModule],
+    controllers: [UsersController, DepartmentsController, EmployeesController, OrganizationController],
+    providers: [OrganizationManagementService, OrganizationQueryService, OrganizationSyncService],
+    exports: [OrganizationManagementService, OrganizationQueryService, OrganizationSyncService],
 })
 export class OrganizationBusinessModule {}
