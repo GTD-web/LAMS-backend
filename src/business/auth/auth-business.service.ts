@@ -4,6 +4,7 @@ import { AuthPayloadDto } from '../../interfaces/dto/auth/responses/auth-payload
 import { UserRole } from '@src/domain/user/enum/user.enum';
 import { UserDomainService } from '@src/domain/user/services/user-domain.service';
 import { LoginResponseDto } from '@src/interfaces/dto/auth/responses/login-response.dto';
+import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 
 /**
  * 인증 비즈니스 서비스
@@ -94,6 +95,10 @@ export class AuthBusinessService {
         return {
             token,
         };
+    }
+
+    async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<LamsUserEntity> {
+        return this.userDomainService.changeUserPassword(userId, currentPassword, newPassword);
     }
 
     /**

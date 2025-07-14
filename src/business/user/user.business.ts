@@ -49,26 +49,10 @@ export class UserBusinessService {
     }
 
     /**
-     * 비밀번호 변경 - 검증 로직은 Domain Service에서 처리
+     * 비밀번호 변경
      */
     async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<UserResponseDto> {
         const result = await this.userDomainService.changeUserPassword(userId, currentPassword, newPassword);
-        const response = plainToInstance(UserResponseDto, result);
-        return response;
-    }
-
-    /**
-     * 사용자 삭제 - 검증 로직은 Domain Service에서 처리
-     */
-    async deleteUser(userId: string): Promise<boolean> {
-        return await this.userDomainService.deleteLamsUser(userId);
-    }
-
-    /**
-     * 사용자 역할 업데이트 - 검증 로직은 Domain Service에서 처리
-     */
-    async updateUserRole(userId: string, roles: UserRole[]): Promise<UserResponseDto> {
-        const result = await this.userDomainService.updateUserRole(userId, roles);
         const response = plainToInstance(UserResponseDto, result);
         return response;
     }

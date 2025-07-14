@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { OrganizationContextService } from '../../../contexts/organization/organization-context.service';
-import { MMSDepartmentResponseDto } from '../../../interfaces/dto/organization/requests/mms-department-import.dto';
-import { MMSEmployeeResponseDto } from '../../../interfaces/dto/organization/requests/mms-employee-import.dto';
 
 /**
  * 조직 동기화 서비스
@@ -23,7 +21,7 @@ export class OrganizationSyncService {
     /**
      * 전체 동기화 실행 (에러 처리 포함)
      */
-    async performFullSync(): Promise<{ success: boolean; message: string }> {
+    async syncMMS(): Promise<{ success: boolean; message: string }> {
         try {
             await this.synchronizeWithMMS();
             return {

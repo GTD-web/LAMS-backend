@@ -21,77 +21,7 @@ export class UserDomainService {
     ) {}
 
     /**
-     * 사용자 생성 (검증 로직 포함)
-     */
-    async createLamsUser(username: string, email: string, password: string): Promise<LamsUserEntity> {
-        try {
-            // 이메일 중복 확인
-            const existingUser = await this.findUserByEmail(email);
-            if (existingUser) {
-                throw new ConflictException('이미 존재하는 이메일입니다.');
-            }
-
-            // 사용자명 중복 확인
-            const existingUsername = await this.findUserByUsername(username);
-            if (existingUsername) {
-                throw new ConflictException('이미 존재하는 사용자명입니다.');
-            }
-
-            const user = this.userRepository.create({
-                username,
-                email,
-                password,
-                roles: [UserRole.SYSTEM_USER],
-                isActive: true,
-            });
-
-            const savedUser = await this.userRepository.save(user);
-            this.logger.log(`사용자 생성 완료: ${savedUser.email}`);
-            return savedUser;
-        } catch (error) {
-            this.logger.error(`사용자 생성 실패: ${email}`, error.stack);
-            throw error;
-        }
-    }
-
-    /**
-     * 사용자 업데이트 (검증 로직 포함)
-     */
-    async updateLamsUser(userId: string, updateData: Partial<LamsUserEntity>): Promise<LamsUserEntity> {
-        try {
-            const user = await this.findUserById(userId);
-            if (!user) {
-                throw new NotFoundException('사용자를 찾을 수 없습니다.');
-            }
-
-            // 이메일 중복 확인 (자신 제외)
-            if (updateData.email && updateData.email !== user.email) {
-                const existingUser = await this.findUserByEmail(updateData.email);
-                if (existingUser && existingUser.userId !== userId) {
-                    throw new ConflictException('이미 존재하는 이메일입니다.');
-                }
-            }
-
-            // 사용자명 중복 확인 (자신 제외)
-            if (updateData.username && updateData.username !== user.username) {
-                const existingUsername = await this.findUserByUsername(updateData.username);
-                if (existingUsername && existingUsername.userId !== userId) {
-                    throw new ConflictException('이미 존재하는 사용자명입니다.');
-                }
-            }
-
-            Object.assign(user, updateData);
-            const updatedUser = await this.userRepository.save(user);
-            this.logger.log(`사용자 정보 업데이트 완료: ${updatedUser.email}`);
-            return updatedUser;
-        } catch (error) {
-            this.logger.error(`사용자 업데이트 실패: ${userId}`, error.stack);
-            throw error;
-        }
-    }
-
-    /**
-     * 사용자 비밀번호 변경 (검증 로직 포함)
+     * 사용자 비밀번호 변경
      */
     async changeUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<LamsUserEntity> {
         try {
@@ -122,48 +52,7 @@ export class UserDomainService {
     }
 
     /**
-     * 사용자 삭제 (검증 로직 포함)
-     */
-    async deleteLamsUser(userId: string): Promise<boolean> {
-        try {
-            const user = await this.findUserById(userId);
-            if (!user) {
-                throw new NotFoundException('사용자를 찾을 수 없습니다.');
-            }
-
-            await this.userRepository.delete(userId);
-            this.logger.log(`사용자 삭제 완료: ${userId}`);
-            return true;
-        } catch (error) {
-            this.logger.error(`사용자 삭제 실패: ${userId}`, error.stack);
-            throw error;
-        }
-    }
-
-    /**
-     * 사용자 역할 업데이트 (검증 로직 포함)
-     */
-    async updateUserRole(userId: string, roles: UserRole[]): Promise<LamsUserEntity> {
-        try {
-            const user = await this.findUserById(userId);
-            if (!user) {
-                throw new NotFoundException('사용자를 찾을 수 없습니다.');
-            }
-
-            const roleStrings = roles.map((role) => role.toString());
-            user.roles = roleStrings;
-
-            const updatedUser = await this.userRepository.save(user);
-            this.logger.log(`사용자 역할 업데이트 완료: ${updatedUser.email}, 새 역할: ${roles.join(', ')}`);
-            return updatedUser;
-        } catch (error) {
-            this.logger.error(`사용자 역할 업데이트 실패: ${userId}`, error.stack);
-            throw error;
-        }
-    }
-
-    /**
-     * 사용자 인증 검증 (검증 로직 포함)
+     * 사용자 인증 검증
      */
     async validateUserCredentials(email: string, password: string): Promise<LamsUserEntity | null> {
         try {

@@ -21,7 +21,7 @@ export class DepartmentDomainService {
     ) {}
 
     /**
-     * 부서 제외 토글 (검증 로직 포함)
+     * 부서 제외 토글
      */
     async toggleDepartmentExclude(departmentId: string): Promise<DepartmentInfoEntity> {
         try {

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { OrganizationContextService } from '../../../contexts/organization/organization-context.service';
 import { DepartmentInfoEntity } from '../../../domain/organization/department/entities/department-info.entity';
 import { EmployeeInfoEntity } from '../../../domain/organization/employee/entities/employee-info.entity';
+import { UpdateUserDto } from '@src/interfaces/dto/organization/requests/update-user.dto';
 
 /**
  * 조직 관리 서비스

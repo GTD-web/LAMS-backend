@@ -21,7 +21,7 @@ export class EmployeeDomainService {
     ) {}
 
     /**
-     * 직원 생성 (검증 로직 포함)
+     * 직원 생성
      */
     async createEmployee(employeeData: Partial<EmployeeInfoEntity>): Promise<EmployeeInfoEntity> {
         try {
@@ -44,7 +44,7 @@ export class EmployeeDomainService {
     }
 
     /**
-     * 직원 정보 업데이트 (검증 로직 포함)
+     * 직원 정보 업데이트
      */
     async updateEmployee(employeeId: string, updateData: Partial<EmployeeInfoEntity>): Promise<EmployeeInfoEntity> {
         try {
@@ -74,7 +74,7 @@ export class EmployeeDomainService {
     }
 
     /**
-     * 퇴사일 업데이트 (검증 로직 포함)
+     * 퇴사일 업데이트
      */
     async updateQuitedAt(
         employeeId: string,
@@ -107,7 +107,7 @@ export class EmployeeDomainService {
     }
 
     /**
-     * 입사일 업데이트 (검증 로직 포함)
+     * 입사일 업데이트
      */
     async updateEntryAt(
         employeeId: string,
@@ -140,7 +140,7 @@ export class EmployeeDomainService {
     }
 
     /**
-     * 생년월일 업데이트 (검증 로직 포함)
+     * 생년월일 업데이트
      */
     async updateBirthDate(employeeId: string, birthDate: string): Promise<EmployeeInfoEntity> {
         try {
@@ -171,7 +171,7 @@ export class EmployeeDomainService {
     }
 
     /**
-     * 직원 제외 토글 (검증 로직 포함)
+     * 직원 제외 토글
      */
     async toggleExcludeEmployee(employeeId: string): Promise<EmployeeInfoEntity> {
         try {
@@ -195,7 +195,7 @@ export class EmployeeDomainService {
     }
 
     /**
-     * 직원 삭제 (검증 로직 포함)
+     * 직원 삭제
      */
     async deleteEmployee(employeeId: string): Promise<boolean> {
         try {
@@ -214,7 +214,7 @@ export class EmployeeDomainService {
     }
 
     /**
-     * 직원 일괄 날짜 업데이트 (검증 로직 포함)
+     * 직원 일괄 날짜 업데이트
      */
     async updateEmployeeDates(
         employeeId: string,
@@ -257,7 +257,7 @@ export class EmployeeDomainService {
     }
 
     /**
-     * 엑셀 직원 정보 업데이트 (검증 로직 포함)
+     * 엑셀 직원 정보 업데이트
      */
     async updateEmployeeInfo(mergedEmployeeInfo: MergedEmployeeInfo): Promise<EmployeeInfoEntity | null> {
         try {

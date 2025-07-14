@@ -1,11 +1,14 @@
 import { GetUser } from '@src/common/decorators/get-user.decorator';
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, HttpStatus, Param, Post, Put } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthBusinessService } from '@src/business/auth/auth-business.service';
 import { Public } from '@src/common/decorators/public.decorator';
 import { LoginResponseDto } from '@src/interfaces/dto/auth/responses/login-response.dto';
 import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 import { LoginDto } from '@src/interfaces/dto/auth/request/login.dto';
+import { Roles } from '@src/common/decorators/roles.decorator';
+import { UserRole } from '@src/domain/user/enum/user.enum';
+import { ChangePasswordDto } from '../dto/auth/request/change-password.dto';
 
 @Controller('admin/auth')
 @ApiTags('인증')
@@ -29,5 +32,25 @@ export class AuthController {
     @ApiResponse({ status: 401, description: '토큰 검증 실패' })
     async validateToken(@GetUser() user: LamsUserEntity) {
         return user;
+    }
+
+    @Put(':userId')
+    @Roles(UserRole.SYSTEM_ADMIN)
+    @ApiOperation({ summary: '사용자 비밀번호 수정' })
+    @ApiParam({ name: 'userId', description: '사용자 ID' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: '사용자 정보가 성공적으로 수정되었습니다.',
+        type: LamsUserEntity,
+    })
+    async changePassword(
+        @Param('userId') userId: string,
+        @Body() changePasswordDto: ChangePasswordDto,
+    ): Promise<LamsUserEntity> {
+        return this.authBusinessService.changePassword(
+            userId,
+            changePasswordDto.currentPassword,
+            changePasswordDto.newPassword,
+        );
     }
 }

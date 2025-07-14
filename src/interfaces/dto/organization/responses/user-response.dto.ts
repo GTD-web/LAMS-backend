@@ -55,7 +55,7 @@ export class UserResponseDto {
 
     @ApiProperty({
         description: '사용자 타입',
-        example: 'LrimUserEntity',
+        example: 'LamsUserEntity',
     })
     @Expose()
     readonly type: string;
@@ -77,34 +77,6 @@ export class UserResponseDto {
     @Expose()
     @Type(() => Date)
     readonly updatedAt: Date;
-
-    @ApiPropertyOptional({
-        description: 'MongoDB ID (레거시 시스템 연동용)',
-        example: '65ba1cc08c17eea428cecb03',
-    })
-    @Expose()
-    readonly mongoId?: string;
-
-    @ApiProperty({
-        description: '평가자 권한 여부',
-        example: true,
-    })
-    @Expose()
-    readonly isEvaluator: boolean;
-
-    @ApiProperty({
-        description: '면접관 권한 여부',
-        example: true,
-    })
-    @Expose()
-    readonly isInterviewer: boolean;
-
-    @ApiProperty({
-        description: '필수 알림 대상 여부',
-        example: false,
-    })
-    @Expose()
-    readonly isRequiredNotifier: boolean;
 
     constructor(partial: Partial<UserResponseDto>) {
         Object.assign(this, partial);

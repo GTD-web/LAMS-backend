@@ -9,7 +9,7 @@ import { UserRole } from '../../../../domain/user/enum/user.enum';
 export class UpdateUserDto {
     @ApiPropertyOptional({
         description: '사용자명',
-        example: '우무현',
+        example: '어이현',
     })
     @IsOptional()
     @IsString({ message: '사용자명은 문자열이어야 합니다' })
@@ -52,28 +52,4 @@ export class UpdateUserDto {
     @IsOptional()
     @IsBoolean({ message: '통합 계정 여부는 boolean 값이어야 합니다' })
     readonly isIntegrated?: boolean;
-
-    @ApiPropertyOptional({
-        description: '평가자 권한 여부',
-        example: true,
-    })
-    @IsOptional()
-    @IsBoolean({ message: '평가자 권한은 boolean 값이어야 합니다' })
-    readonly isEvaluator?: boolean;
-
-    @ApiPropertyOptional({
-        description: '면접관 권한 여부',
-        example: true,
-    })
-    @IsOptional()
-    @IsBoolean({ message: '면접관 권한은 boolean 값이어야 합니다' })
-    readonly isInterviewer?: boolean;
-
-    @ApiPropertyOptional({
-        description: '필수 알림 대상 여부',
-        example: false,
-    })
-    @IsOptional()
-    @IsBoolean({ message: '필수 알림 대상 여부는 boolean 값이어야 합니다' })
-    readonly isRequiredNotifier?: boolean;
 }

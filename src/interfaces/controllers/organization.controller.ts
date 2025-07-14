@@ -26,7 +26,7 @@ export class OrganizationController {
         status: HttpStatus.OK,
         description: 'MMS 전체 동기화가 성공적으로 완료되었습니다.',
     })
-    async performFullSync(): Promise<{ success: boolean; message: string }> {
-        return await this.organizationSyncService.performFullSync();
+    async syncMMS(): Promise<{ success: boolean; message: string }> {
+        return await this.organizationSyncService.syncMMS();
     }
 }
