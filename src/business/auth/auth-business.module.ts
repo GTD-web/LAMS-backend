@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthBusinessService } from './auth-business.service';
 import { UserDomainModule } from '@src/domain/user/user.module';
 import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
-import { AuthController } from '@src/business/auth/auth.controller';
+import { AuthController } from '@src/interfaces/controllers/auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 /**

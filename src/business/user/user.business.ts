@@ -6,6 +6,7 @@ import { plainToInstance } from 'class-transformer';
 import { UserRole } from '@src/domain/user/enum/user.enum';
 import { UserDomainService } from '@src/domain/user/services/user-domain.service';
 import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
+import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
 
 /**
  * 사용자 비즈니스 서비스

@@ -3,7 +3,9 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthBusinessService } from '@src/business/auth/auth-business.service';
 import { Public } from '@src/common/decorators/public.decorator';
+import { LoginResponseDto } from '@src/interfaces/dto/auth/responses/login-response.dto';
 import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
+import { LoginDto } from '@src/interfaces/dto/auth/request/login.dto';
 
 @Controller('admin/auth')
 @ApiTags('인증')

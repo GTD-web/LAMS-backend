@@ -19,30 +19,6 @@ import { MMSEmployeeResponseDto } from '../dto/organization/requests/mms-employe
 export class OrganizationController {
     constructor(private readonly organizationSyncService: OrganizationSyncService) {}
 
-    @Get('mms/departments')
-    @Roles(UserRole.SYSTEM_ADMIN)
-    @ApiOperation({ summary: 'MMS에서 부서 데이터 가져오기 (조회용)' })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        description: 'MMS 부서 데이터가 성공적으로 조회되었습니다.',
-        type: [MMSDepartmentResponseDto],
-    })
-    async getDepartmentsFromMMS(): Promise<MMSDepartmentResponseDto[]> {
-        return await this.organizationSyncService.getDepartmentsFromMMS();
-    }
-
-    @Get('mms/employees')
-    @Roles(UserRole.SYSTEM_ADMIN)
-    @ApiOperation({ summary: 'MMS에서 직원 데이터 가져오기 (조회용)' })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        description: 'MMS 직원 데이터가 성공적으로 조회되었습니다.',
-        type: [MMSEmployeeResponseDto],
-    })
-    async getEmployeesFromMMS(): Promise<MMSEmployeeResponseDto[]> {
-        return await this.organizationSyncService.getEmployeesFromMMS();
-    }
-
     @Post('sync')
     @Roles(UserRole.SYSTEM_ADMIN)
     @ApiOperation({ summary: 'MMS와 전체 동기화 실행' })
@@ -52,21 +28,5 @@ export class OrganizationController {
     })
     async performFullSync(): Promise<{ success: boolean; message: string }> {
         return await this.organizationSyncService.performFullSync();
-    }
-
-    @Get('sync/status')
-    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
-    @ApiOperation({ summary: '동기화 상태 확인' })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        description: '동기화 상태가 성공적으로 조회되었습니다.',
-    })
-    async checkSyncStatus(): Promise<{
-        mmsConnection: boolean;
-        lastSyncTime?: Date;
-        departmentCount: number;
-        employeeCount: number;
-    }> {
-        return await this.organizationSyncService.checkSyncStatus();
     }
 }

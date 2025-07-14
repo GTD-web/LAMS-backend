@@ -1,9 +1,9 @@
 import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { LoginResponseDto } from '../user/dto/responses/login-response.dto';
 import { AuthPayloadDto } from '../../interfaces/dto/auth/responses/auth-payload.dto';
 import { UserRole } from '@src/domain/user/enum/user.enum';
 import { UserDomainService } from '@src/domain/user/services/user-domain.service';
+import { LoginResponseDto } from '@src/interfaces/dto/auth/responses/login-response.dto';
 
 /**
  * 인증 비즈니스 서비스
