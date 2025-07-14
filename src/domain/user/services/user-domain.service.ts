@@ -91,20 +91,11 @@ export class UserDomainService {
     }
 
     /**
-     * 이메일로 사용자 조회
+     * 사용자명으로 사용자 조회
      */
     async findUserByEmail(email: string): Promise<LamsUserEntity | null> {
         return await this.userRepository.findOne({
             where: { email },
-        });
-    }
-
-    /**
-     * 사용자명으로 사용자 조회
-     */
-    async findUserByUsername(username: string): Promise<LamsUserEntity | null> {
-        return await this.userRepository.findOne({
-            where: { username },
         });
     }
 
@@ -119,76 +110,5 @@ export class UserDomainService {
         });
 
         return { users, total };
-    }
-
-    /**
-     * 역할별 사용자 조회
-     */
-    async findUsersByRole(role: string): Promise<LamsUserEntity[]> {
-        return await this.userRepository.find({
-            where: { roles: Like(`%${role}%`) },
-            order: { createdAt: 'DESC' },
-        });
-    }
-
-    /**
-     * 활성 사용자 조회
-     */
-    async findActiveUsers(): Promise<LamsUserEntity[]> {
-        return await this.userRepository.find({
-            where: { isActive: true },
-            order: { createdAt: 'DESC' },
-        });
-    }
-
-    /**
-     * 비활성 사용자 조회
-     */
-    async findInactiveUsers(): Promise<LamsUserEntity[]> {
-        return await this.userRepository.find({
-            where: { isActive: false },
-            order: { createdAt: 'DESC' },
-        });
-    }
-
-    /**
-     * 사용자 존재 여부 확인
-     */
-    async existsUser(userId: string): Promise<boolean> {
-        try {
-            const count = await this.userRepository.count({
-                where: { userId },
-            });
-            return count > 0;
-        } catch (error) {
-            this.logger.error(`사용자 존재 확인 실패: ${userId}`, error.stack);
-            throw error;
-        }
-    }
-
-    /**
-     * 이메일 중복 확인
-     */
-    async existsByEmail(email: string, excludeId?: string): Promise<boolean> {
-        const whereCondition: any = { email };
-        if (excludeId) {
-            whereCondition.userId = Not(excludeId);
-        }
-
-        const count = await this.userRepository.count({ where: whereCondition });
-        return count > 0;
-    }
-
-    /**
-     * 사용자명 중복 확인
-     */
-    async existsByUsername(username: string, excludeId?: string): Promise<boolean> {
-        const whereCondition: any = { username };
-        if (excludeId) {
-            whereCondition.userId = Not(excludeId);
-        }
-
-        const count = await this.userRepository.count({ where: whereCondition });
-        return count > 0;
     }
 }

@@ -9,6 +9,10 @@ import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-quer
 import { UserRole } from '../../domain/user/enum/user.enum';
 import { EmployeeInfoEntity } from '../../domain/organization/employee/entities/employee-info.entity';
 import { DepartmentInfoEntity } from '../../domain/organization/department/entities/department-info.entity';
+import { EmployeeResponseDto } from '../dto/organization/responses/employee-response.dto';
+import { EmployeeListResponseDto } from '../dto/organization/responses/employee-list-response.dto';
+import { EmployeeWithDepartmentResponseDto } from '../dto/organization/responses/employee-with-department-response.dto';
+import { DepartmentResponseDto } from '../dto/organization/responses/department-response.dto';
 
 /**
  * 직원 관리 컨트롤러
@@ -34,12 +38,17 @@ export class EmployeesController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '직원 목록이 성공적으로 조회되었습니다.',
+        type: EmployeeListResponseDto,
     })
     async getEmployees(
         @Query() paginationQuery: PaginationQueryDto,
         @Query('isExcludedFromCalculation') isExcludedFromCalculation?: boolean,
-    ): Promise<{ employees: EmployeeInfoEntity[]; total: number }> {
-        return await this.organizationQueryService.getEmployees(paginationQuery, isExcludedFromCalculation);
+    ): Promise<EmployeeListResponseDto> {
+        const result = await this.organizationQueryService.getEmployees(paginationQuery, isExcludedFromCalculation);
+        return new EmployeeListResponseDto({
+            employees: result.employees.map((emp) => new EmployeeResponseDto(emp)),
+            total: result.total,
+        });
     }
 
     @Get(':employeeId')
@@ -49,10 +58,12 @@ export class EmployeesController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '직원이 성공적으로 조회되었습니다.',
-        type: EmployeeInfoEntity,
+        type: EmployeeResponseDto,
     })
-    async getEmployeeById(@Param('employeeId') employeeId: string): Promise<EmployeeInfoEntity | null> {
-        return await this.organizationQueryService.getEmployeeById(employeeId);
+    async getEmployeeById(@Param('employeeId') employeeId: string): Promise<EmployeeResponseDto | null> {
+        const employee = await this.organizationQueryService.getEmployeeById(employeeId);
+        if (!employee) return null;
+        return new EmployeeResponseDto(employee);
     }
 
     @Get('number/:employeeNumber')
@@ -62,12 +73,14 @@ export class EmployeesController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '직원이 성공적으로 조회되었습니다.',
-        type: EmployeeInfoEntity,
+        type: EmployeeResponseDto,
     })
     async getEmployeeByEmployeeNumber(
         @Param('employeeNumber') employeeNumber: string,
-    ): Promise<EmployeeInfoEntity | null> {
-        return await this.organizationQueryService.getEmployeeByEmployeeNumber(employeeNumber);
+    ): Promise<EmployeeResponseDto | null> {
+        const employee = await this.organizationQueryService.getEmployeeByEmployeeNumber(employeeNumber);
+        if (!employee) return null;
+        return new EmployeeResponseDto(employee);
     }
 
     @Get(':employeeId/with-department')
@@ -77,11 +90,16 @@ export class EmployeesController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '직원과 소속 부서가 성공적으로 조회되었습니다.',
+        type: EmployeeWithDepartmentResponseDto,
     })
     async getEmployeeWithDepartment(
         @Param('employeeId') employeeId: string,
-    ): Promise<{ employee: EmployeeInfoEntity | null; department: DepartmentInfoEntity | null }> {
-        return await this.organizationQueryService.getEmployeeWithDepartment(employeeId);
+    ): Promise<EmployeeWithDepartmentResponseDto> {
+        const result = await this.organizationQueryService.getEmployeeWithDepartment(employeeId);
+        return new EmployeeWithDepartmentResponseDto({
+            employee: result.employee ? new EmployeeResponseDto(result.employee) : null,
+            department: result.department ? new DepartmentResponseDto(result.department) : null,
+        });
     }
 
     @Put(':employeeId/toggle-exclude')
@@ -91,10 +109,11 @@ export class EmployeesController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '직원 제외 상태가 성공적으로 변경되었습니다.',
-        type: EmployeeInfoEntity,
+        type: EmployeeResponseDto,
     })
-    async toggleEmployeeExclude(@Param('employeeId') employeeId: string): Promise<EmployeeInfoEntity> {
-        return await this.organizationManagementService.toggleEmployeeExclude(employeeId);
+    async toggleEmployeeExclude(@Param('employeeId') employeeId: string): Promise<EmployeeResponseDto> {
+        const employee = await this.organizationManagementService.toggleEmployeeExclude(employeeId);
+        return new EmployeeResponseDto(employee);
     }
 
     @Post(':employeeId/assign-department/:departmentId')

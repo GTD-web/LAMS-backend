@@ -9,6 +9,7 @@ import { LoginDto } from '@src/interfaces/dto/auth/request/login.dto';
 import { Roles } from '@src/common/decorators/roles.decorator';
 import { UserRole } from '@src/domain/user/enum/user.enum';
 import { ChangePasswordDto } from '../dto/auth/request/change-password.dto';
+import { UserResponseDto } from '../dto/organization/responses/user-response.dto';
 
 @Controller('admin/auth')
 @ApiTags('인증')
@@ -41,12 +42,12 @@ export class AuthController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '사용자 정보가 성공적으로 수정되었습니다.',
-        type: LamsUserEntity,
+        type: UserResponseDto,
     })
     async changePassword(
         @Param('userId') userId: string,
         @Body() changePasswordDto: ChangePasswordDto,
-    ): Promise<LamsUserEntity> {
+    ): Promise<UserResponseDto> {
         return this.authBusinessService.changePassword(
             userId,
             changePasswordDto.currentPassword,

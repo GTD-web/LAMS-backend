@@ -9,6 +9,12 @@ import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-quer
 import { UserRole } from '../../domain/user/enum/user.enum';
 import { DepartmentInfoEntity } from '../../domain/organization/department/entities/department-info.entity';
 import { EmployeeInfoEntity } from '../../domain/organization/employee/entities/employee-info.entity';
+import { DepartmentResponseDto } from '../dto/organization/responses/department-response.dto';
+import { DepartmentListResponseDto } from '../dto/organization/responses/department-list-response.dto';
+import {
+    DepartmentWithEmployeesResponseDto,
+    EmployeeInDepartmentDto,
+} from '../dto/organization/responses/department-with-employees-response.dto';
 
 /**
  * 부서 관리 컨트롤러
@@ -34,12 +40,17 @@ export class DepartmentsController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '부서 목록이 성공적으로 조회되었습니다.',
+        type: DepartmentListResponseDto,
     })
     async getDepartments(
         @Query() paginationQuery: PaginationQueryDto,
         @Query('isExclude') isExclude?: boolean,
-    ): Promise<{ departments: DepartmentInfoEntity[]; total: number }> {
-        return await this.organizationQueryService.getDepartments(paginationQuery, isExclude);
+    ): Promise<DepartmentListResponseDto> {
+        const result = await this.organizationQueryService.getDepartments(paginationQuery, isExclude);
+        return new DepartmentListResponseDto({
+            departments: result.departments.map((dept) => new DepartmentResponseDto(dept)),
+            total: result.total,
+        });
     }
 
     @Get('search')
@@ -50,12 +61,14 @@ export class DepartmentsController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '부서 검색이 성공적으로 완료되었습니다.',
+        type: [DepartmentResponseDto],
     })
     async searchDepartments(
         @Query('searchTerm') searchTerm: string,
         @Query('userId') userId?: string,
-    ): Promise<DepartmentInfoEntity[]> {
-        return await this.organizationQueryService.searchDepartments(searchTerm, userId);
+    ): Promise<DepartmentResponseDto[]> {
+        const departments = await this.organizationQueryService.searchDepartments(searchTerm, userId);
+        return departments.map((dept) => new DepartmentResponseDto(dept));
     }
 
     @Get('hierarchy')
@@ -65,9 +78,11 @@ export class DepartmentsController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '부서 계층이 성공적으로 조회되었습니다.',
+        type: [DepartmentResponseDto],
     })
-    async getDepartmentHierarchy(@Query('departmentId') departmentId?: string): Promise<DepartmentInfoEntity[]> {
-        return await this.organizationQueryService.getDepartmentHierarchy(departmentId);
+    async getDepartmentHierarchy(@Query('departmentId') departmentId?: string): Promise<DepartmentResponseDto[]> {
+        const departments = await this.organizationQueryService.getDepartmentHierarchy(departmentId);
+        return departments.map((dept) => new DepartmentResponseDto(dept));
     }
 
     @Get(':departmentId')
@@ -77,10 +92,12 @@ export class DepartmentsController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '부서가 성공적으로 조회되었습니다.',
-        type: DepartmentInfoEntity,
+        type: DepartmentResponseDto,
     })
-    async getDepartmentById(@Param('departmentId') departmentId: string): Promise<DepartmentInfoEntity | null> {
-        return await this.organizationQueryService.getDepartmentById(departmentId);
+    async getDepartmentById(@Param('departmentId') departmentId: string): Promise<DepartmentResponseDto | null> {
+        const department = await this.organizationQueryService.getDepartmentById(departmentId);
+        if (!department) return null;
+        return new DepartmentResponseDto(department);
     }
 
     @Get(':departmentId/employees')
@@ -91,9 +108,11 @@ export class DepartmentsController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '부서별 직원이 성공적으로 조회되었습니다.',
+        type: [EmployeeInDepartmentDto],
     })
-    async getEmployeesByDepartment(@Param('departmentId') departmentId: string): Promise<EmployeeInfoEntity[]> {
-        return await this.organizationQueryService.getEmployeesByDepartment(departmentId);
+    async getEmployeesByDepartment(@Param('departmentId') departmentId: string): Promise<EmployeeInDepartmentDto[]> {
+        const employees = await this.organizationQueryService.getEmployeesByDepartment(departmentId);
+        return employees.map((emp) => new EmployeeInDepartmentDto(emp));
     }
 
     @Get(':departmentId/with-employees')
@@ -103,11 +122,16 @@ export class DepartmentsController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '부서와 소속 직원이 성공적으로 조회되었습니다.',
+        type: DepartmentWithEmployeesResponseDto,
     })
     async getDepartmentWithEmployees(
         @Param('departmentId') departmentId: string,
-    ): Promise<{ department: DepartmentInfoEntity | null; employees: EmployeeInfoEntity[] }> {
-        return await this.organizationQueryService.getDepartmentWithEmployees(departmentId);
+    ): Promise<DepartmentWithEmployeesResponseDto> {
+        const result = await this.organizationQueryService.getDepartmentWithEmployees(departmentId);
+        return new DepartmentWithEmployeesResponseDto({
+            department: result.department ? new DepartmentResponseDto(result.department) : null,
+            employees: result.employees.map((emp) => new EmployeeInDepartmentDto(emp)),
+        });
     }
 
     @Put(':departmentId/toggle-exclude')
@@ -117,9 +141,10 @@ export class DepartmentsController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '부서 제외 상태가 성공적으로 변경되었습니다.',
-        type: DepartmentInfoEntity,
+        type: DepartmentResponseDto,
     })
-    async toggleDepartmentExclude(@Param('departmentId') departmentId: string): Promise<DepartmentInfoEntity> {
-        return await this.organizationManagementService.toggleDepartmentExclude(departmentId);
+    async toggleDepartmentExclude(@Param('departmentId') departmentId: string): Promise<DepartmentResponseDto> {
+        const department = await this.organizationManagementService.toggleDepartmentExclude(departmentId);
+        return new DepartmentResponseDto(department);
     }
 }

@@ -9,6 +9,8 @@ import { UpdateUserDto } from '../dto/organization/requests/update-user.dto';
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
 import { UserRole } from '../../domain/user/enum/user.enum';
 import { LamsUserEntity } from '../../domain/user/entities/lams-user.entity';
+import { UserResponseDto } from '../dto/organization/responses/user-response.dto';
+import { UserListResponseDto } from '../dto/organization/responses/user-list-response.dto';
 
 /**
  * 사용자 권한 관리 컨트롤러
@@ -31,9 +33,20 @@ export class UsersController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '사용자 목록이 성공적으로 조회되었습니다.',
+        type: UserListResponseDto,
     })
-    async getUsers(@Query() paginationQuery: PaginationQueryDto): Promise<{ users: LamsUserEntity[]; total: number }> {
-        return await this.organizationQueryService.getUsers(paginationQuery);
+    async getUsers(@Query() paginationQuery: PaginationQueryDto): Promise<UserListResponseDto> {
+        const result = await this.organizationQueryService.getUsers(paginationQuery);
+        return new UserListResponseDto({
+            users: result.users.map(
+                (user) =>
+                    new UserResponseDto({
+                        ...user,
+                        roles: user.roles as UserRole[],
+                    }),
+            ),
+            total: result.total,
+        });
     }
 
     @Get(':userId')
@@ -43,10 +56,15 @@ export class UsersController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '사용자가 성공적으로 조회되었습니다.',
-        type: LamsUserEntity,
+        type: UserResponseDto,
     })
-    async getUserById(@Param('userId') userId: string): Promise<LamsUserEntity | null> {
-        return await this.organizationQueryService.getUserById(userId);
+    async getUserById(@Param('userId') userId: string): Promise<UserResponseDto | null> {
+        const user = await this.organizationQueryService.getUserById(userId);
+        if (!user) return null;
+        return new UserResponseDto({
+            ...user,
+            roles: user.roles as UserRole[],
+        });
     }
 
     @Get('email/:email')
@@ -56,9 +74,14 @@ export class UsersController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '사용자가 성공적으로 조회되었습니다.',
-        type: LamsUserEntity,
+        type: UserResponseDto,
     })
-    async getUserByEmail(@Param('email') email: string): Promise<LamsUserEntity | null> {
-        return await this.organizationQueryService.getUserByEmail(email);
+    async getUserByEmail(@Param('email') email: string): Promise<UserResponseDto | null> {
+        const user = await this.organizationQueryService.getUserByEmail(email);
+        if (!user) return null;
+        return new UserResponseDto({
+            ...user,
+            roles: user.roles as UserRole[],
+        });
     }
 }

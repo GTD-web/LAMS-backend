@@ -5,8 +5,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { OrganizationSyncService } from '../../business/organization/services/organization-sync.service';
 import { UserRole } from '../../domain/user/enum/user.enum';
-import { MMSDepartmentResponseDto } from '../dto/organization/requests/mms-department-import.dto';
-import { MMSEmployeeResponseDto } from '../dto/organization/requests/mms-employee-import.dto';
+import { MMSSyncResponseDto } from '../dto/organization/responses/mms-sync-response.dto';
 
 /**
  * 조직도 전체 관리 컨트롤러
@@ -25,8 +24,14 @@ export class OrganizationController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'MMS 전체 동기화가 성공적으로 완료되었습니다.',
+        type: MMSSyncResponseDto,
     })
-    async syncMMS(): Promise<{ success: boolean; message: string }> {
-        return await this.organizationSyncService.syncMMS();
+    async syncMMS(): Promise<MMSSyncResponseDto> {
+        const result = await this.organizationSyncService.syncMMS();
+        return new MMSSyncResponseDto({
+            success: result.success,
+            message: result.message,
+            timestamp: new Date().toISOString(),
+        });
     }
 }

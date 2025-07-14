@@ -11,13 +11,16 @@ import { UsersController } from '../../interfaces/controllers/users.controller';
 import { DepartmentsController } from '../../interfaces/controllers/departments.controller';
 import { EmployeesController } from '../../interfaces/controllers/employees.controller';
 import { OrganizationController } from '../../interfaces/controllers/organization.controller';
+import { EmployeeDomainModule } from '@src/domain/organization/employee/employee-domain.module';
+import { DepartmentDomainModule } from '@src/domain/organization/department/department-domain.module';
+import { UserDomainModule } from '@src/domain/user/user.module';
 
 /**
  * 조직 비즈니스 모듈
  * - 조직 관련 모든 비즈니스 로직과 컨트롤러를 관리
  */
 @Module({
-    imports: [OrganizationContextModule],
+    imports: [OrganizationContextModule, DepartmentDomainModule, EmployeeDomainModule, UserDomainModule],
     controllers: [UsersController, DepartmentsController, EmployeesController, OrganizationController],
     providers: [OrganizationManagementService, OrganizationQueryService, OrganizationSyncService],
     exports: [OrganizationManagementService, OrganizationQueryService, OrganizationSyncService],

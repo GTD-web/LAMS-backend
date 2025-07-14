@@ -1,6 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { UserRole } from '../../../../domain/user/enum/user.enum';
+import { ApprovalRequestBaseInfoEntity } from '@src/domain/approval/entities/approval-request-info.entity';
+import { ApprovalStepInfoEntity } from '@src/domain/approval/entities/approval-step-info.entity';
+import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 
 /**
  * 사용자 응답 DTO
@@ -77,6 +80,48 @@ export class UserResponseDto {
     @Expose()
     @Type(() => Date)
     readonly updatedAt: Date;
+
+    @ApiProperty({
+        description: '권한 여부',
+        example: true,
+    })
+    @Expose()
+    readonly hasAccessAuthority: boolean;
+
+    @ApiProperty({
+        description: '권한 여부',
+        example: true,
+    })
+    @Expose()
+    readonly hasReviewAuthority: boolean;
+
+    @ApiProperty({
+        description: '권한 여부',
+        example: true,
+    })
+    @Expose()
+    readonly accessableDepartments: DepartmentInfoEntity[];
+
+    @ApiProperty({
+        description: '권한 여부',
+        example: true,
+    })
+    @Expose()
+    readonly reviewableDepartments: DepartmentInfoEntity[];
+
+    @ApiProperty({
+        description: '권한 여부',
+        example: true,
+    })
+    @Expose()
+    readonly requests: ApprovalRequestBaseInfoEntity[];
+
+    @ApiProperty({
+        description: '권한 여부',
+        example: true,
+    })
+    @Expose()
+    readonly approvalSteps: ApprovalStepInfoEntity[];
 
     constructor(partial: Partial<UserResponseDto>) {
         Object.assign(this, partial);
