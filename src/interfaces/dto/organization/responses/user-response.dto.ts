@@ -20,14 +20,14 @@ export class UserResponseDto {
 
     @ApiProperty({
         description: '사용자명',
-        example: '우무현',
+        example: '삼각김밥',
     })
     @Expose()
     readonly username: string;
 
     @ApiProperty({
         description: '이메일 주소',
-        example: 'woo.mh@lumir.space',
+        example: 'sam.kim@lumir.space',
         format: 'email',
     })
     @Expose()
@@ -94,34 +94,6 @@ export class UserResponseDto {
     })
     @Expose()
     readonly hasReviewAuthority: boolean;
-
-    @ApiProperty({
-        description: '권한 여부',
-        example: true,
-    })
-    @Expose()
-    readonly accessableDepartments: DepartmentInfoEntity[];
-
-    @ApiProperty({
-        description: '권한 여부',
-        example: true,
-    })
-    @Expose()
-    readonly reviewableDepartments: DepartmentInfoEntity[];
-
-    @ApiProperty({
-        description: '권한 여부',
-        example: true,
-    })
-    @Expose()
-    readonly requests: ApprovalRequestBaseInfoEntity[];
-
-    @ApiProperty({
-        description: '권한 여부',
-        example: true,
-    })
-    @Expose()
-    readonly approvalSteps: ApprovalStepInfoEntity[];
 
     constructor(partial: Partial<UserResponseDto>) {
         Object.assign(this, partial);

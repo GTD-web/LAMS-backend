@@ -1,9 +1,11 @@
 import { Injectable, Logger, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, Not } from 'typeorm';
+import { Repository } from 'typeorm';
 import { LamsUserEntity } from '../entities/lams-user.entity';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { UserRole } from '../enum/user.enum';
+import { PaginatedResponseDto, PaginationMetaDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 /**
  * 사용자 도메인 서비스
@@ -102,13 +104,18 @@ export class UserDomainService {
     /**
      * 전체 사용자 조회 (페이지네이션)
      */
-    async findAllUsers(query: PaginationQueryDto): Promise<{ users: LamsUserEntity[]; total: number }> {
+    async findAllUsers(query: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>> {
+        const page = Number(query.page) || 1;
+        const limit = Number(query.limit) || 10;
+
         const [users, total] = await this.userRepository.findAndCount({
             skip: (query.page - 1) * query.limit,
             take: query.limit,
             order: { createdAt: 'DESC' },
         });
 
-        return { users, total };
+        const meta = new PaginationMetaDto(page, limit, total);
+        const data = users.map((user) => plainToInstance(UserResponseDto, user));
+        return { data, meta };
     }
 }

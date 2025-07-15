@@ -7,8 +7,6 @@ import { OrganizationManagementService } from '../../business/organization/servi
 import { OrganizationQueryService } from '../../business/organization/services/organization-query.service';
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
 import { UserRole } from '../../domain/user/enum/user.enum';
-import { DepartmentInfoEntity } from '../../domain/organization/department/entities/department-info.entity';
-import { EmployeeInfoEntity } from '../../domain/organization/employee/entities/employee-info.entity';
 import { DepartmentResponseDto } from '../dto/organization/responses/department-response.dto';
 import { DepartmentListResponseDto } from '../dto/organization/responses/department-list-response.dto';
 import {

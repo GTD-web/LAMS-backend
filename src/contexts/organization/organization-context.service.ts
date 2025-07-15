@@ -12,6 +12,9 @@ import { EmployeeDomainService } from '../../domain/organization/employee/servic
 import { MMSDepartmentResponseDto } from '../../interfaces/dto/organization/requests/mms-department-import.dto';
 import { MMSEmployeeResponseDto } from '../../interfaces/dto/organization/requests/mms-employee-import.dto';
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
+import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
+import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 /**
  * 조직 컨텍스트 서비스
@@ -39,21 +42,21 @@ export class OrganizationContextService {
     /**
      * 사용자 조회 (ID)
      */
-    async findUserById(userId: string): Promise<LamsUserEntity | null> {
-        return await this.userDomainService.findUserById(userId);
+    async findUserById(userId: string): Promise<UserResponseDto | null> {
+        return plainToInstance(UserResponseDto, await this.userDomainService.findUserById(userId));
     }
 
     /**
      * 사용자 조회 (이메일)
      */
-    async findUserByEmail(email: string): Promise<LamsUserEntity | null> {
-        return await this.userDomainService.findUserByEmail(email);
+    async findUserByEmail(email: string): Promise<UserResponseDto | null> {
+        return plainToInstance(UserResponseDto, await this.userDomainService.findUserByEmail(email));
     }
 
     /**
      * 사용자 목록 조회
      */
-    async findAllUsers(query: PaginationQueryDto): Promise<{ users: LamsUserEntity[]; total: number }> {
+    async findAllUsers(query: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>> {
         return await this.userDomainService.findAllUsers(query);
     }
 

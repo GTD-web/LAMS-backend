@@ -53,24 +53,6 @@ export class DepartmentDomainService {
     }
 
     /**
-     * 부서 코드로 조회
-     */
-    async findDepartmentByCode(departmentCode: string): Promise<DepartmentInfoEntity | null> {
-        return await this.departmentRepository.findOne({
-            where: { departmentCode },
-        });
-    }
-
-    /**
-     * 부서 이름으로 조회
-     */
-    async findDepartmentByName(departmentName: string): Promise<DepartmentInfoEntity | null> {
-        return await this.departmentRepository.findOne({
-            where: { departmentName },
-        });
-    }
-
-    /**
      * MMS 부서 ID로 조회
      */
     async findDepartmentByMMSDepartmentId(mmsDepartmentId: string): Promise<DepartmentInfoEntity | null> {
@@ -80,20 +62,6 @@ export class DepartmentDomainService {
             });
         } catch (error) {
             this.logger.error(`MMS 부서 ID 조회 실패: ${mmsDepartmentId}`, error.stack);
-            throw error;
-        }
-    }
-
-    /**
-     * 모든 부서 조회 (페이지네이션 없이)
-     */
-    async findAllDepartmentsWithoutPagination(): Promise<DepartmentInfoEntity[]> {
-        try {
-            return await this.departmentRepository.find({
-                order: { departmentName: 'ASC' },
-            });
-        } catch (error) {
-            this.logger.error('모든 부서 조회 실패', error.stack);
             throw error;
         }
     }
@@ -115,33 +83,6 @@ export class DepartmentDomainService {
         });
 
         return { departments, total };
-    }
-
-    /**
-     * 부서 생성 또는 업데이트 (MMS 동기화용)
-     */
-    async createOrUpdateDepartment(departmentData: Partial<DepartmentInfoEntity>): Promise<DepartmentInfoEntity> {
-        try {
-            if (departmentData.mmsDepartmentId) {
-                const existingDepartment = await this.findDepartmentByMMSDepartmentId(departmentData.mmsDepartmentId);
-                if (existingDepartment) {
-                    // 기존 부서 업데이트
-                    Object.assign(existingDepartment, departmentData);
-                    const updatedDepartment = await this.departmentRepository.save(existingDepartment);
-                    this.logger.log(`부서 업데이트 완료 (MMS): ${updatedDepartment.departmentName}`);
-                    return updatedDepartment;
-                }
-            }
-
-            // 새 부서 생성
-            const department = this.departmentRepository.create(departmentData);
-            const savedDepartment = await this.departmentRepository.save(department);
-            this.logger.log(`부서 생성 완료 (MMS): ${savedDepartment.departmentName}`);
-            return savedDepartment;
-        } catch (error) {
-            this.logger.error('부서 생성/업데이트 실패 (MMS)', error.stack);
-            throw error;
-        }
     }
 
     /**
@@ -180,38 +121,6 @@ export class DepartmentDomainService {
     }
 
     /**
-     * 하위 부서 조회
-     */
-    async findChildDepartments(departmentId: string): Promise<DepartmentInfoEntity[]> {
-        try {
-            return await this.departmentRepository.find({
-                where: { parentDepartmentId: departmentId },
-                order: { departmentName: 'ASC' },
-            });
-        } catch (error) {
-            this.logger.error(`하위 부서 조회 실패: ${departmentId}`, error.stack);
-            throw error;
-        }
-    }
-
-    /**
-     * 상위 부서 조회
-     */
-    async findParentDepartment(departmentId: string): Promise<DepartmentInfoEntity | null> {
-        try {
-            const department = await this.findDepartmentById(departmentId);
-            if (!department || !department.parentDepartmentId) {
-                return null;
-            }
-
-            return await this.findDepartmentById(department.parentDepartmentId);
-        } catch (error) {
-            this.logger.error(`상위 부서 조회 실패: ${departmentId}`, error.stack);
-            throw error;
-        }
-    }
-
-    /**
      * 부서 검색
      */
     async searchDepartments(searchTerm: string): Promise<DepartmentInfoEntity[]> {
@@ -219,47 +128,6 @@ export class DepartmentDomainService {
             where: [{ departmentName: Like(`%${searchTerm}%`) }, { departmentCode: Like(`%${searchTerm}%`) }],
             order: { departmentName: 'ASC' },
         });
-    }
-
-    /**
-     * 부서 존재 여부 확인
-     */
-    async existsDepartment(departmentId: string): Promise<boolean> {
-        try {
-            const count = await this.departmentRepository.count({
-                where: { departmentId },
-            });
-            return count > 0;
-        } catch (error) {
-            this.logger.error(`부서 존재 확인 실패: ${departmentId}`, error.stack);
-            throw error;
-        }
-    }
-
-    /**
-     * 부서 코드 중복 확인
-     */
-    async existsDepartmentByCode(departmentCode: string, excludeId?: string): Promise<boolean> {
-        const whereCondition: any = { departmentCode };
-        if (excludeId) {
-            whereCondition.departmentId = Not(excludeId);
-        }
-
-        const count = await this.departmentRepository.count({ where: whereCondition });
-        return count > 0;
-    }
-
-    /**
-     * 부서 이름 중복 확인
-     */
-    async existsDepartmentByName(departmentName: string, excludeId?: string): Promise<boolean> {
-        const whereCondition: any = { departmentName };
-        if (excludeId) {
-            whereCondition.departmentId = Not(excludeId);
-        }
-
-        const count = await this.departmentRepository.count({ where: whereCondition });
-        return count > 0;
     }
 
     async deleteDepartment(departmentId: string): Promise<void> {

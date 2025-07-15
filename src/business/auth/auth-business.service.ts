@@ -46,36 +46,20 @@ export class AuthBusinessService {
     /**
      * JWT 토큰 검증
      */
-    verifyToken(token: string): AuthPayloadDto | null {
+    verifyToken(token: string): boolean {
         try {
             if (!token || token.trim().length === 0) {
-                return null;
+                return false;
             }
 
             // Bearer 토큰에서 실제 토큰 추출
             const cleanToken = token.startsWith('Bearer ') ? token.substring(7) : token;
             const decoded = this.jwtService.verify(cleanToken);
 
-            return new AuthPayloadDto(decoded.sub, decoded.roles as UserRole[], decoded.exp);
+            if (decoded) return true;
+            else return false;
         } catch (error) {
-            return null;
-        }
-    }
-
-    /**
-     * 토큰 만료 확인
-     */
-    isTokenExpired(token: string): boolean {
-        try {
-            const payload = this.verifyToken(token);
-            if (!payload || !payload.exp) {
-                return true;
-            }
-
-            const currentTime = Math.floor(Date.now() / 1000);
-            return payload.exp < currentTime;
-        } catch (error) {
-            return true;
+            return false;
         }
     }
 
@@ -109,14 +93,7 @@ export class AuthBusinessService {
     /**
      * 토큰 검증 (별칭)
      */
-    validateToken(token: string): AuthPayloadDto | null {
-        return this.verifyToken(token);
-    }
-
-    /**
-     * 토큰에서 사용자 정보 추출 (별칭)
-     */
-    extractUserFromToken(token: string): AuthPayloadDto | null {
-        return this.verifyToken(token);
+    validateToken(auth: string): boolean {
+        return this.verifyToken(auth);
     }
 }

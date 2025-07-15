@@ -25,25 +25,11 @@ export class PaginationMetaDto {
     })
     readonly totalPages: number;
 
-    @ApiProperty({
-        description: 'Whether there is a next page',
-        example: true,
-    })
-    readonly hasNext: boolean;
-
-    @ApiProperty({
-        description: 'Whether there is a previous page',
-        example: false,
-    })
-    readonly hasPrevious: boolean;
-
     constructor(page: number, limit: number, total: number) {
         this.page = page;
         this.limit = limit;
         this.total = total;
         this.totalPages = Math.ceil(total / limit);
-        this.hasNext = page < this.totalPages;
-        this.hasPrevious = page > 1;
     }
 }
 

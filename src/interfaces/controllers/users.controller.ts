@@ -1,16 +1,13 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { OrganizationManagementService } from '../../business/organization/services/organization-management.service';
 import { OrganizationQueryService } from '../../business/organization/services/organization-query.service';
-import { UpdateUserDto } from '../dto/organization/requests/update-user.dto';
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
 import { UserRole } from '../../domain/user/enum/user.enum';
-import { LamsUserEntity } from '../../domain/user/entities/lams-user.entity';
 import { UserResponseDto } from '../dto/organization/responses/user-response.dto';
-import { UserListResponseDto } from '../dto/organization/responses/user-list-response.dto';
+import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 
 /**
  * 사용자 권한 관리 컨트롤러
@@ -20,10 +17,7 @@ import { UserListResponseDto } from '../dto/organization/responses/user-list-res
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class UsersController {
-    constructor(
-        private readonly organizationManagementService: OrganizationManagementService,
-        private readonly organizationQueryService: OrganizationQueryService,
-    ) {}
+    constructor(private readonly organizationQueryService: OrganizationQueryService) {}
 
     @Get()
     @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
@@ -33,20 +27,10 @@ export class UsersController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '사용자 목록이 성공적으로 조회되었습니다.',
-        type: UserListResponseDto,
+        type: PaginatedResponseDto<UserResponseDto>,
     })
-    async getUsers(@Query() paginationQuery: PaginationQueryDto): Promise<UserListResponseDto> {
-        const result = await this.organizationQueryService.getUsers(paginationQuery);
-        return new UserListResponseDto({
-            users: result.users.map(
-                (user) =>
-                    new UserResponseDto({
-                        ...user,
-                        roles: user.roles as UserRole[],
-                    }),
-            ),
-            total: result.total,
-        });
+    async getUsers(@Query() paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>> {
+        return this.organizationQueryService.findAllUsers(paginationQuery);
     }
 
     @Get(':userId')
@@ -59,12 +43,7 @@ export class UsersController {
         type: UserResponseDto,
     })
     async getUserById(@Param('userId') userId: string): Promise<UserResponseDto | null> {
-        const user = await this.organizationQueryService.getUserById(userId);
-        if (!user) return null;
-        return new UserResponseDto({
-            ...user,
-            roles: user.roles as UserRole[],
-        });
+        return this.organizationQueryService.findUserById(userId);
     }
 
     @Get('email/:email')
@@ -77,11 +56,6 @@ export class UsersController {
         type: UserResponseDto,
     })
     async getUserByEmail(@Param('email') email: string): Promise<UserResponseDto | null> {
-        const user = await this.organizationQueryService.getUserByEmail(email);
-        if (!user) return null;
-        return new UserResponseDto({
-            ...user,
-            roles: user.roles as UserRole[],
-        });
+        return this.organizationQueryService.findUserByEmail(email);
     }
 }

@@ -4,6 +4,8 @@ import { LamsUserEntity } from '../../../domain/user/entities/lams-user.entity';
 import { DepartmentInfoEntity } from '../../../domain/organization/department/entities/department-info.entity';
 import { EmployeeInfoEntity } from '../../../domain/organization/employee/entities/employee-info.entity';
 import { PaginationQueryDto } from '../../../common/dtos/pagination/pagination-query.dto';
+import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
+import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 
 /**
  * 조직 조회 서비스
@@ -16,21 +18,21 @@ export class OrganizationQueryService {
     /**
      * 사용자 단일 조회
      */
-    async getUserById(userId: string): Promise<LamsUserEntity | null> {
+    async findUserById(userId: string): Promise<UserResponseDto | null> {
         return await this.organizationContextService.findUserById(userId);
     }
 
     /**
      * 사용자 이메일로 조회
      */
-    async getUserByEmail(email: string): Promise<LamsUserEntity | null> {
+    async findUserByEmail(email: string): Promise<UserResponseDto | null> {
         return await this.organizationContextService.findUserByEmail(email);
     }
 
     /**
      * 사용자 목록 조회
      */
-    async getUsers(paginationQuery: PaginationQueryDto): Promise<{ users: LamsUserEntity[]; total: number }> {
+    async findAllUsers(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>> {
         return await this.organizationContextService.findAllUsers(paginationQuery);
     }
 
