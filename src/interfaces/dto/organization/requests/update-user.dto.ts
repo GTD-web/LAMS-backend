@@ -4,52 +4,52 @@ import { Transform } from 'class-transformer';
 import { UserRole } from '../../../../domain/user/enum/user.enum';
 
 /**
- * 사용자 업데이트 요청 DTO
+ * ?�용???�데?�트 ?�청 DTO
  */
 export class UpdateUserDto {
     @ApiPropertyOptional({
-        description: '사용자명',
-        example: '어이현',
+        description: '?�용?�명',
+        example: '?�이??,
     })
     @IsOptional()
-    @IsString({ message: '사용자명은 문자열이어야 합니다' })
+    @IsString({ message: '?�용?�명?� 문자?�이?�야 ?�니?? })
     @Transform(({ value }) => value?.trim())
     readonly username?: string;
 
     @ApiPropertyOptional({
-        description: '이메일 주소',
+        description: '?�메??주소',
         example: 'woo.mh@lumir.space',
         format: 'email',
     })
     @IsOptional()
-    @IsEmail({}, { message: '유효한 이메일 주소를 입력해주세요' })
+    @IsEmail({}, { message: '?�효???�메??주소�??�력?�주?�요' })
     @Transform(({ value }) => value?.toLowerCase().trim())
     readonly email?: string;
 
     @ApiPropertyOptional({
-        description: '사용자 권한 목록',
+        description: '?�용??권한 목록',
         example: ['SYSTEM_USER', 'ATTENDANCE_USER', 'PROJECT_USER', 'LRIM_USER'],
         type: [String],
         enum: UserRole,
     })
     @IsOptional()
-    @IsArray({ message: '권한은 배열 형태여야 합니다' })
-    @IsEnum(UserRole, { each: true, message: '유효한 권한을 선택해주세요' })
+    @IsArray({ message: '권한?� 배열 ?�태?�야 ?�니?? })
+    @IsEnum(UserRole, { each: true, message: '?�효??권한???�택?�주?�요' })
     readonly roles?: UserRole[];
 
     @ApiPropertyOptional({
-        description: '계정 활성화 상태',
+        description: '계정 ?�성???�태',
         example: true,
     })
     @IsOptional()
-    @IsBoolean({ message: '활성화 상태는 boolean 값이어야 합니다' })
+    @IsBoolean({ message: '?�성???�태??boolean 값이?�야 ?�니?? })
     readonly isActive?: boolean;
 
     @ApiPropertyOptional({
-        description: '통합 계정 여부',
+        description: '?�합 계정 ?��?',
         example: true,
     })
     @IsOptional()
-    @IsBoolean({ message: '통합 계정 여부는 boolean 값이어야 합니다' })
+    @IsBoolean({ message: '?�합 계정 ?��???boolean 값이?�야 ?�니?? })
     readonly isIntegrated?: boolean;
 }

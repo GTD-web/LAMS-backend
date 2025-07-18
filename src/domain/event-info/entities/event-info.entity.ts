@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class EventInfoEntity {
     @PrimaryGeneratedColumn('uuid')
     @ApiProperty({
-        description: '이벤트 아이디',
+        description: '?�벤???�이??,
         example: 'exEventId',
     })
     eventId: string;
@@ -34,7 +34,7 @@ export class EventInfoEntity {
 
     static fromEventInfo(eventInfo: any): EventInfoEntity {
         const entity = new EventInfoEntity();
-        entity.eventId = uuidv4(); // UUID 명시적 생성
+        entity.eventId = uuidv4(); // UUID 명시???�성
 
         for (const key in eventInfo) {
             if (eventInfo[key]) {

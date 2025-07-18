@@ -4,7 +4,7 @@ import { EmployeeResponseDto } from './employee-response.dto';
 import { DepartmentResponseDto } from './department-response.dto';
 
 /**
- * 직원과 부서 정보 함께 조회 응답 DTO
+ * 직원 부서 정보 조회 응답 DTO
  */
 @Exclude()
 export class EmployeeWithDepartmentResponseDto {
@@ -17,7 +17,7 @@ export class EmployeeWithDepartmentResponseDto {
     readonly employee: EmployeeResponseDto | null;
 
     @ApiPropertyOptional({
-        description: '소속 부서 정보',
+        description: '속 부서 정보',
         type: DepartmentResponseDto,
     })
     @Expose()

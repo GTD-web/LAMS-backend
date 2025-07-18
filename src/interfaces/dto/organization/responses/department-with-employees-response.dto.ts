@@ -3,7 +3,7 @@ import { Exclude, Expose, Type } from 'class-transformer';
 import { DepartmentResponseDto } from './department-response.dto';
 
 /**
- * 직원 정보 DTO (부서 포함 응답용)
+ * 직원 정보 DTO (부서 포함 응답)
  */
 @Exclude()
 export class EmployeeInDepartmentDto {
@@ -23,7 +23,7 @@ export class EmployeeInDepartmentDto {
     readonly employeeName: string;
 
     @ApiProperty({
-        description: '직원 사번',
+        description: '직원 번호',
         example: 'EMP001',
     })
     @Expose()
@@ -42,7 +42,7 @@ export class EmployeeInDepartmentDto {
 }
 
 /**
- * 부서와 직원 정보 함께 조회 응답 DTO
+ * 부서 직원 정보 조회 응답 DTO
  */
 @Exclude()
 export class DepartmentWithEmployeesResponseDto {
@@ -55,7 +55,7 @@ export class DepartmentWithEmployeesResponseDto {
     readonly department: DepartmentResponseDto | null;
 
     @ApiProperty({
-        description: '부서 소속 직원 목록',
+        description: '부서 속 직원 목록',
         type: [EmployeeInDepartmentDto],
     })
     @Expose()

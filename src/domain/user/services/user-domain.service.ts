@@ -4,10 +4,10 @@ import { FindManyOptions, Repository } from 'typeorm';
 import { LamsUserEntity } from '../entities/lams-user.entity';
 
 /**
- * 사용자 도메인 서비스
- * - 사용자 관련 핵심 비즈니스 로직을 처리
- * - 도메인 규칙과 불변성을 보장
- * - 검증 로직 및 데이터 접근 통합 처리
+ * ?�용???�메???�비??
+ * - ?�용??관???�심 비즈?�스 로직??처리
+ * - ?�메??규칙�?불�??�을 보장
+ * - 검�?로직 �??�이???�근 ?�합 처리
  */
 @Injectable()
 export class UserDomainService {
@@ -19,43 +19,43 @@ export class UserDomainService {
     ) {}
 
     /**
-     * 사용자 비밀번호 변경
+     * ?�용??비�?번호 변�?
      */
     async changeUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<LamsUserEntity> {
         try {
             if (!userId || !currentPassword || !newPassword || currentPassword === newPassword) {
-                throw new BadRequestException('유효하지 않은 비밀번호 변경 정보입니다.');
+                throw new BadRequestException('?�효?��? ?��? 비�?번호 변�??�보?�니??');
             }
 
             const user = await this.findUserById(userId);
             if (!user) {
-                throw new NotFoundException('사용자를 찾을 수 없습니다.');
+                throw new NotFoundException('?�용?��? 찾을 ???�습?�다.');
             }
 
-            // 현재 비밀번호 확인
+            // ?�재 비�?번호 ?�인
             if (!user.validatePassword(currentPassword)) {
-                throw new BadRequestException('현재 비밀번호가 올바르지 않습니다.');
+                throw new BadRequestException('?�재 비�?번호가 ?�바르�? ?�습?�다.');
             }
 
             const hashedPassword = user.updateHashedPassword(newPassword);
             user.password = hashedPassword;
 
             const updatedUser = await this.userRepository.save(user);
-            this.logger.log(`비밀번호 변경 완료: ${updatedUser.email}`);
+            this.logger.log(`비�?번호 변�??�료: ${updatedUser.email}`);
             return updatedUser;
         } catch (error) {
-            this.logger.error(`비밀번호 변경 실패: ${userId}`, error.stack);
+            this.logger.error(`비�?번호 변�??�패: ${userId}`, error.stack);
             throw error;
         }
     }
 
     /**
-     * 사용자 인증 검증
+     * ?�용???�증 검�?
      */
     async validateUserCredentials(email: string, password: string): Promise<LamsUserEntity | null> {
         try {
             if (!email || !password || email.trim().length === 0 || password.trim().length === 0) {
-                throw new BadRequestException('유효하지 않은 로그인 정보입니다.');
+                throw new BadRequestException('?�효?��? ?��? 로그???�보?�니??');
             }
 
             const user = await this.findUserByEmail(email);
@@ -64,7 +64,7 @@ export class UserDomainService {
             }
 
             if (!user.isActive) {
-                throw new BadRequestException('비활성화된 사용자입니다.');
+                throw new BadRequestException('비활?�화???�용?�입?�다.');
             }
 
             const isPasswordValid = user.validatePassword(password);
@@ -74,13 +74,13 @@ export class UserDomainService {
 
             return user;
         } catch (error) {
-            this.logger.error(`사용자 인증 검증 실패: ${email}`, error.stack);
+            this.logger.error(`?�용???�증 검�??�패: ${email}`, error.stack);
             throw error;
         }
     }
 
     /**
-     * 사용자 ID로 조회
+     * ?�용??ID�?조회
      */
     async findUserById(userId: string): Promise<LamsUserEntity | null> {
         return await this.userRepository.findOne({
@@ -89,7 +89,7 @@ export class UserDomainService {
     }
 
     /**
-     * 사용자명으로 사용자 조회
+     * ?�용?�명?�로 ?�용??조회
      */
     async findUserByEmail(email: string): Promise<LamsUserEntity | null> {
         return await this.userRepository.findOne({
@@ -98,7 +98,7 @@ export class UserDomainService {
     }
 
     /**
-     * 전체 사용자 조회
+     * ?�체 ?�용??조회
      */
     async findAllUsers(): Promise<LamsUserEntity[]> {
         return await this.userRepository.find({
@@ -107,9 +107,36 @@ export class UserDomainService {
     }
 
     /**
-     * 전체 사용자 조회(페이지네이션)
+     * ?�체 ?�용??조회(?�이지?�이??
      */
     async findAndCount(options: FindManyOptions<LamsUserEntity>): Promise<[LamsUserEntity[], number]> {
         return await this.userRepository.findAndCount(options);
+    }
+
+    /**
+     * ?�이지?�이?�된 ?�용??목록??조회?�니??
+     */
+    async findPaginatedUsers(
+        page: number,
+        limit: number,
+    ): Promise<{
+        users: LamsUserEntity[];
+        total: number;
+    }> {
+        try {
+            const skip = (page - 1) * limit;
+
+            const [users, total] = await this.userRepository.findAndCount({
+                skip,
+                take: limit,
+                order: { createdAt: 'DESC' },
+            });
+
+            this.logger.log(`?�이지?�이?�된 ?�용??목록 조회: ${users.length}�?조회`);
+            return { users, total };
+        } catch (error) {
+            this.logger.error('?�이지?�이?�된 ?�용??목록 조회 ?�패', error.stack);
+            throw error;
+        }
     }
 }

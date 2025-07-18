@@ -2,19 +2,19 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsOptional } from 'class-validator';
 
 /**
- * 직원 수정 요청 DTO
+ * 직원 ?�정 ?�청 DTO
  */
 export class UpdateEmployeeDto {
     @ApiPropertyOptional({
-        description: '직원 이름',
-        example: '홍길동',
+        description: '직원 ?�름',
+        example: '?�길??,
     })
     @IsString()
     @IsOptional()
     name?: string;
 
     @ApiPropertyOptional({
-        description: '연결된 사용자 ID',
+        description: '?�결???�용??ID',
         example: 'user123',
     })
     @IsString()
@@ -22,7 +22,7 @@ export class UpdateEmployeeDto {
     userId?: string;
 
     @ApiPropertyOptional({
-        description: '부서 ID',
+        description: '부??ID',
         example: 'dept-123',
     })
     @IsString()

@@ -1,9 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { UserRole } from '../../../../domain/user/enum/user.enum';
-import { ApprovalRequestBaseInfoEntity } from '@src/domain/approval/entities/approval-request-info.entity';
-import { ApprovalStepInfoEntity } from '@src/domain/approval/entities/approval-step-info.entity';
-import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 
 /**
  * 사용자 응답 DTO
@@ -19,8 +16,8 @@ export class UserResponseDto {
     readonly userId: string;
 
     @ApiProperty({
-        description: '사용자명',
-        example: '삼각김밥',
+        description: '사용자 이름',
+        example: '각김',
     })
     @Expose()
     readonly username: string;
@@ -43,7 +40,7 @@ export class UserResponseDto {
     readonly roles: UserRole[];
 
     @ApiProperty({
-        description: '계정 활성화 상태',
+        description: '계정 활성 여부',
         example: true,
     })
     @Expose()
@@ -57,14 +54,14 @@ export class UserResponseDto {
     readonly isIntegrated: boolean;
 
     @ApiProperty({
-        description: '사용자 타입',
+        description: '사용자 유형',
         example: 'LamsUserEntity',
     })
     @Expose()
     readonly type: string;
 
     @ApiProperty({
-        description: '계정 생성일',
+        description: '계정 생성 시간',
         example: '2025-07-11T08:05:22.339Z',
         format: 'date-time',
     })
@@ -73,7 +70,7 @@ export class UserResponseDto {
     readonly createdAt: Date;
 
     @ApiProperty({
-        description: '계정 수정일',
+        description: '계정 정보 업데이트 시간',
         example: '2025-07-11T08:05:22.339Z',
         format: 'date-time',
     })
@@ -82,14 +79,14 @@ export class UserResponseDto {
     readonly updatedAt: Date;
 
     @ApiProperty({
-        description: '권한 여부',
+        description: '권한 접근 여부',
         example: true,
     })
     @Expose()
     readonly hasAccessAuthority: boolean;
 
     @ApiProperty({
-        description: '권한 여부',
+        description: '권한 검토 여부',
         example: true,
     })
     @Expose()

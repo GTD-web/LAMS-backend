@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsArray, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { OrganizationTreeNode } from '@src/domain/organization/organization-domain.service';
 
 /**
  * 조직도 직원 정보 DTO
@@ -22,25 +21,6 @@ export class OrganizationEmployeeDto {
     @IsString()
     @IsOptional()
     employeeName?: string;
-}
-
-/**
- * 조직도 위치 정보 DTO
- */
-export class OrganizationPositionDto {
-    @ApiProperty({
-        description: 'X 좌표',
-        example: 100,
-    })
-    @IsNumber()
-    x: number;
-
-    @ApiProperty({
-        description: 'Y 좌표',
-        example: 200,
-    })
-    @IsNumber()
-    y: number;
 }
 
 /**
@@ -77,15 +57,6 @@ export class SaveOrganizationDto {
     @IsString()
     @IsOptional()
     parentId?: string;
-
-    @ApiPropertyOptional({
-        description: '조직도 상의 위치 정보',
-        type: OrganizationPositionDto,
-    })
-    @ValidateNested()
-    @Type(() => OrganizationPositionDto)
-    @IsOptional()
-    position?: OrganizationPositionDto;
 
     @ApiPropertyOptional({
         description: '부서 소속 직원 목록',
@@ -137,12 +108,6 @@ export class OrganizationTreeResponseDto {
     parentId?: string;
 
     @ApiProperty({
-        description: '조직도 상의 위치 정보',
-        type: OrganizationPositionDto,
-    })
-    position: OrganizationPositionDto;
-
-    @ApiProperty({
         description: '부서 소속 직원 목록',
         type: [OrganizationEmployeeDto],
     })
@@ -159,7 +124,6 @@ export class OrganizationTreeResponseDto {
         name: string,
         isSupport: boolean,
         parentId: string | undefined,
-        position: OrganizationPositionDto,
         employees: OrganizationEmployeeDto[],
         children: OrganizationTreeResponseDto[],
     ) {
@@ -167,26 +131,7 @@ export class OrganizationTreeResponseDto {
         this.name = name;
         this.isSupport = isSupport;
         this.parentId = parentId;
-        this.position = position;
         this.employees = employees;
         this.children = children;
-    }
-
-    static fromDomain(node: OrganizationTreeNode): OrganizationTreeResponseDto {
-        return new OrganizationTreeResponseDto(
-            node.id,
-            node.name,
-            node.isSupport,
-            node.parentId,
-            {
-                x: node.position.x,
-                y: node.position.y,
-            },
-            node.employees.map((emp) => ({
-                employeeId: emp.employeeId,
-                employeeName: emp.employeeName,
-            })),
-            node.children.map((child) => OrganizationTreeResponseDto.fromDomain(child)),
-        );
     }
 }

@@ -2,13 +2,15 @@ import {
     Controller,
     Get,
     Post,
-    Delete,
     Param,
-    Query,
     Body,
+    Query,
     UseGuards,
     HttpStatus,
     ParseUUIDPipe,
+    BadRequestException,
+    ValidationPipe,
+    UsePipes,
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -16,18 +18,17 @@ import {
     ApiResponse,
     ApiQuery,
     ApiParam,
-    ApiBearerAuth,
     ApiBody,
+    ApiBearerAuth,
     ApiOkResponse,
     ApiCreatedResponse,
-    ApiBadRequestResponse,
     ApiUnauthorizedResponse,
     ApiForbiddenResponse,
     ApiNotFoundResponse,
+    ApiBadRequestResponse,
     ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { UserBusinessService } from '@src/business/user/user.business';
-import { UserContextService } from '@src/contexts/user/user-context.service';
 import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@src/common/guards/roles.guard';
 import { Roles } from '@src/common/decorators/roles.decorator';
@@ -36,23 +37,20 @@ import { UserRole } from '@src/domain/user/enum/user.enum';
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { ManageDepartmentAuthorityDto } from '@src/interfaces/dto/organization/requests/manage-department-authority.dto';
+import { DepartmentAuthorityResponse } from '@src/interfaces/dto/organization/responses/department-authority-response.dto';
 import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
-import { ManageDepartmentAuthorityDto } from '@src/interfaces/dto/user/requests/manage-department-authority.dto';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 
 /**
- * 사용자 권한 관리 컨트롤러
- * - 사용자 목록 조회, 부서 권한 관리 등의 API 제공
+ * 사용자 관리 컨트롤러
+ * - 사용자 목록 조회, 프로필 관리, 부서 권한 관리 등의 API 제공
  */
 @ApiTags('사용자 관리 (Users)')
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class UsersController {
-    constructor(
-        private readonly userBusinessService: UserBusinessService,
-        private readonly userContextService: UserContextService,
-    ) {}
+    constructor(private readonly userBusinessService: UserBusinessService) {}
 
     @Get()
     @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
@@ -97,7 +95,7 @@ export class UsersController {
     @Get('profile')
     @ApiOperation({
         summary: '내 프로필 조회',
-        description: '현재 로그인된 사용자의 프로필을 조회합니다.',
+        description: '현재 로그인한 사용자의 프로필 정보를 조회합니다.',
     })
     @ApiOkResponse({
         description: '프로필이 성공적으로 조회되었습니다.',
@@ -107,75 +105,47 @@ export class UsersController {
         description: '인증 실패',
         type: ErrorResponseDto,
     })
-    async getMyProfile(@GetUser() user: LamsUserEntity): Promise<UserResponseDto> {
-        return this.userBusinessService.getProfile(user.userId);
+    @ApiInternalServerErrorResponse({
+        description: '서버 내부 오류',
+        type: ErrorResponseDto,
+    })
+    async getProfile(@GetUser('userId') userId: string): Promise<UserResponseDto> {
+        return this.userBusinessService.getUserProfile(userId);
     }
 
-    @Get(':userId')
+    @Post('departments/:departmentId/authorities/:type/:action')
     @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
-    @ApiOperation({
-        summary: '사용자 단일 조회',
-        description: '특정 사용자의 정보를 조회합니다. 관리자만 접근 가능합니다.',
-    })
-    @ApiParam({
-        name: 'userId',
-        description: '사용자 ID (UUID)',
-        type: 'string',
-        format: 'uuid',
-    })
-    @ApiOkResponse({
-        description: '사용자가 성공적으로 조회되었습니다.',
-        type: UserResponseDto,
-    })
-    @ApiUnauthorizedResponse({
-        description: '인증 실패',
-        type: ErrorResponseDto,
-    })
-    @ApiForbiddenResponse({
-        description: '접근 권한 없음 - 관리자 권한 필요',
-        type: ErrorResponseDto,
-    })
-    @ApiNotFoundResponse({
-        description: '사용자를 찾을 수 없음',
-        type: ErrorResponseDto,
-    })
-    async getUserById(@Param('userId', ParseUUIDPipe) userId: string): Promise<UserResponseDto> {
-        return this.userBusinessService.getProfile(userId);
-    }
-
-    @Post('departments/:departmentId/authorities')
-    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     @ApiOperation({
         summary: '부서 권한 관리',
-        description: '사용자의 부서 검토/접근 권한을 추가하거나 삭제합니다.',
+        description: '사용자의 부서 접근/검토 권한을 추가하거나 삭제합니다. 관리자만 접근 가능합니다.',
     })
     @ApiParam({
         name: 'departmentId',
         description: '부서 ID (UUID)',
         type: 'string',
         format: 'uuid',
+        example: 'uuid-v4-string',
+    })
+    @ApiParam({
+        name: 'type',
+        description: '권한 타입',
+        enum: ['access', 'review'],
+        example: 'access',
+    })
+    @ApiParam({
+        name: 'action',
+        description: '수행할 작업',
+        enum: ['add', 'delete'],
+        example: 'add',
     })
     @ApiBody({
         type: ManageDepartmentAuthorityDto,
-        description: '권한 관리 요청 정보',
+        description: '권한을 관리할 사용자 정보',
     })
-    @ApiOkResponse({
-        description: '부서 권한이 성공적으로 변경되었습니다.',
-        schema: {
-            type: 'object',
-            properties: {
-                success: { type: 'boolean', example: true },
-                message: { type: 'string', example: '부서 권한이 성공적으로 변경되었습니다.' },
-                departmentId: { type: 'string', format: 'uuid' },
-                userId: { type: 'string', format: 'uuid' },
-                action: { type: 'string', enum: ['add', 'delete'] },
-                type: { type: 'string', enum: ['access', 'review'] },
-            },
-        },
-    })
-    @ApiBadRequestResponse({
-        description: '잘못된 요청 데이터',
-        type: ErrorResponseDto,
+    @ApiCreatedResponse({
+        description: '부서 권한이 성공적으로 관리되었습니다.',
+        type: DepartmentAuthorityResponse,
     })
     @ApiUnauthorizedResponse({
         description: '인증 실패',
@@ -186,77 +156,63 @@ export class UsersController {
         type: ErrorResponseDto,
     })
     @ApiNotFoundResponse({
-        description: '사용자 또는 부서를 찾을 수 없음',
+        description: '부서 또는 사용자를 찾을 수 없음',
+        type: ErrorResponseDto,
+    })
+    @ApiBadRequestResponse({
+        description: '잘못된 요청 데이터',
+        type: ErrorResponseDto,
+    })
+    @ApiInternalServerErrorResponse({
+        description: '서버 내부 오류',
         type: ErrorResponseDto,
     })
     async manageDepartmentAuthority(
         @Param('departmentId', ParseUUIDPipe) departmentId: string,
+        @Param('type') type: 'access' | 'review',
+        @Param('action') action: 'add' | 'delete',
         @Body() body: ManageDepartmentAuthorityDto,
-    ): Promise<{
-        success: boolean;
-        message: string;
-        departmentId: string;
-        userId: string;
-        action: 'add' | 'delete';
-        type: 'access' | 'review';
-    }> {
-        const { userId, action, type } = body;
+    ): Promise<DepartmentAuthorityResponse> {
+        // 컨트롤러 단에서 입력 검증
+        this.validateAuthorityParams(type, action);
 
-        // 비즈니스 서비스를 통해 권한 변경
-        await this.userBusinessService.manageDepartmentAuthority(departmentId, userId, action, type);
-
-        const actionText = action === 'add' ? '추가' : '삭제';
-        const typeText = type === 'access' ? '접근' : '검토';
-
-        return {
-            success: true,
-            message: `부서 ${typeText} 권한이 성공적으로 ${actionText}되었습니다.`,
+        const result = await this.userBusinessService.manageDepartmentAuthority(
             departmentId,
-            userId,
-            action,
+            body.userId,
             type,
-        };
+            action,
+        );
+        return new DepartmentAuthorityResponse(result);
     }
 
     @Get(':userId/departments/authorities')
     @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
     @ApiOperation({
         summary: '사용자 부서 권한 조회',
-        description: '특정 사용자의 부서 권한 목록을 조회합니다.',
+        description: '특정 사용자의 모든 부서 권한 정보를 조회합니다. 관리자만 접근 가능합니다.',
     })
     @ApiParam({
         name: 'userId',
         description: '사용자 ID (UUID)',
         type: 'string',
         format: 'uuid',
+        example: 'uuid-v4-string',
     })
     @ApiOkResponse({
-        description: '사용자 부서 권한이 성공적으로 조회되었습니다.',
+        description: '사용자 부서 권한 정보가 성공적으로 조회되었습니다.',
         schema: {
             type: 'object',
             properties: {
-                userId: { type: 'string', format: 'uuid' },
-                accessDepartments: {
-                    type: 'array',
-                    items: {
-                        type: 'object',
-                        properties: {
-                            departmentId: { type: 'string', format: 'uuid' },
-                            departmentName: { type: 'string' },
-                            departmentCode: { type: 'string' },
-                        },
-                    },
-                },
+                userId: { type: 'string', example: 'uuid-v4-string' },
                 reviewDepartments: {
                     type: 'array',
-                    items: {
-                        type: 'object',
-                        properties: {
-                            departmentId: { type: 'string', format: 'uuid' },
-                            departmentName: { type: 'string' },
-                            departmentCode: { type: 'string' },
-                        },
-                    },
+                    items: { type: 'string' },
+                    example: ['dept-1', 'dept-2'],
+                },
+                accessDepartments: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    example: ['dept-3', 'dept-4'],
                 },
             },
         },
@@ -273,33 +229,32 @@ export class UsersController {
         description: '사용자를 찾을 수 없음',
         type: ErrorResponseDto,
     })
+    @ApiInternalServerErrorResponse({
+        description: '서버 내부 오류',
+        type: ErrorResponseDto,
+    })
     async getUserDepartmentAuthorities(@Param('userId', ParseUUIDPipe) userId: string): Promise<{
         userId: string;
-        accessDepartments: Array<{
-            departmentId: string;
-            departmentName: string;
-            departmentCode: string;
-        }>;
-        reviewDepartments: Array<{
-            departmentId: string;
-            departmentName: string;
-            departmentCode: string;
-        }>;
+        reviewDepartments: string[];
+        accessDepartments: string[];
     }> {
-        const authorities = await this.userBusinessService.getUserDepartmentAuthorities(userId);
+        return this.userBusinessService.getUserDepartmentAuthorities(userId);
+    }
 
-        return {
-            userId,
-            accessDepartments: authorities.accessDepartments.map((dept) => ({
-                departmentId: dept.departmentId,
-                departmentName: dept.departmentName,
-                departmentCode: dept.departmentCode,
-            })),
-            reviewDepartments: authorities.reviewDepartments.map((dept) => ({
-                departmentId: dept.departmentId,
-                departmentName: dept.departmentName,
-                departmentCode: dept.departmentCode,
-            })),
-        };
+    /**
+     * 권한 파라미터 검증
+     * 컨트롤러 단에서 입력값 검증 수행
+     */
+    private validateAuthorityParams(type: string, action: string): void {
+        const validTypes = ['access', 'review'];
+        const validActions = ['add', 'delete'];
+
+        if (!validTypes.includes(type)) {
+            throw new BadRequestException(`잘못된 권한 타입입니다. 허용된 값: ${validTypes.join(', ')}`);
+        }
+
+        if (!validActions.includes(action)) {
+            throw new BadRequestException(`잘못된 작업 타입입니다. 허용된 값: ${validActions.join(', ')}`);
+        }
     }
 }

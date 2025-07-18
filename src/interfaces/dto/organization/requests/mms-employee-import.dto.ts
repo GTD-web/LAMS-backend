@@ -4,10 +4,10 @@ export class MMSEmployeeResponseDto {
     @ApiProperty({ description: '직원 ID', example: '67d116b591e5366c327915d2' })
     id: string;
 
-    @ApiProperty({ description: '사번', example: '24020' })
+    @ApiProperty({ description: '직원 번호', example: '24020' })
     employee_number: string;
 
-    @ApiProperty({ description: '이름', example: '구석현' })
+    @ApiProperty({ description: '이름', example: '구석' })
     name: string;
 
     @ApiProperty({ description: '이메일', example: 'koo.sukhyun@lumir.space' })
@@ -31,14 +31,14 @@ export class MMSEmployeeResponseDto {
     @ApiProperty({ description: '재직 상태', example: '재직중' })
     status: string;
 
-    @ApiProperty({ description: '부서', example: '대표이사' })
+    @ApiProperty({ description: '부서', example: '개발' })
     department: {
         _id: string;
         department_name: string;
         department_code: string;
     };
 
-    @ApiProperty({ description: '직위', example: '대표이사' })
+    @ApiProperty({ description: '직위', example: '개발자' })
     position: {
         _id: string;
         position_title: string;
@@ -46,7 +46,7 @@ export class MMSEmployeeResponseDto {
         level: number;
     };
 
-    @ApiProperty({ description: '직급', example: '대표이사' })
+    @ApiProperty({ description: '직급', example: '대리' })
     rank: {
         _id: string;
         rank_name: string;

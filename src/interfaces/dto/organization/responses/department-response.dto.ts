@@ -16,20 +16,20 @@ export class DepartmentResponseDto {
 
     @ApiProperty({
         description: '부서명',
-        example: '개발팀',
+        example: '개발',
     })
     @Expose()
     readonly departmentName: string;
 
     @ApiProperty({
-        description: '부서 코드',
+        description: '부서코드',
         example: 'DEV001',
     })
     @Expose()
     readonly departmentCode: string;
 
     @ApiPropertyOptional({
-        description: 'MMS 부서 ID',
+        description: 'MMS 부서ID',
         example: 'mms_dept_001',
     })
     @Expose()
@@ -43,7 +43,7 @@ export class DepartmentResponseDto {
     readonly isExclude: boolean;
 
     @ApiPropertyOptional({
-        description: '상위 부서 ID',
+        description: '상위 부서ID',
         example: 'parent-dept-uuid',
         format: 'uuid',
     })
@@ -51,7 +51,7 @@ export class DepartmentResponseDto {
     readonly parentDepartmentId?: string;
 
     @ApiPropertyOptional({
-        description: '조직도 정보 ID',
+        description: '조직 정보 ID',
         example: 'org-chart-uuid',
         format: 'uuid',
     })

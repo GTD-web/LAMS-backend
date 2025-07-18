@@ -22,7 +22,7 @@ export class EmployeeResponseDto {
     readonly employeeName: string;
 
     @ApiProperty({
-        description: '직원 사번',
+        description: '직원 번호',
         example: 'EMP001',
     })
     @Expose()
@@ -43,7 +43,7 @@ export class EmployeeResponseDto {
     readonly isExcludedFromCalculation: boolean;
 
     @ApiPropertyOptional({
-        description: '소속 부서 ID',
+        description: '속 부서ID',
         example: 'dept-uuid-123',
         format: 'uuid',
     })

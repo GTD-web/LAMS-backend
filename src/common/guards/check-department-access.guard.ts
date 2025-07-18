@@ -11,17 +11,17 @@ export class CheckDepartmentAccessGuard implements CanActivate {
         const departmentId = request.params.departmentId;
 
         if (!user) {
-            throw new ForbiddenException('사용자 정보를 찾을 수 없습니다.');
+            throw new ForbiddenException('?�용???�보�?찾을 ???�습?�다.');
         }
 
         if (!departmentId) {
-            throw new ForbiddenException('부서 ID가 제공되지 않았습니다.');
+            throw new ForbiddenException('부??ID가 ?�공?��? ?�았?�니??');
         }
 
         const department = await this.departmentService.findDepartmentById(departmentId);
 
         if (!department) {
-            throw new ForbiddenException('해당 부서를 찾을 수 없습니다.');
+            throw new ForbiddenException('?�당 부?��? 찾을 ???�습?�다.');
         }
 
         if (department.isAccessAuthority(user.sub) || user.roles.includes('SYSTEM_ADMIN')) {
@@ -29,6 +29,6 @@ export class CheckDepartmentAccessGuard implements CanActivate {
             return true;
         }
 
-        throw new ForbiddenException('이 부서에 대한 접근 권한이 없습니다.');
+        throw new ForbiddenException('??부?�에 ?�???�근 권한???�습?�다.');
     }
 }

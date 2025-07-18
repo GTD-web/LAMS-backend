@@ -17,12 +17,12 @@ export class RolesGuard implements CanActivate {
 
         const { user } = context.switchToHttp().getRequest();
         if (!user) {
-            throw new ForbiddenException('접근 권한이 없습니다. 로그인이 필요합니다.');
+            throw new ForbiddenException('?�근 권한???�습?�다. 로그?�이 ?�요?�니??');
         }
 
         const hasRole = requiredRoles.some((role) => user.roles?.includes(role));
         if (!hasRole) {
-            throw new ForbiddenException('해당 작업을 수행할 권한이 없습니다.');
+            throw new ForbiddenException('?�당 ?�업???�행??권한???�습?�다.');
         }
 
         return true;

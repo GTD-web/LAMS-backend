@@ -9,8 +9,8 @@ import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 
 /**
- * 사용자 비즈니스 모듈
- * - 사용자 비즈니스 계층의 컴포넌트들을 관리
+ * ?�용??비즈?�스 모듈
+ * - ?�용??비즈?�스 계층??컴포?�트?�을 관�?
  */
 @Module({
     imports: [

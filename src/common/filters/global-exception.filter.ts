@@ -3,9 +3,9 @@ import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
 
 /**
- * 글로벌 예외 필터
- * - 모든 예외를 캐치하고 적절한 응답 형태로 변환
- * - 데이터베이스 에러, 비즈니스 로직 에러 등을 처리
+ * 글로벌 ?�외 ?�터
+ * - 모든 ?�외�?캐치?�고 ?�절???�답 ?�태�?변??
+ * - ?�이?�베?�스 ?�러, 비즈?�스 로직 ?�러 ?�을 처리
  */
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -18,10 +18,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
         const { status, message, details } = this.getErrorResponse(exception);
 
-        // 에러 로그 기록 (너무 많은 정보를 포함하지 않도록 간소화)
+        // ?�러 로그 기록 (?�무 많�? ?�보�??�함?��? ?�도�?간소??
         this.logError(exception, request, status, message);
 
-        // 클라이언트 응답
+        // ?�라?�언???�답
         response.status(status).json({
             result: false,
             status,
@@ -33,14 +33,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     /**
-     * 예외 타입에 따른 적절한 응답 생성
+     * ?�외 ?�?�에 ?�른 ?�절???�답 ?�성
      */
     private getErrorResponse(exception: unknown): {
         status: number;
         message: string;
         details?: string[];
     } {
-        // HTTP 예외 처리
+        // HTTP ?�외 처리
         if (exception instanceof HttpException) {
             const response = exception.getResponse();
             return {
@@ -50,20 +50,20 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             };
         }
 
-        // TypeORM 쿼리 실패 에러 처리
+        // TypeORM 쿼리 ?�패 ?�러 처리
         if (exception instanceof QueryFailedError) {
             return this.handleDatabaseError(exception);
         }
 
-        // 기타 알 수 없는 에러
+        // 기�? ?????�는 ?�러
         return {
             status: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: '서버 내부 오류가 발생했습니다.',
+            message: '?�버 ?��? ?�류가 발생?�습?�다.',
         };
     }
 
     /**
-     * 데이터베이스 에러 처리
+     * ?�이?�베?�스 ?�러 처리
      */
     private handleDatabaseError(error: QueryFailedError): {
         status: number;
@@ -73,48 +73,48 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         const errorCode = (error as any).code;
         const errorMessage = error.message;
 
-        // PostgreSQL 에러 코드 처리
+        // PostgreSQL ?�러 코드 처리
         switch (errorCode) {
             case '23505': // unique_violation
                 if (errorMessage.includes('email')) {
                     return {
                         status: HttpStatus.CONFLICT,
-                        message: '이미 사용 중인 이메일입니다.',
+                        message: '?��? ?�용 중인 ?�메?�입?�다.',
                     };
                 }
                 if (errorMessage.includes('username')) {
                     return {
                         status: HttpStatus.CONFLICT,
-                        message: '이미 사용 중인 사용자명입니다.',
+                        message: '?��? ?�용 중인 ?�용?�명?�니??',
                     };
                 }
                 return {
                     status: HttpStatus.CONFLICT,
-                    message: '중복된 데이터입니다.',
+                    message: '중복???�이?�입?�다.',
                 };
 
             case '23503': // foreign_key_violation
                 return {
                     status: HttpStatus.BAD_REQUEST,
-                    message: '참조 무결성 제약 조건 위반입니다.',
+                    message: '참조 무결???�약 조건 ?�반?�니??',
                 };
 
             case '23502': // not_null_violation
                 return {
                     status: HttpStatus.BAD_REQUEST,
-                    message: '필수 필드가 누락되었습니다.',
+                    message: '?�수 ?�드가 ?�락?�었?�니??',
                 };
 
             default:
                 return {
                     status: HttpStatus.INTERNAL_SERVER_ERROR,
-                    message: '데이터베이스 오류가 발생했습니다.',
+                    message: '?�이?�베?�스 ?�류가 발생?�습?�다.',
                 };
         }
     }
 
     /**
-     * 에러 로그 기록 (간소화된 형태)
+     * ?�러 로그 기록 (간소?�된 ?�태)
      */
     private logError(exception: unknown, request: Request, status: number, message: string): void {
         const logContext = {
@@ -127,13 +127,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         };
 
         if (status >= 500) {
-            // 서버 에러는 ERROR 레벨로 기록
+            // ?�버 ?�러??ERROR ?�벨�?기록
             this.logger.error(
                 `Server Error: ${JSON.stringify(logContext)}`,
                 exception instanceof Error ? exception.stack : String(exception),
             );
         } else {
-            // 클라이언트 에러는 WARN 레벨로 기록
+            // ?�라?�언???�러??WARN ?�벨�?기록
             this.logger.warn(`Client Error: ${JSON.stringify(logContext)}`);
         }
     }

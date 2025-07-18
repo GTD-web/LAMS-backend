@@ -34,12 +34,12 @@ export class LamsUserEntity extends UserEntity {
     approvalSteps: ApprovalStepInfoEntity[];
 
     setLamsRoles(role: LamsUserRole) {
-        // 기존 역할 제거
+        // 기존 ??�� ?�거
         this.roles = this.roles.filter(
             (r) => r !== LamsUserRole.ATTENDANCE_ADMIN && r !== LamsUserRole.ATTENDANCE_USER,
         );
 
-        // 새로운 역할 추가
+        // ?�로????�� 추�?
         this.roles.push(role);
     }
 

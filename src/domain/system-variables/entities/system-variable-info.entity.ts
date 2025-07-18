@@ -5,21 +5,21 @@ import { ApiProperty } from '@nestjs/swagger';
 export class SystemVariableInfoEntity {
     @PrimaryGeneratedColumn('uuid')
     @ApiProperty({
-        description: '시스템 변수 아이디',
+        description: '?�스??변???�이??,
         example: 'exSystemVariableId',
     })
     systemVariableId: string;
 
     @Column()
     @ApiProperty({
-        description: '시스템 변수 이름',
+        description: '?�스??변???�름',
         example: 'exSystemVariableName',
     })
     systemVariableName: string;
 
     @Column()
     @ApiProperty({
-        description: '시스템 변수 값',
+        description: '?�스??변??�?,
         example: 'exSystemVariableValue',
     })
     systemVariableValue: string;

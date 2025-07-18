@@ -5,21 +5,21 @@ import { ApiProperty } from '@nestjs/swagger';
 export class MonthlyEmployeeAttendanceInfoEntity {
     @PrimaryGeneratedColumn('uuid')
     @ApiProperty({
-        description: '월별 이벤트 요약 아이디',
+        description: '?�별 ?�벤???�약 ?�이??,
         example: 'exMonthlyEventSummaryId',
     })
     monthlyEventSummaryId: string;
 
     @Column()
     @ApiProperty({
-        description: '사원 번호',
+        description: '?�원 번호',
         example: '23027',
     })
     employeeNumber: string;
 
     @Column()
     @ApiProperty({
-        description: '사원 고유 아이디',
+        description: '?�원 고유 ?�이??,
         example: 'exEmployeeId',
     })
     employeeId: string;
@@ -28,14 +28,14 @@ export class MonthlyEmployeeAttendanceInfoEntity {
         nullable: true,
     })
     @ApiProperty({
-        description: '사원 이름',
-        example: '홍길동',
+        description: '?�원 ?�름',
+        example: '?�길??,
     })
     employeeName: string;
 
     @Column()
     @ApiProperty({
-        description: '해당 월의 첫 날',
+        description: '?�당 ?�의 �???,
         example: '2023-07',
     })
     yyyymm: string;
@@ -43,20 +43,20 @@ export class MonthlyEmployeeAttendanceInfoEntity {
     @Column({ nullable: true })
     @ApiProperty({
         description: '비고',
-        example: '휴가 1일 사용',
+        example: '?��? 1???�용',
     })
     note?: string;
 
     @Column({ default: '' })
     @ApiProperty({
-        description: '월간 근태 요약 노트',
-        example: '휴가 1일 사용',
+        description: '?�간 근태 ?�약 ?�트',
+        example: '?��? 1???�용',
     })
     additionalNote?: string;
 
     @Column()
     @ApiProperty({
-        description: '근무 일수',
+        description: '근무 ?�수',
         example: 22,
     })
     workDaysCount: number;
@@ -65,33 +65,33 @@ export class MonthlyEmployeeAttendanceInfoEntity {
         nullable: true,
     })
     @ApiProperty({
-        description: '총 업무 가능 시간 (분 단위)',
+        description: '�??�무 가???�간 (�??�위)',
         example: 12801,
     })
     totalWorkableTime: number;
 
     @Column('int')
     @ApiProperty({
-        description: '총 근무 시간 (분 단위)',
+        description: '�?근무 ?�간 (�??�위)',
         example: 12801,
     })
     totalWorkTime: number;
 
     @Column('float')
     @ApiProperty({
-        description: '평균 근무 시간 (분 단위)',
+        description: '?�균 근무 ?�간 (�??�위)',
         example: 581.86,
     })
     avgWorkTimes: number;
 
     @Column('simple-json')
     @ApiProperty({
-        description: '근태 유형별 횟수',
+        description: '근태 ?�형�??�수',
         example: {
-            연차: 1,
-            오전반차: 0,
-            오후반차: 0,
-            // ... 기타 근태 유형
+            ?�차: 1,
+            ?�전반차: 0,
+            ?�후반차: 0,
+            // ... 기�? 근태 ?�형
         },
     })
     attendanceTypeCount: Record<string, number>;
@@ -100,7 +100,7 @@ export class MonthlyEmployeeAttendanceInfoEntity {
         nullable: true,
     })
     @ApiProperty({
-        description: '일별 이벤트 요약',
+        description: '?�별 ?�벤???�약',
         example: [
             {
                 dailyEventSummaryId: '8a5a35e8-46fd-458f-9ccf-843404b5e0c8',
@@ -119,7 +119,7 @@ export class MonthlyEmployeeAttendanceInfoEntity {
         nullable: true,
     })
     @ApiProperty({
-        description: '주별 이벤트 요약',
+        description: '주별 ?�벤???�약',
         example: [
             {
                 weekNumber: 21,
@@ -135,7 +135,7 @@ export class MonthlyEmployeeAttendanceInfoEntity {
         nullable: true,
     })
     @ApiProperty({
-        description: '지각 상세정보',
+        description: '지�??�세?�보',
         example: [
             {
                 dailyEventSummaryId: '8a5a35e8-46fd-458f-9ccf-843404b5e0c8',
@@ -153,7 +153,7 @@ export class MonthlyEmployeeAttendanceInfoEntity {
         nullable: true,
     })
     @ApiProperty({
-        description: '결근 상세정보',
+        description: '결근 ?�세?�보',
         example: [
             {
                 dailyEventSummaryId: '8a5a35e8-46fd-458f-9ccf-843404b5e0c8',
@@ -171,7 +171,7 @@ export class MonthlyEmployeeAttendanceInfoEntity {
         nullable: true,
     })
     @ApiProperty({
-        description: '조퇴 상세정보',
+        description: '조퇴 ?�세?�보',
         example: [
             {
                 dailyEventSummaryId: '8a5a35e8-46fd-458f-9ccf-843404b5e0c8',

@@ -3,10 +3,10 @@ import { ApprovalRequestBaseInfoEntity } from './approval-request-info.entity';
 import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 
 export enum ApprovalHistoryAction {
-    APPROVE = '승인',
+    APPROVE = '?�인',
     REJECT = '반려',
     CANCEL = '취소',
-    REQUEST = '요청',
+    REQUEST = '?�청',
 }
 
 @Entity()

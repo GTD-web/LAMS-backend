@@ -10,9 +10,9 @@ import {
 } from 'typeorm';
 
 export enum BirthDayLeaveStatus {
-    CAN_NOT_INPUT = '생일이 입력되지 않음',
-    CAN_NOT_USED = '생일 휴가 사용되지 않음',
-    USED = '생일 휴가 사용됨',
+    CAN_NOT_INPUT = '?�일???�력?��? ?�음',
+    CAN_NOT_USED = '?�일 ?��? ?�용?��? ?�음',
+    USED = '?�일 ?��? ?�용??,
 }
 
 @Entity()

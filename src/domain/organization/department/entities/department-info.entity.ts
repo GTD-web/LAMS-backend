@@ -7,7 +7,6 @@ import {
     ManyToMany,
     ManyToOne,
     OneToMany,
-    OneToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
     Repository,
@@ -17,7 +16,6 @@ import {
 } from 'typeorm';
 import { DepartmentEmployeeEntity } from './department-employee.entity';
 import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
-import { OrganizationChartInfoEntity } from '../../entities/organization-chart-info.entity';
 import { EmployeeInfoEntity } from '../../employee/entities/employee-info.entity';
 
 @Entity()
@@ -34,7 +32,7 @@ export class DepartmentInfoEntity {
     @Column({ nullable: true })
     mmsDepartmentId: string;
 
-    // 기본값을 빈배열로 지정
+    // 기본값을 빈배?�로 지??
     @ManyToMany(() => LamsUserEntity, (user) => user.accessableDepartments, {
         cascade: true,
         eager: true,
@@ -69,13 +67,6 @@ export class DepartmentInfoEntity {
     @OneToMany(() => DepartmentInfoEntity, (department) => department.parent)
     children: DepartmentInfoEntity[];
 
-    @Column({ type: 'uuid', nullable: true })
-    orgChartInfoId: string;
-
-    @OneToOne(() => OrganizationChartInfoEntity, (department) => department.orgChartInfoId)
-    @JoinColumn({ name: 'orgChartInfoId' })
-    orgChartInfo: OrganizationChartInfoEntity;
-
     @OneToMany(() => DepartmentEmployeeEntity, (employee) => employee.department)
     employees: DepartmentEmployeeEntity[];
 
@@ -84,14 +75,6 @@ export class DepartmentInfoEntity {
 
     @UpdateDateColumn()
     updatedAt: Date;
-
-    private getAccessAuthorities(): LamsUserEntity[] {
-        return this.accessAuthorities;
-    }
-
-    private getReviewAuthorities(): LamsUserEntity[] {
-        return this.reviewAuthorities;
-    }
 
     private setAccessAuthorities(authorities: LamsUserEntity[]): void {
         this.accessAuthorities = authorities;
@@ -151,99 +134,96 @@ export class DepartmentInfoEntity {
         }
     }
 
-    static async findDepartmentWithChildren(
-        repository: Repository<DepartmentInfoEntity>,
-        options: {
-            departmentId?: string;
-            withOrgChart?: boolean;
-            withEmployees?: boolean;
-            withChildren?: boolean;
-            where?: FindOptionsWhere<DepartmentInfoEntity>;
-            order?: FindOptionsOrder<DepartmentInfoEntity>;
-        } = {},
-    ) {
-        const {
-            departmentId,
-            withOrgChart = false,
-            withEmployees = true,
-            withChildren = true,
-            where = {},
-            order,
-        } = options;
-        const relations: string[] = [];
-        if (withEmployees)
-            relations.push(
-                'employees',
-                'employees.employee',
-                'employees.employee.departments',
-                'employees.employee.departments.department',
-            );
-        if (withOrgChart) relations.push('orgChartInfo');
-        if (withChildren) relations.push('children');
+    // static async findDepartmentWithChildren(
+    //     repository: Repository<DepartmentInfoEntity>,
+    //     options: {
+    //         departmentId?: string;
+    //         withEmployees?: boolean;
+    //         withChildren?: boolean;
+    //         where?: FindOptionsWhere<DepartmentInfoEntity>;
+    //         order?: FindOptionsOrder<DepartmentInfoEntity>;
+    //     } = {},
+    // ) {
+    //     const {
+    //         departmentId,
+    //         withEmployees = true,
+    //         withChildren = true,
+    //         where = {},
+    //         order,
+    //     } = options;
+    //     const relations: string[] = [];
+    //     if (withEmployees)
+    //         relations.push(
+    //             'employees',
+    //             'employees.employee',
+    //             'employees.employee.departments',
+    //             'employees.employee.departments.department',
+    //         );
+    //     if (withChildren) relations.push('children');
 
-        if (departmentId) {
-            where.departmentId = departmentId;
-        } else {
-            where.parentDepartmentId = IsNull();
-        }
+    //     if (departmentId) {
+    //         where.departmentId = departmentId;
+    //     } else {
+    //         where.parentDepartmentId = IsNull();
+    //     }
 
-        const department = await repository.findOne({
-            where,
-            relations,
-            order,
-        });
+    //     const department = await repository.findOne({
+    //         where,
+    //         relations,
+    //         order,
+    //     });
 
-        return this.getAllChildDepartments(repository, department, relations);
-    }
+    //     return this.getAllChildDepartments(repository, department, relations);
+    // }
 
-    static async getAllChildDepartments(
-        repository: Repository<DepartmentInfoEntity>,
-        dept: DepartmentInfoEntity,
-        relations: string[],
-    ): Promise<DepartmentInfoEntity> {
-        if (!dept.children?.length) return dept;
+    // static async getAllChildDepartments(
+    //     repository: Repository<DepartmentInfoEntity>,
+    //     dept: DepartmentInfoEntity,
+    //     relations: string[],
+    // ): Promise<DepartmentInfoEntity> {
+    //     if (!dept.children?.length) return dept;
 
-        const childDepts = await Promise.all(
-            dept.children.map((child) =>
-                repository.findOne({
-                    where: { departmentId: child.departmentId },
-                    relations,
-                }),
-            ),
-        );
+    //     const childDepts = await Promise.all(
+    //         dept.children.map((child) =>
+    //             repository.findOne({
+    //                 where: { departmentId: child.departmentId },
+    //                 relations,
+    //             }),
+    //         ),
+    //     );
 
-        dept.children = await Promise.all(
-            childDepts.map((child) => this.getAllChildDepartments(repository, child, relations)),
-        );
-        return dept;
-    }
+    //     dept.children = await Promise.all(
+    //         childDepts.map((child) => this.getAllChildDepartments(repository, child, relations)),
+    //     );
+    //     return dept;
+    // }
 
-    static async getAllEmployee(
-        dept: DepartmentInfoEntity,
-        options: {
-            withQuited: boolean;
-            withExclude: boolean;
-        } = {
-            withQuited: false,
-            withExclude: true,
-        },
-    ): Promise<EmployeeInfoEntity[]> {
-        const { withQuited, withExclude } = options;
-        let currentDeptEmployees = dept.employees?.map((emp) => emp.employee) || [];
+    // static async getAllEmployee(
+    //     dept: DepartmentInfoEntity,
+    //     options: {
+    //         withQuited: boolean;
+    //         withExclude: boolean;
+    //     } = {
+    //         withQuited: false,
+    //         withExclude: true,
+    //     },
+    // ): Promise<EmployeeInfoEntity[]> {
+    //     const { withQuited, withExclude } = options;
+    //     let currentDeptEmployees = dept.employees?.map((emp) => emp.employee) || [];
 
-        if (!withQuited) {
-            currentDeptEmployees = currentDeptEmployees.filter((emp) => emp.quitedAt === null || emp.quitedAt === '');
-        }
-        if (!withExclude) {
-            currentDeptEmployees = currentDeptEmployees.filter((emp) => emp.isExcludedFromCalculation === false);
-        }
-        if (dept.children?.length) {
-            const childDepts = (
-                await Promise.all(dept.children.map((child) => this.getAllEmployee(child, options)))
-            ).flat();
+    //     if (!withQuited) {
+    //         currentDeptEmployees = currentDeptEmployees.filter((emp) => emp.quitedAt === null || emp.quitedAt === '');
+    //     }
+    //     if (!withExclude) {
+    //         currentDeptEmployees = currentDeptEmployees.filter((emp) => emp.isExcludedFromCalculation === false);
+    //     }
+    //     if (dept.children?.length) {
+    //         const childDepts = (
+    //             await Promise.all(dept.children.map((child) => this.getAllEmployee(child, options)))
+    //         ).flat();
 
-            return [...currentDeptEmployees, ...childDepts];
-        }
-        return currentDeptEmployees;
-    }
+    //         return [...currentDeptEmployees, ...childDepts];
+    //     }
+    //     return currentDeptEmployees;
+    // }
 }

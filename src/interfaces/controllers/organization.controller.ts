@@ -1,37 +1,56 @@
 import { Controller, Post, UseGuards, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { OrganizationSyncService } from '../../business/organization/services/organization-sync.service';
-import { UserRole } from '../../domain/user/enum/user.enum';
-import { MMSSyncResponseDto } from '../dto/organization/responses/mms-sync-response.dto';
+import {
+    ApiTags,
+    ApiOperation,
+    ApiResponse,
+    ApiBearerAuth,
+    ApiOkResponse,
+    ApiUnauthorizedResponse,
+    ApiForbiddenResponse,
+    ApiInternalServerErrorResponse,
+} from '@nestjs/swagger';
+import { OrganizationBusinessService } from '@src/business/organization/organization.business';
+import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@src/common/guards/roles.guard';
+import { Roles } from '@src/common/decorators/roles.decorator';
+import { UserRole } from '@src/domain/user/enum/user.enum';
+import { MMSSyncResponseDto } from '@src/interfaces/dto/organization/responses/mms-sync-response.dto';
+import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
 
 /**
- * 조직도 전체 관리 컨트롤러
- * - MMS 전체 동기화만 지원
+ * 조직 관리 컨트롤러
+ * - 조직 동기화 및 관리 관련 API 제공
  */
-@ApiTags('organization')
+@ApiTags('조직 관리 (Organization)')
 @Controller('organization')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class OrganizationController {
-    constructor(private readonly organizationSyncService: OrganizationSyncService) {}
+    constructor(private readonly organizationBusinessService: OrganizationBusinessService) {}
 
     @Post('sync')
-    @Roles(UserRole.SYSTEM_ADMIN)
-    @ApiOperation({ summary: 'MMS와 전체 동기화 실행' })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        description: 'MMS 전체 동기화가 성공적으로 완료되었습니다.',
+    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @ApiOperation({
+        summary: '조직 동기화',
+        description: 'MMS 시스템과 조직 데이터를 동기화합니다. 부서와 직원 정보를 업데이트합니다.',
+    })
+    @ApiOkResponse({
+        description: '조직 동기화가 성공적으로 완료되었습니다.',
         type: MMSSyncResponseDto,
     })
-    async syncMMS(): Promise<MMSSyncResponseDto> {
-        const result = await this.organizationSyncService.syncMMS();
-        return new MMSSyncResponseDto({
-            success: result.success,
-            message: result.message,
-            timestamp: new Date().toISOString(),
-        });
+    @ApiUnauthorizedResponse({
+        description: '인증 실패',
+        type: ErrorResponseDto,
+    })
+    @ApiForbiddenResponse({
+        description: '접근 권한 없음 - 관리자 권한 필요',
+        type: ErrorResponseDto,
+    })
+    @ApiInternalServerErrorResponse({
+        description: '서버 내부 오류',
+        type: ErrorResponseDto,
+    })
+    async syncOrganization(): Promise<MMSSyncResponseDto> {
+        return this.organizationBusinessService.syncOrganization();
     }
 }

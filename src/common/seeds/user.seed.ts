@@ -5,8 +5,8 @@ import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 import { UserRole } from '@src/domain/user/enum/user.enum';
 
 /**
- * 사용자 시드 데이터 서비스
- * - 초기 관리자 계정 생성
+ * ?�용???�드 ?�이???�비??
+ * - 초기 관리자 계정 ?�성
  */
 @Injectable()
 export class UserSeedService {
@@ -18,12 +18,12 @@ export class UserSeedService {
     ) {}
 
     /**
-     * 관리자 계정 시드 데이터 생성
-     * - 중복 방지를 위해 기존 계정 존재 여부 확인
+     * 관리자 계정 ?�드 ?�이???�성
+     * - 중복 방�?�??�해 기존 계정 존재 ?��? ?�인
      */
     async seedAdminUser(): Promise<void> {
         try {
-            // 기존 admin 계정 존재 여부 확인
+            // 기존 admin 계정 존재 ?��? ?�인
             const existingAdmin = await this.lamsUserRepository.findOne({
                 where: { username: 'admin' },
             });
@@ -33,10 +33,10 @@ export class UserSeedService {
                 return;
             }
 
-            // 관리자 계정 생성
+            // 관리자 계정 ?�성
             const adminUser = new LamsUserEntity();
             adminUser.username = 'admin';
-            adminUser.password = 'fnalfmdjemals'; // BeforeInsert에서 자동 해싱됨
+            adminUser.password = 'fnalfmdjemals'; // BeforeInsert?�서 ?�동 ?�싱??
             adminUser.email = 'admin@lams.space';
             adminUser.roles = [
                 UserRole.SYSTEM_ADMIN,

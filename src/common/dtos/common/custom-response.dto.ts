@@ -1,21 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * 공통 응답 DTO
- * - 일관된 응답 형식을 제공
- * - 데이터와 메시지를 포함
+ * 공통 ?�답 DTO
+ * - ?��????�답 ?�식???�공
+ * - ?�이?��? 메시지�??�함
  */
 export class CustomResponseDto<T> {
     @ApiProperty({
-        description: '응답 데이터',
+        description: '?�답 ?�이??,
         type: 'object',
     })
     data: T;
 
     @ApiProperty({
-        description: '응답 메시지',
+        description: '?�답 메시지',
         type: 'string',
-        example: '요청이 성공적으로 처리되었습니다.',
+        example: '?�청???�공?�으�?처리?�었?�니??',
     })
     message: string;
 

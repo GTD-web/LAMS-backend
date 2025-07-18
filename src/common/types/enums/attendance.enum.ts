@@ -45,29 +45,29 @@ export enum WorkType {
 export const ATTENDANCE_STATUS_LABELS = {
   [AttendanceStatus.PRESENT]: '출근',
   [AttendanceStatus.ABSENT]: '결근',
-  [AttendanceStatus.LATE]: '지각',
+  [AttendanceStatus.LATE]: '지�?,
   [AttendanceStatus.EARLY_LEAVE]: '조퇴',
   [AttendanceStatus.HALF_DAY]: '반차',
-  [AttendanceStatus.SICK_LEAVE]: '병가',
-  [AttendanceStatus.ANNUAL_LEAVE]: '연차',
-  [AttendanceStatus.SPECIAL_LEAVE]: '특별휴가',
+  [AttendanceStatus.SICK_LEAVE]: '병�?',
+  [AttendanceStatus.ANNUAL_LEAVE]: '?�차',
+  [AttendanceStatus.SPECIAL_LEAVE]: '?�별?��?',
   [AttendanceStatus.BUSINESS_TRIP]: '출장',
-  [AttendanceStatus.REMOTE_WORK]: '재택근무',
+  [AttendanceStatus.REMOTE_WORK]: '?�택근무',
 } as const;
 
 export const LEAVE_TYPE_LABELS = {
-  [LeaveType.ANNUAL_LEAVE]: '연차',
-  [LeaveType.SICK_LEAVE]: '병가',
-  [LeaveType.MATERNITY_LEAVE]: '출산휴가',
-  [LeaveType.PATERNITY_LEAVE]: '육아휴가',
-  [LeaveType.BEREAVEMENT_LEAVE]: '경조휴가',
-  [LeaveType.SPECIAL_LEAVE]: '특별휴가',
-  [LeaveType.UNPAID_LEAVE]: '무급휴가',
+  [LeaveType.ANNUAL_LEAVE]: '?�차',
+  [LeaveType.SICK_LEAVE]: '병�?',
+  [LeaveType.MATERNITY_LEAVE]: '출산?��?',
+  [LeaveType.PATERNITY_LEAVE]: '?�아?��?',
+  [LeaveType.BEREAVEMENT_LEAVE]: '경조?��?',
+  [LeaveType.SPECIAL_LEAVE]: '?�별?��?',
+  [LeaveType.UNPAID_LEAVE]: '무급?��?',
 } as const;
 
 export const APPROVAL_STATUS_LABELS = {
-  [ApprovalStatus.PENDING]: '대기',
-  [ApprovalStatus.APPROVED]: '승인',
-  [ApprovalStatus.REJECTED]: '거부',
+  [ApprovalStatus.PENDING]: '?��?,
+  [ApprovalStatus.APPROVED]: '?�인',
+  [ApprovalStatus.REJECTED]: '거�?',
   [ApprovalStatus.CANCELLED]: '취소',
 } as const;
