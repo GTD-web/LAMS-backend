@@ -56,7 +56,7 @@ export class UserContextService {
     /**
      * 부서의 검토 권한에 사용자를 추가한다 (권한 관리는 복잡한 비즈니스 로직이므로 try-catch 유지)
      */
-    async 부서의_검토_권한에_사용자를_추가한다(departmentId: string, userId: string): Promise<void> {
+    async 부서의_검토_권한에_사용자를_추가한다(departmentId: string, userId: string): Promise<LamsUserEntity> {
         try {
             const user = await this.userDomainService.findUserById(userId);
             if (!user) {
@@ -69,7 +69,11 @@ export class UserContextService {
             }
 
             await this.departmentDomainService.addReviewAuthority(departmentId, userId);
+
+            // 업데이트된 사용자 정보 반환
+            const updatedUser = await this.userDomainService.findUserById(userId);
             this.logger.log(`부서 검토 권한 추가 성공: ${user.email} -> ${department.departmentName}`);
+            return updatedUser as LamsUserEntity;
         } catch (error) {
             this.logger.error(`부서 검토 권한 추가 실패: ${departmentId}, ${userId}`, error.stack);
             throw error;
@@ -79,10 +83,14 @@ export class UserContextService {
     /**
      * 부서의 검토 권한에서 사용자를 삭제한다 (권한 관리는 복잡한 비즈니스 로직이므로 try-catch 유지)
      */
-    async 부서의_검토_권한에서_사용자를_삭제한다(departmentId: string, userId: string): Promise<void> {
+    async 부서의_검토_권한에서_사용자를_삭제한다(departmentId: string, userId: string): Promise<LamsUserEntity> {
         try {
             await this.departmentDomainService.removeReviewAuthority(departmentId, userId);
+
+            // 업데이트된 사용자 정보 반환
+            const updatedUser = await this.userDomainService.findUserById(userId);
             this.logger.log(`부서 검토 권한 삭제 성공: ${userId} -> ${departmentId}`);
+            return updatedUser as LamsUserEntity;
         } catch (error) {
             this.logger.error(`부서 검토 권한 삭제 실패: ${departmentId}, ${userId}`, error.stack);
             throw error;
@@ -92,7 +100,7 @@ export class UserContextService {
     /**
      * 부서의 접근 권한에 사용자를 추가한다 (권한 관리는 복잡한 비즈니스 로직이므로 try-catch 유지)
      */
-    async 부서의_접근_권한에_사용자를_추가한다(departmentId: string, userId: string): Promise<void> {
+    async 부서의_접근_권한에_사용자를_추가한다(departmentId: string, userId: string): Promise<LamsUserEntity> {
         try {
             const user = await this.userDomainService.findUserById(userId);
             if (!user) {
@@ -105,7 +113,11 @@ export class UserContextService {
             }
 
             await this.departmentDomainService.addAccessAuthority(departmentId, userId);
+
+            // 업데이트된 사용자 정보 반환
+            const updatedUser = await this.userDomainService.findUserById(userId);
             this.logger.log(`부서 접근 권한 추가 성공: ${user.email} -> ${department.departmentName}`);
+            return updatedUser as LamsUserEntity;
         } catch (error) {
             this.logger.error(`부서 접근 권한 추가 실패: ${departmentId}, ${userId}`, error.stack);
             throw error;
@@ -115,10 +127,14 @@ export class UserContextService {
     /**
      * 부서의 접근 권한에서 사용자를 삭제한다 (권한 관리는 복잡한 비즈니스 로직이므로 try-catch 유지)
      */
-    async 부서의_접근_권한에서_사용자를_삭제한다(departmentId: string, userId: string): Promise<void> {
+    async 부서의_접근_권한에서_사용자를_삭제한다(departmentId: string, userId: string): Promise<LamsUserEntity> {
         try {
             await this.departmentDomainService.removeAccessAuthority(departmentId, userId);
+
+            // 업데이트된 사용자 정보 반환
+            const updatedUser = await this.userDomainService.findUserById(userId);
             this.logger.log(`부서 접근 권한 삭제 성공: ${userId} -> ${departmentId}`);
+            return updatedUser as LamsUserEntity;
         } catch (error) {
             this.logger.error(`부서 접근 권한 삭제 실패: ${departmentId}, ${userId}`, error.stack);
             throw error;

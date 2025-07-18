@@ -290,7 +290,7 @@ export class UsersController {
         @Param('type') type: 'access' | 'review',
         @Param('action') action: 'add' | 'delete',
         @Body() dto: ManageDepartmentAuthorityDto,
-    ): Promise<DepartmentAuthorityResponse> {
+    ): Promise<SuccessResponseWithData<LamsUserEntity>> {
         return this.userBusinessService.manageDepartmentAuthority(departmentId, dto.userId, type, action);
     }
 }

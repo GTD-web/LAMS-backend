@@ -8,6 +8,7 @@ import { SearchUserDto } from '@src/interfaces/dto/user/requests/search-user.dto
 import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 import { SuccessMessageHelper } from '@src/common/helpers/success-message.helper';
 import { PaginatedSuccessResponse, SuccessResponseWithData } from '@src/common/types/success-response.type';
+import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 
 /**
  * 사용자 비즈니스 서비스
@@ -155,40 +156,43 @@ export class UserBusinessService {
         userId: string,
         type: 'access' | 'review',
         action: 'add' | 'delete',
-    ): Promise<SuccessResponseWithData<any>> {
+    ): Promise<SuccessResponseWithData<LamsUserEntity>> {
         try {
             if (!departmentId || !userId) {
                 throw new Error('부서 ID와 사용자 ID가 필요합니다.');
             }
 
+            let updatedUser: LamsUserEntity;
+
             if (type === 'access') {
                 if (action === 'add') {
-                    await this.userContextService.부서의_접근_권한에_사용자를_추가한다(departmentId, userId);
+                    updatedUser = await this.userContextService.부서의_접근_권한에_사용자를_추가한다(
+                        departmentId,
+                        userId,
+                    );
                 } else {
-                    await this.userContextService.부서의_접근_권한에서_사용자를_삭제한다(departmentId, userId);
+                    updatedUser = await this.userContextService.부서의_접근_권한에서_사용자를_삭제한다(
+                        departmentId,
+                        userId,
+                    );
                 }
             } else {
                 if (action === 'add') {
-                    await this.userContextService.부서의_검토_권한에_사용자를_추가한다(departmentId, userId);
+                    updatedUser = await this.userContextService.부서의_검토_권한에_사용자를_추가한다(
+                        departmentId,
+                        userId,
+                    );
                 } else {
-                    await this.userContextService.부서의_검토_권한에서_사용자를_삭제한다(departmentId, userId);
+                    updatedUser = await this.userContextService.부서의_검토_권한에서_사용자를_삭제한다(
+                        departmentId,
+                        userId,
+                    );
                 }
             }
 
-            const actionText = action === 'add' ? '추가' : '삭제';
-            const typeText = type === 'access' ? '접근' : '검토';
-
-            const result = {
-                departmentId,
-                userId,
-                type,
-                action,
-                message: `${typeText} 권한 ${actionText} 완료`,
-            };
-
             return SuccessMessageHelper.createUpdateSuccessResponse(
                 SuccessMessageHelper.MESSAGES.DEPARTMENT_AUTHORITY_UPDATED,
-                result,
+                updatedUser,
                 [`${type}_authority`],
             );
         } catch (error) {

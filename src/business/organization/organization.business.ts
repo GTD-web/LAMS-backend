@@ -5,6 +5,7 @@ import { EmployeeResponseDto } from '@src/interfaces/dto/organization/responses/
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 import { SuccessMessageHelper } from '@src/common/helpers/success-message.helper';
+import { plainToInstance } from 'class-transformer';
 import {
     SyncSuccessResponse,
     SuccessResponseWithData,
@@ -127,9 +128,12 @@ export class OrganizationBusinessService {
 
         const result = await this.organizationContextService.직원의_제외_여부_변경한다(employeeId);
 
+        // EmployeeInfoEntity를 EmployeeResponseDto로 변환
+        const employeeDto = plainToInstance(EmployeeResponseDto, result);
+
         return SuccessMessageHelper.createToggleSuccessResponse(
             SuccessMessageHelper.MESSAGES.EMPLOYEE_EXCLUSION_TOGGLED,
-            result,
+            employeeDto,
             'isExcludedFromCalculation',
             result.isExcludedFromCalculation,
         );
@@ -149,10 +153,13 @@ export class OrganizationBusinessService {
             departmentId,
         );
 
+        // EmployeeInfoEntity[]를 EmployeeResponseDto[]로 변환
+        const employeeDtos = result.map((employee) => plainToInstance(EmployeeResponseDto, employee));
+
         return SuccessMessageHelper.createRetrievalSuccessResponse(
             SuccessMessageHelper.MESSAGES.EMPLOYEE_LIST_RETRIEVED,
-            result,
-            result.length,
+            employeeDtos,
+            employeeDtos.length,
         );
     }
 }

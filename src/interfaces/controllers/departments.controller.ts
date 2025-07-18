@@ -21,6 +21,7 @@ import { DepartmentResponseDto } from '@src/interfaces/dto/organization/response
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
+import { SuccessResponseWithData } from '@src/common/types/success-response.type';
 
 /**
  * 부서 관리 컨트롤러
@@ -109,7 +110,7 @@ export class DepartmentsController {
     })
     async toggleDepartmentExclusion(
         @Param('departmentId', ParseUUIDPipe) departmentId: string,
-    ): Promise<DepartmentResponseDto> {
+    ): Promise<SuccessResponseWithData<DepartmentResponseDto>> {
         return this.organizationBusinessService.toggleDepartmentExclusion(departmentId);
     }
 }
