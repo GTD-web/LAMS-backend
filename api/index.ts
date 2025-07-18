@@ -1,20 +1,18 @@
-const { NestFactory } = require('@nestjs/core');
-const { ValidationPipe } = require('@nestjs/common');
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from '../dist/app.module';
+import { ResponseInterceptor } from '../dist/common/interceptors/response.interceptor';
+import { GlobalExceptionFilter } from '../dist/common/filters/global-exception.filter';
+import { JwtAuthGuard } from '../dist/common/guards/jwt-auth.guard';
+import { RolesGuard } from '../dist/common/guards/roles.guard';
+import { Reflector } from '@nestjs/core';
+import { settingSwagger } from '../dist/common/utils/swagger/swagger.util';
 
-let app;
+let app: any;
 
 async function bootstrap() {
     if (!app) {
         try {
-            // 동적 import를 사용하여 빌드된 모듈들을 로드
-            const { AppModule } = require('../dist/app.module');
-            const { ResponseInterceptor } = require('../dist/common/interceptors/response.interceptor');
-            const { GlobalExceptionFilter } = require('../dist/common/filters/global-exception.filter');
-            const { JwtAuthGuard } = require('../dist/common/guards/jwt-auth.guard');
-            const { RolesGuard } = require('../dist/common/guards/roles.guard');
-            const { Reflector } = require('@nestjs/core');
-            const { settingSwagger } = require('../dist/common/utils/swagger/swagger.util');
-
             app = await NestFactory.create(AppModule);
 
             // Global interceptors and filters
@@ -53,7 +51,7 @@ async function bootstrap() {
     return app;
 }
 
-module.exports = async (req, res) => {
+export default async (req: any, res: any) => {
     try {
         const server = await bootstrap();
         const httpAdapter = server.getHttpAdapter();
