@@ -1,6 +1,7 @@
 {
     "version": 2,
     "name": "lams-backend",
+    "buildCommand": "npm run build",
     "rewrites": [
         {
             "source": "/api/(.*)",
@@ -11,16 +12,12 @@
             "destination": "/api/index.js"
         }
     ],
-    "env": {
-        "NODE_ENV": "production"
-    },
     "functions": {
         "api/index.js": {
             "maxDuration": 30,
             "memory": 1024
         }
     },
-    "regions": ["icn1", "sin1"],
     "headers": [
         {
             "source": "/api/(.*)",

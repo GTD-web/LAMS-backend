@@ -19,8 +19,6 @@ test
 
 # Build files
 *.tsbuildinfo
-tsconfig.json
-tsconfig.build.json
 
 # Documentation
 docs
