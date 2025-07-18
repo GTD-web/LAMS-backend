@@ -32,7 +32,7 @@ export class DepartmentInfoEntity {
     @Column({ nullable: true })
     mmsDepartmentId: string;
 
-    // 기본값을 빈배?�로 지??
+    // 기본값을 빈배열로 지정
     @ManyToMany(() => LamsUserEntity, (user) => user.accessableDepartments, {
         cascade: true,
         eager: true,

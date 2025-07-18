@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, Not } from 'typeorm';
+import { Repository, Like, Not, FindOptionsWhere, FindManyOptions, ILike } from 'typeorm';
 import { DepartmentInfoEntity } from '../entities/department-info.entity';
 import { UserDomainService } from '../../../user/services/user-domain.service';
 import { MMSDepartmentResponseDto } from '@src/interfaces/dto/organization/requests/mms-department-import.dto';
@@ -323,5 +323,138 @@ export class DepartmentDomainService {
         // 여기서는 빈 배열 반환
         this.logger.log(`접근 권한 부서 조회: ${userId}`);
         return [];
+    }
+
+    /**
+     * 부서 검색 (복합 조건)
+     */
+    async searchDepartments(searchCriteria: {
+        departmentName?: string;
+        departmentCode?: string;
+        isExclude?: boolean;
+        keyword?: string;
+        limit?: number;
+        offset?: number;
+    }): Promise<{ departments: DepartmentInfoEntity[]; total: number }> {
+        const { departmentName, departmentCode, isExclude, keyword, limit = 10, offset = 0 } = searchCriteria;
+
+        // 검색 조건 구성
+        const whereConditions: FindOptionsWhere<DepartmentInfoEntity>[] = [];
+
+        // 키워드 통합 검색이 있는 경우
+        if (keyword) {
+            const keywordConditions: FindOptionsWhere<DepartmentInfoEntity> = {
+                departmentName: ILike(`%${keyword}%`),
+            };
+            if (isExclude !== undefined) {
+                keywordConditions.isExclude = isExclude;
+            }
+            whereConditions.push(keywordConditions);
+
+            // 부서 코드로도 검색
+            const codeConditions: FindOptionsWhere<DepartmentInfoEntity> = {
+                departmentCode: ILike(`%${keyword}%`),
+            };
+            if (isExclude !== undefined) {
+                codeConditions.isExclude = isExclude;
+            }
+            whereConditions.push(codeConditions);
+        } else {
+            // 개별 필드 검색
+            const individualConditions: FindOptionsWhere<DepartmentInfoEntity> = {};
+
+            if (departmentName) {
+                individualConditions.departmentName = ILike(`%${departmentName}%`);
+            }
+            if (departmentCode) {
+                individualConditions.departmentCode = ILike(`%${departmentCode}%`);
+            }
+            if (isExclude !== undefined) {
+                individualConditions.isExclude = isExclude;
+            }
+
+            if (Object.keys(individualConditions).length > 0) {
+                whereConditions.push(individualConditions);
+            }
+        }
+
+        // 검색 조건이 없으면 전체 조회
+        const findOptions: FindManyOptions<DepartmentInfoEntity> = {
+            where: whereConditions.length > 0 ? whereConditions : isExclude !== undefined ? { isExclude } : undefined,
+            order: { departmentName: 'ASC' },
+            skip: offset,
+            take: limit,
+            relations: ['employees', 'employees.employee'],
+        };
+
+        // 총 개수와 데이터 조회
+        const [departments, total] = await this.departmentRepository.findAndCount(findOptions);
+
+        this.logger.log(`부서 검색 완료: ${departments.length}개 조회 (총 ${total}개)`);
+        return { departments, total };
+    }
+
+    /**
+     * 부서명으로 부서 검색
+     */
+    async searchDepartmentsByName(departmentName: string): Promise<DepartmentInfoEntity[]> {
+        if (!departmentName || departmentName.trim().length === 0) {
+            throw new BadRequestException('부서명이 필요합니다.');
+        }
+
+        const departments = await this.departmentRepository.find({
+            where: { departmentName: ILike(`%${departmentName}%`) },
+            order: { departmentName: 'ASC' },
+            relations: ['employees', 'employees.employee'],
+        });
+
+        this.logger.log(`부서명 검색 완료: ${departments.length}개 조회`);
+        return departments;
+    }
+
+    /**
+     * 부서 코드로 부서 검색
+     */
+    async searchDepartmentsByCode(departmentCode: string): Promise<DepartmentInfoEntity[]> {
+        if (!departmentCode || departmentCode.trim().length === 0) {
+            throw new BadRequestException('부서 코드가 필요합니다.');
+        }
+
+        const departments = await this.departmentRepository.find({
+            where: { departmentCode: ILike(`%${departmentCode}%`) },
+            order: { departmentName: 'ASC' },
+            relations: ['employees', 'employees.employee'],
+        });
+
+        this.logger.log(`부서 코드 검색 완료: ${departments.length}개 조회`);
+        return departments;
+    }
+
+    /**
+     * 활성 부서 조회 (제외되지 않은 부서)
+     */
+    async findActiveDepartments(): Promise<DepartmentInfoEntity[]> {
+        const departments = await this.departmentRepository.find({
+            where: { isExclude: false },
+            order: { departmentName: 'ASC' },
+            relations: ['employees', 'employees.employee'],
+        });
+
+        this.logger.log(`활성 부서 조회 완료: ${departments.length}개 조회`);
+        return departments;
+    }
+
+    /**
+     * 제외된 부서 조회
+     */
+    async findExcludedDepartments(): Promise<DepartmentInfoEntity[]> {
+        const departments = await this.departmentRepository.find({
+            where: { isExclude: true },
+            order: { departmentName: 'ASC' },
+            relations: ['employees', 'employees.employee'],
+        });
+
+        this.logger.log(`제외된 부서 조회 완료: ${departments.length}개 조회`);
+        return departments;
     }
 }

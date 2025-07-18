@@ -6,8 +6,8 @@ import { DepartmentsController } from '@src/interfaces/controllers/departments.c
 import { EmployeesController } from '@src/interfaces/controllers/employees.controller';
 
 /**
- * 조직 비즈?�스 모듈
- * - 조직 비즈?�스 계층??컴포?�트?�을 관�?
+ * 조직 비즈니스 모듈
+ * - 조직 비즈니스 계층의 컴포넌트들을 관리
  */
 @Module({
     imports: [OrganizationContextModule],

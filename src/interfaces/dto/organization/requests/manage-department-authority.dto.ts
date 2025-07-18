@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsUUID } from 'class-validator';
 
 /**
- * 부??권한 관�??�청 DTO
+ * 부서 권한 관리 요청 DTO
  */
 export class ManageDepartmentAuthorityDto {
     @ApiProperty({

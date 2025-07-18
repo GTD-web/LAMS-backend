@@ -3,10 +3,10 @@ import { DataSnapshotInfoEntity } from './data-snapshot-info.entity';
 import { ApprovalRequestBaseInfoEntity } from '@src/domain/approval/entities/approval-request-info.entity';
 
 export enum SnapshotApprovalRequestStatus {
-    CREATE_SNAPSHOT_REQUEST = '??攴柬儨 ?勴櫓 ?る儏??瓴办灛 ?旍箔',
-    CREATE_SNAPSHOT_APPROVAL = '??攴柬儨 ?勴櫓 ?る儏??瓴办灛 ?轨澑',
-    CREATE_SNAPSHOT_REJECTION = '??攴柬儨 ?勴櫓 ?る儏??瓴办灛 瓯办爤',
-    CANCEL_SNAPSHOT_CANCELLATION = '??攴柬儨 ?勴櫓 ?る儏??瓴办灛 旆唽',
+    CREATE_SNAPSHOT_REQUEST = '?? ?? ??? ?? ??',
+    CREATE_SNAPSHOT_APPROVAL = '?? ?? ??? ?? ??',
+    CREATE_SNAPSHOT_REJECTION = '?? ?? ??? ?? ??',
+    CANCEL_SNAPSHOT_CANCELLATION = '?? ?? ??? ?? ??',
 }
 @ChildEntity()
 export class DataSnapshotApprovalRequestInfoEntity extends ApprovalRequestBaseInfoEntity {

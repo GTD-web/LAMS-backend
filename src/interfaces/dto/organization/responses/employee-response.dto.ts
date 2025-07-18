@@ -42,13 +42,13 @@ export class EmployeeResponseDto {
     @Expose()
     readonly isExcludedFromCalculation: boolean;
 
-    @ApiPropertyOptional({
-        description: '속 부서ID',
-        example: 'dept-uuid-123',
-        format: 'uuid',
+    @ApiProperty({
+        description: '소속 부서ID',
+        example: 'department-uuid',
+        required: false,
     })
     @Expose()
-    readonly departmentId?: string;
+    readonly departmentId: string;
 
     @ApiProperty({
         description: '직원 생성일',

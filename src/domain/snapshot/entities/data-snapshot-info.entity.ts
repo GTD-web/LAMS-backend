@@ -46,7 +46,7 @@ export class DataSnapshotInfoEntity {
         cascade: ['insert', 'update', 'remove'],
     })
     dataSnapshotChildInfoList: DataSnapshotChildInfoEntity[];
-    /* TODO: 추후 ?�거 ?�정 - 2025-01-07*/
+    /* TODO: 추후 제거 예정 - 2025-01-07*/
     @ManyToOne(() => DepartmentInfoEntity, { eager: true, cascade: true })
     @JoinColumn({ name: 'departmentId' })
     department: DepartmentInfoEntity;

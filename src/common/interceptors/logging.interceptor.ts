@@ -13,7 +13,7 @@ export class LoggingInterceptor implements NestInterceptor {
         const url = req.url;
         const now = Date.now();
 
-        // 로그 ?�작
+        // 로그 시작
         this.logger.log(`Incoming Request: ${method} ${url}, Body: ${JSON.stringify(req.body)}`);
 
         return next.handle().pipe(

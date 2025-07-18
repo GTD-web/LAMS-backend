@@ -4,10 +4,10 @@ import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 import { DateHelper } from '@src/common/utils/helpers/date.helper';
 
 export enum ApprovalHistoryAction {
-    APPROVE = '?�인',
+    APPROVE = '승인',
     REJECT = '반려',
     CANCEL = '취소',
-    REQUEST = '?�청',
+    REQUEST = '신청',
 }
 
 @Entity()

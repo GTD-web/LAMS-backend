@@ -1,6 +1,6 @@
 import { Injectable, Logger, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Repository } from 'typeorm';
+import { FindManyOptions, Repository, FindOptionsWhere, ILike, Or } from 'typeorm';
 import { LamsUserEntity } from '../entities/lams-user.entity';
 
 /**
@@ -165,7 +165,7 @@ export class UserDomainService {
     }
 
     /**
-     * 사용자 검색
+     * 사용자 검색 (복합 조건)
      */
     async searchUsers(searchCriteria: {
         userId?: string;
@@ -178,38 +178,49 @@ export class UserDomainService {
     }): Promise<{ users: LamsUserEntity[]; total: number }> {
         const { userId, email, name, loginId, keyword, limit = 10, offset = 0 } = searchCriteria;
 
-        const queryBuilder = this.userRepository.createQueryBuilder('user');
+        // 검색 조건 구성
+        const whereConditions: FindOptionsWhere<LamsUserEntity>[] = [];
 
-        // 특정 필드 검색
-        if (userId) {
-            queryBuilder.andWhere('user.userId = :userId', { userId });
-        }
-
-        if (email) {
-            queryBuilder.andWhere('LOWER(user.email) LIKE LOWER(:email)', { email: `%${email}%` });
-        }
-
-        if (name) {
-            queryBuilder.andWhere('user.name LIKE :name', { name: `%${name}%` });
-        }
-
-        if (loginId) {
-            queryBuilder.andWhere('user.loginId LIKE :loginId', { loginId: `%${loginId}%` });
-        }
-
-        // 키워드 통합 검색
+        // 키워드 통합 검색이 있는 경우
         if (keyword) {
-            queryBuilder.andWhere(
-                '(user.name LIKE :keyword OR LOWER(user.email) LIKE LOWER(:keyword) OR user.loginId LIKE :keyword)',
-                { keyword: `%${keyword}%` },
-            );
+            whereConditions.push({
+                username: ILike(`%${keyword}%`),
+            });
+            whereConditions.push({
+                email: ILike(`%${keyword}%`),
+            });
+        } else {
+            // 개별 필드 검색
+            const individualConditions: FindOptionsWhere<LamsUserEntity> = {};
+
+            if (userId) {
+                individualConditions.userId = userId;
+            }
+            if (email) {
+                individualConditions.email = ILike(`%${email}%`);
+            }
+            if (name) {
+                individualConditions.username = ILike(`%${name}%`);
+            }
+            if (loginId) {
+                individualConditions.username = ILike(`%${loginId}%`);
+            }
+
+            if (Object.keys(individualConditions).length > 0) {
+                whereConditions.push(individualConditions);
+            }
         }
 
-        // 총 개수 조회
-        const total = await queryBuilder.getCount();
+        // 검색 조건이 없으면 전체 조회
+        const findOptions: FindManyOptions<LamsUserEntity> = {
+            where: whereConditions.length > 0 ? whereConditions : undefined,
+            order: { createdAt: 'DESC' },
+            skip: offset,
+            take: limit,
+        };
 
-        // 페이지네이션 적용
-        const users = await queryBuilder.skip(offset).take(limit).orderBy('user.createdAt', 'DESC').getMany();
+        // 총 개수와 데이터 조회
+        const [users, total] = await this.userRepository.findAndCount(findOptions);
 
         this.logger.log(`사용자 검색 완료: ${users.length}명 조회 (총 ${total}명)`);
         return { users, total };
@@ -227,12 +238,7 @@ export class UserDomainService {
             where: { userId },
         });
 
-        if (user) {
-            this.logger.log(`사용자 ID 검색 성공: ${user.email}`);
-        } else {
-            this.logger.log(`사용자 ID 검색 결과 없음: ${userId}`);
-        }
-
+        this.logger.log(`사용자 ID 검색 완료: ${user ? '발견' : '없음'}`);
         return user;
     }
 
@@ -245,7 +251,8 @@ export class UserDomainService {
         }
 
         const users = await this.userRepository.find({
-            where: { email: email.toLowerCase().trim() },
+            where: { email: ILike(`%${email}%`) },
+            order: { createdAt: 'DESC' },
         });
 
         this.logger.log(`이메일 검색 완료: ${users.length}명 조회`);
@@ -260,11 +267,10 @@ export class UserDomainService {
             throw new BadRequestException('이름이 필요합니다.');
         }
 
-        const users = await this.userRepository
-            .createQueryBuilder('user')
-            .where('user.name LIKE :name', { name: `%${name}%` })
-            .orderBy('user.createdAt', 'DESC')
-            .getMany();
+        const users = await this.userRepository.find({
+            where: { username: ILike(`%${name}%`) },
+            order: { createdAt: 'DESC' },
+        });
 
         this.logger.log(`이름 검색 완료: ${users.length}명 조회`);
         return users;

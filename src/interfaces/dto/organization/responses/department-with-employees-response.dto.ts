@@ -55,8 +55,9 @@ export class DepartmentWithEmployeesResponseDto {
     readonly department: DepartmentResponseDto | null;
 
     @ApiProperty({
-        description: '부서 속 직원 목록',
+        description: '부서 소속 직원 목록',
         type: [EmployeeInDepartmentDto],
+        isArray: true,
     })
     @Expose()
     @Type(() => EmployeeInDepartmentDto)

@@ -8,21 +8,17 @@ import { DepartmentResponseDto } from './department-response.dto';
  */
 @Exclude()
 export class EmployeeWithDepartmentResponseDto {
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: '직원 정보',
         type: EmployeeResponseDto,
     })
-    @Expose()
-    @Type(() => EmployeeResponseDto)
-    readonly employee: EmployeeResponseDto | null;
+    employee: EmployeeResponseDto;
 
-    @ApiPropertyOptional({
-        description: '속 부서 정보',
+    @ApiProperty({
+        description: '소속 부서 정보',
         type: DepartmentResponseDto,
     })
-    @Expose()
-    @Type(() => DepartmentResponseDto)
-    readonly department: DepartmentResponseDto | null;
+    department: DepartmentResponseDto;
 
     constructor(partial: Partial<EmployeeWithDepartmentResponseDto>) {
         Object.assign(this, partial);

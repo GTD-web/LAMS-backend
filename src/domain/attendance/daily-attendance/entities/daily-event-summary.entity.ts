@@ -20,40 +20,40 @@ export class DailyEventSummaryEntity {
     @Column({ type: 'boolean', default: false })
     isHoliday: boolean;
 
-    // 보여주기??출근 ?�간
+    // 보여주기용 출근 시간
     @Column({ nullable: true })
     enter: string;
 
-    // 보여주기???�근 ?�간
+    // 보여주기용 퇴근 시간
     @Column({ nullable: true })
     leave: string;
 
-    // ?�제 출근 ?�간
+    // 실제 출근 시간
     @Column({ nullable: true })
     realEnter: string;
 
-    // ?�제 ?�근 ?�간
+    // 실제 퇴근 시간
 
     @Column({ nullable: true })
     realLeave: string;
 
-    // 검???�료 ?��?
+    // 검증 완료 여부
     @Column({ default: true })
     isChecked: boolean;
 
-    // 지�??��?
+    // 지각 여부
     @Column({ default: false })
     isLate: boolean;
 
-    // 조퇴 ?��?
+    // 조퇴 여부
     @Column({ default: false })
     isEarlyLeave: boolean;
 
-    // 결근 ?��?
+    // 결근 여부
     @Column({ default: false })
     isAbsent: boolean;
 
-    // 근무 ?�간
+    // 근무 시간
     @Column({ type: 'int', nullable: true })
     workTime: number;
 

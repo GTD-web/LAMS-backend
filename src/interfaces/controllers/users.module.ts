@@ -4,8 +4,8 @@ import { UserBusinessModule } from '@src/business/user/user-business.module';
 import { UserContextModule } from '@src/contexts/user/user-context.module';
 
 /**
- * ?�용??컨트롤러 모듈
- * - ?�용??관??컨트롤러?�을 관�?
+ * 사용자 컨트롤러 모듈
+ * - 사용자 관련 컨트롤러들을 관리
  */
 @Module({
     imports: [UserBusinessModule, UserContextModule],

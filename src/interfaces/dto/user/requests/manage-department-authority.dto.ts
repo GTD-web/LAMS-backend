@@ -3,29 +3,29 @@ import { IsUUID, IsIn, IsNotEmpty } from 'class-validator';
 
 export class ManageDepartmentAuthorityDto {
     @ApiProperty({
-        description: '?�용??ID',
+        description: '사용자 ID',
         example: 'uuid-v4-string',
         format: 'uuid',
     })
-    @IsUUID(4, { message: '?�효??UUID ?�식?�어???�니??' })
-    @IsNotEmpty({ message: '?�용??ID???�수?�니??' })
+    @IsUUID(4, { message: '유효한 UUID 형식이어야 합니다' })
+    @IsNotEmpty({ message: '사용자 ID는 필수입니다' })
     readonly userId: string;
 
     @ApiProperty({
-        description: '권한 ?�션',
+        description: '권한 액션',
         example: 'add',
         enum: ['add', 'delete'],
     })
-    @IsIn(['add', 'delete'], { message: '?�션?� add ?�는 delete?�야 ?�니??' })
-    @IsNotEmpty({ message: '?�션?� ?�수?�니??' })
+    @IsIn(['add', 'delete'], { message: '액션은 add 또는 delete여야 합니다' })
+    @IsNotEmpty({ message: '액션은 필수입니다' })
     readonly action: 'add' | 'delete';
 
     @ApiProperty({
-        description: '권한 ?�??,
+        description: '권한 타입',
         example: 'access',
         enum: ['access', 'review'],
     })
-    @IsIn(['access', 'review'], { message: '?�?��? access ?�는 review?�야 ?�니??' })
-    @IsNotEmpty({ message: '?�?��? ?�수?�니??' })
+    @IsIn(['access', 'review'], { message: '타입은 access 또는 review여야 합니다' })
+    @IsNotEmpty({ message: '타입은 필수입니다' })
     readonly type: 'access' | 'review';
 }

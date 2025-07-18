@@ -7,18 +7,18 @@ export class ExcelImportProcessEntity {
     @PrimaryGeneratedColumn('uuid')
     excelImportProcessId: string;
 
-    // ?�로?�스 ???�요??부?�정�?json
+    // 프로세스 필요 부서 정보 json
     @Column({ type: 'json' })
     @ApiProperty({
-        description: '?�로?�스 ???�요??부?�정�?json',
+        description: '프로세스 필요 부서 정보 json',
         example: '{"extractedDepartments": [], "undefinedDepartments": [], "departments": [], "newDepartments": []}',
     })
     departmentInfoJson: string;
 
-    // ?�로?�스 ???�요??직원?�보 json
+    // 프로세스 필요 직원 정보 json
     @Column({ type: 'json' })
     @ApiProperty({
-        description: '?�로?�스 ???�요??직원?�보 json',
+        description: '프로세스 필요 직원 정보 json',
         example:
             '{"tempEnteredEmployeeInfoList": [], "tempExitedEmployeeInfoList": [], "enteredEmployeeInfoList": [], "ExitedEmployeeInfoList": []}',
     })
@@ -26,7 +26,7 @@ export class ExcelImportProcessEntity {
 
     @Column({ type: 'json' })
     @ApiProperty({
-        description: '?�로?�스 �??�택???�이??json',
+        description: '프로세스 선택 데이터 json',
         example: '{"extractedExcelDataList": [], "selectedDataList": []}',
     })
     dataJson: string;
@@ -35,7 +35,7 @@ export class ExcelImportProcessEntity {
         nullable: true,
     })
     @ApiProperty({
-        description: '?�본 ?�이??,
+        description: '추출된 엑셀 데이터 목록',
         example: [
             {
                 employeeNumber: '1234567890',
@@ -48,29 +48,29 @@ export class ExcelImportProcessEntity {
     })
     extractedExcelDataList: any[];
 
-    // ?�로?�스 진행 ?�태
+    // 프로세스 진행 상태
     @Column()
     status: string;
 
-    // 진행?�는 ?�로?�스??????
+    // 진행된 프로세스는 연도
     @Column()
     year: string;
 
     @Column()
     month: string;
 
-    // 참조?�는 event-info ?�일 ID
+    // 참조는 event-info 파일 ID
     @Column({ nullable: true })
     eventInfoFileId: string;
 
-    // 참조?�는 used-attendance ?�일 ID
+    // 참조는 used-attendance 파일 ID
     @Column({ nullable: true })
     usedAttendanceFileId: string;
 
     @CreateDateColumn()
     createdAt: Date;
 
-    // user?� 관계설??
+    // user 관계설정
     @ManyToOne(() => LamsUserEntity)
     @JoinColumn({ name: 'userId' })
     user: LamsUserEntity;

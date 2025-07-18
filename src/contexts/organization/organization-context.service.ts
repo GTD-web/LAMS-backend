@@ -36,6 +36,7 @@ export class OrganizationContextService {
         try {
             const url = 'https://lumir-metadata-manager.vercel.app';
             const department = await axios.get(`${url}/api/departments?hierarchy=true`);
+            console.log('department:', department.data);
             return department.data;
         } catch (error) {
             this.logger.error('MMS 부서 데이터 조회 실패', error);
@@ -50,6 +51,7 @@ export class OrganizationContextService {
         try {
             const url = 'https://lumir-metadata-manager.vercel.app';
             const employee = await axios.get(`${url}/api/employees`);
+            console.log('employee:', employee.data);
             return employee.data;
         } catch (error) {
             this.logger.error('MMS 직원 데이터 조회 실패', error);
