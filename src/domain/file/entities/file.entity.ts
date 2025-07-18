@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { DateHelper } from '@src/common/utils/helpers/date.helper';
 
 export enum FileStatus {
     UNREAD = 'unread',
@@ -42,12 +43,12 @@ export class FileEntity {
     uploadedAt: string;
 
     readFile(): void {
-        this.readAt = new Date().toISOString();
+        this.readAt = DateHelper.now();
         this.status = FileStatus.READ;
     }
 
     errorFile(e: any): void {
-        this.readAt = new Date().toISOString();
+        this.readAt = DateHelper.now();
         this.status = FileStatus.ERROR;
         this.error = e;
     }

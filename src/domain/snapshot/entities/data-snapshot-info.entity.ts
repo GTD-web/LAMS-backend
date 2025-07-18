@@ -13,6 +13,7 @@ import {
 import { DataSnapshotChildInfoEntity } from './data-snapshot-child.entity';
 import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 import { DataSnapshotApprovalRequestInfoEntity } from './data-snapshot-approval-request-info.entity';
+import { DateHelper } from '@src/common/utils/helpers/date.helper';
 
 export enum SnapshotType {
     DAILY = 'DAILY',
@@ -45,7 +46,7 @@ export class DataSnapshotInfoEntity {
         cascade: ['insert', 'update', 'remove'],
     })
     dataSnapshotChildInfoList: DataSnapshotChildInfoEntity[];
-    /* TODO: 추후 ?�거 ?�정 - 2025-01-07*/
+    /* TODO: 추후 ?�거 ?�정 - 2025-01-07*/
     @ManyToOne(() => DepartmentInfoEntity, { eager: true, cascade: true })
     @JoinColumn({ name: 'departmentId' })
     department: DepartmentInfoEntity;
@@ -66,9 +67,7 @@ export class DataSnapshotInfoEntity {
 
     @AfterLoad()
     afterLoadFunction() {
-        this.createdAt = new Date(this.createdAt).toLocaleString('ko-KR', {
-            timeZone: 'Asia/Seoul',
-        });
+        this.createdAt = DateHelper.toKoreanDateTime(this.createdAt);
 
         if (this.dataSnapshotChildInfoList) {
             this.dataSnapshotChildInfoList.sort((a, b) => a.employeeName.localeCompare(b.employeeName, 'ko'));

@@ -2,9 +2,7 @@ import { Controller, Post, UseGuards, HttpStatus } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
-    ApiResponse,
     ApiBearerAuth,
-    ApiOkResponse,
     ApiUnauthorizedResponse,
     ApiForbiddenResponse,
     ApiInternalServerErrorResponse,
@@ -15,6 +13,7 @@ import { RolesGuard } from '@src/common/guards/roles.guard';
 import { Roles } from '@src/common/decorators/roles.decorator';
 import { UserRole } from '@src/domain/user/enum/user.enum';
 import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
+import { SyncSuccessResponse } from '@src/common/types/success-response.type';
 
 /**
  * 조직 관리 컨트롤러
@@ -33,10 +32,6 @@ export class OrganizationController {
         summary: '조직 동기화',
         description: 'MMS 시스템과 조직 데이터를 동기화합니다. 부서와 직원 정보를 업데이트합니다.',
     })
-    @ApiOkResponse({
-        description: '조직 동기화가 성공적으로 완료되었습니다.',
-        type: MMSSyncResponseDto,
-    })
     @ApiUnauthorizedResponse({
         description: '인증 실패',
         type: ErrorResponseDto,
@@ -49,7 +44,7 @@ export class OrganizationController {
         description: '서버 내부 오류',
         type: ErrorResponseDto,
     })
-    async syncOrganization(): Promise<MMSSyncResponseDto> {
+    async syncOrganization(): Promise<SyncSuccessResponse> {
         return this.organizationBusinessService.syncOrganization();
     }
 }

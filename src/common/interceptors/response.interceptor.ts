@@ -2,6 +2,7 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nes
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiResponse } from '../interfaces/api-response.interface';
+import { DateHelper } from '@src/common/utils/helpers/date.helper';
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
@@ -13,7 +14,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>
                     return {
                         success: true,
                         message: '요청이 성공적으로 처리되었습니다.',
-                        timestamp: new Date().toISOString(),
+                        timestamp: DateHelper.now(),
                         data: null as T,
                     };
                 }
@@ -24,7 +25,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>
                 return {
                     success: true,
                     message: result.message || '요청이 성공적으로 처리되었습니다.',
-                    timestamp: new Date().toISOString(),
+                    timestamp: DateHelper.now(),
                     data: hasDataProperty ? result.data : result,
                     ...(result && typeof result === 'object' && 'meta' in result && { meta: result.meta }),
                 };

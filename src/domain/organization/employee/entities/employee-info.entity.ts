@@ -3,6 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { DailyEventSummaryEntity } from '@src/domain/attendance/daily-attendance/entities/daily-event-summary.entity';
 import { DepartmentEmployeeEntity } from '../../department/entities/department-employee.entity';
 import { DepartmentInfoEntity } from '../../department/entities/department-info.entity';
+import { DateHelper } from '@src/common/utils/helpers/date.helper';
 
 @Entity()
 export class EmployeeInfoEntity {
@@ -95,7 +96,7 @@ export class EmployeeInfoEntity {
      */
     isActive(): boolean {
         if (!this.quitedAt) return true;
-        const today = new Date().toISOString().split('T')[0];
+        const today = DateHelper.today();
         return this.quitedAt > today;
     }
 
@@ -114,13 +115,8 @@ export class EmployeeInfoEntity {
     getYearsOfService(baseDate?: string): number {
         if (!this.entryAt) return 0;
 
-        const endDate = baseDate ? new Date(baseDate) : this.quitedAt ? new Date(this.quitedAt) : new Date();
-        const startDate = new Date(this.entryAt);
-
-        const diffTime = endDate.getTime() - startDate.getTime();
-        const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
-
-        return Math.floor(diffYears);
+        const endDate = baseDate || this.quitedAt || DateHelper.today();
+        return DateHelper.calculateWorkPeriod(this.entryAt, endDate) / 12; // 월 단위를 연 단위로 변환
     }
 
     /**
@@ -129,16 +125,7 @@ export class EmployeeInfoEntity {
     getAge(): number | null {
         if (!this.birthDate) return null;
 
-        const today = new Date();
-        const birthDate = new Date(this.birthDate);
-        let age = today.getFullYear() - birthDate.getFullYear();
-
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-
-        return age;
+        return DateHelper.calculateAge(this.birthDate);
     }
 
     /**

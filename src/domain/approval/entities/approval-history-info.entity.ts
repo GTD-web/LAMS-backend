@@ -1,12 +1,13 @@
 import { AfterLoad, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ApprovalRequestBaseInfoEntity } from './approval-request-info.entity';
 import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
+import { DateHelper } from '@src/common/utils/helpers/date.helper';
 
 export enum ApprovalHistoryAction {
-    APPROVE = '?�인',
+    APPROVE = '?�인',
     REJECT = '반려',
     CANCEL = '취소',
-    REQUEST = '?�청',
+    REQUEST = '?�청',
 }
 
 @Entity()
@@ -31,6 +32,6 @@ export class ApprovalHistoryInfoEntity {
 
     @AfterLoad()
     afterLoad() {
-        this.actionAt = new Date(new Date(this.actionAt).toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+        this.actionAt = DateHelper.parseTime(DateHelper.toKoreanTime(this.actionAt));
     }
 }

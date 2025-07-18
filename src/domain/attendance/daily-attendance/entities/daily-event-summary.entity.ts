@@ -1,5 +1,6 @@
 import { EmployeeInfoEntity } from '@src/domain/organization/employee/entities/employee-info.entity';
 import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { DateHelper } from '@src/common/utils/helpers/date.helper';
 
 @Entity()
 @Index(['date', 'employee'])
@@ -19,40 +20,40 @@ export class DailyEventSummaryEntity {
     @Column({ type: 'boolean', default: false })
     isHoliday: boolean;
 
-    // 보여주기??출근 ?�간
+    // 보여주기??출근 ?�간
     @Column({ nullable: true })
     enter: string;
 
-    // 보여주기???�근 ?�간
+    // 보여주기???�근 ?�간
     @Column({ nullable: true })
     leave: string;
 
-    // ?�제 출근 ?�간
+    // ?�제 출근 ?�간
     @Column({ nullable: true })
     realEnter: string;
 
-    // ?�제 ?�근 ?�간
+    // ?�제 ?�근 ?�간
 
     @Column({ nullable: true })
     realLeave: string;
 
-    // 검???�료 ?��?
+    // 검???�료 ?��?
     @Column({ default: true })
     isChecked: boolean;
 
-    // 지�??��?
+    // 지�??��?
     @Column({ default: false })
     isLate: boolean;
 
-    // 조퇴 ?��?
+    // 조퇴 ?��?
     @Column({ default: false })
     isEarlyLeave: boolean;
 
-    // 결근 ?��?
+    // 결근 ?��?
     @Column({ default: false })
     isAbsent: boolean;
 
-    // 근무 ?�간
+    // 근무 ?�간
     @Column({ type: 'int', nullable: true })
     workTime: number;
 
@@ -63,11 +64,8 @@ export class DailyEventSummaryEntity {
     @BeforeUpdate()
     calculateWorkTime() {
         if (this.enter && this.leave && this.date) {
-            const enterDate = new Date(`${this.date}T${this.enter}`);
-            const leaveDate = new Date(`${this.date}T${this.leave}`);
-            const diff = leaveDate.getTime() - enterDate.getTime();
-            // Convert milliseconds to minutes
-            this.workTime = Math.floor(diff / (1000 * 60));
+            const workHours = DateHelper.calculateWorkHours(this.enter, this.leave, this.date);
+            this.workTime = Math.floor(workHours * 60); // Convert hours to minutes
         } else {
             this.workTime = null;
         }

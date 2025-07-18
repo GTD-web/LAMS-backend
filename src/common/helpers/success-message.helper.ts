@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { SUCCESS_MESSAGE, SUCCESS_MESSAGES, SuccessMessageType } from '../constants/success-messages.constants';
+import { DateHelper } from '@src/common/utils/helpers/date.helper';
 
 /**
  * 성공 메시지 헬퍼
@@ -27,7 +28,7 @@ export class SuccessMessageHelper {
         const response = {
             success: true as const,
             message,
-            timestamp: new Date().toISOString(),
+            timestamp: DateHelper.now(),
             [SUCCESS_MESSAGE]: SUCCESS_MESSAGE,
             ...(data !== undefined && { data }),
             ...(meta && { meta }),
@@ -85,7 +86,7 @@ export class SuccessMessageHelper {
             message,
             data,
             meta,
-            timestamp: new Date().toISOString(),
+            timestamp: DateHelper.now(),
             [SUCCESS_MESSAGE]: SUCCESS_MESSAGE,
         };
 
@@ -119,7 +120,7 @@ export class SuccessMessageHelper {
             success: true as const,
             message,
             data,
-            timestamp: new Date().toISOString(),
+            timestamp: DateHelper.now(),
             [SUCCESS_MESSAGE]: SUCCESS_MESSAGE,
         };
 
@@ -150,7 +151,7 @@ export class SuccessMessageHelper {
             success: true as const,
             message,
             data,
-            timestamp: new Date().toISOString(),
+            timestamp: DateHelper.now(),
             [SUCCESS_MESSAGE]: SUCCESS_MESSAGE,
         };
 
@@ -180,7 +181,7 @@ export class SuccessMessageHelper {
             success: true as const,
             message,
             data,
-            timestamp: new Date().toISOString(),
+            timestamp: DateHelper.now(),
             [SUCCESS_MESSAGE]: SUCCESS_MESSAGE,
         };
 
@@ -236,7 +237,7 @@ export class SuccessMessageHelper {
             success: true as const,
             message,
             data,
-            timestamp: new Date().toISOString(),
+            timestamp: DateHelper.now(),
             [SUCCESS_MESSAGE]: SUCCESS_MESSAGE,
         };
 
