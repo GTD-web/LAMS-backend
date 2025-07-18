@@ -2,8 +2,6 @@ import { Injectable, Logger, NotFoundException, BadRequestException } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Not } from 'typeorm';
 import { DepartmentInfoEntity } from '../entities/department-info.entity';
-import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { MMSDepartmentResponseDto } from '@src/interfaces/dto/organization/requests/mms-department-import.dto';
 
 /**
  * 부서 도메인 서비스
@@ -21,28 +19,6 @@ export class DepartmentDomainService {
     ) {}
 
     /**
-     * 부서 제외 토글
-     */
-    async toggleDepartmentExclude(departmentId: string): Promise<DepartmentInfoEntity> {
-        try {
-            const department = await this.findDepartmentById(departmentId);
-            if (!department) {
-                throw new NotFoundException('부서를 찾을 수 없습니다.');
-            }
-
-            department.isExclude = !department.isExclude;
-            const updatedDepartment = await this.departmentRepository.save(department);
-
-            const status = updatedDepartment.isExclude ? '제외' : '포함';
-            this.logger.log(`부서 ${status} 처리 완료: ${updatedDepartment.departmentName}`);
-            return updatedDepartment;
-        } catch (error) {
-            this.logger.error(`부서 제외 토글 실패: ${departmentId}`, error.stack);
-            throw error;
-        }
-    }
-
-    /**
      * 부서 ID로 조회
      */
     async findDepartmentById(departmentId: string): Promise<DepartmentInfoEntity | null> {
@@ -53,48 +29,44 @@ export class DepartmentDomainService {
     }
 
     /**
-     * MMS 부서 ID로 조회
+     * 부서 코드로 조회
      */
-    async findDepartmentByMMSDepartmentId(mmsDepartmentId: string): Promise<DepartmentInfoEntity | null> {
-        try {
-            return await this.departmentRepository.findOne({
-                where: { mmsDepartmentId },
-            });
-        } catch (error) {
-            this.logger.error(`MMS 부서 ID 조회 실패: ${mmsDepartmentId}`, error.stack);
-            throw error;
-        }
+    async findDepartmentByCode(departmentCode: string): Promise<DepartmentInfoEntity | null> {
+        return await this.departmentRepository.findOne({
+            where: { departmentCode },
+        });
     }
 
     /**
-     * 부서 목록 조회 (페이지네이션)
+     * 부서 목록 조회
      */
-    async findAllDepartmentsPaginated(
-        query: PaginationQueryDto,
-        isExclude?: boolean,
-    ): Promise<{ departments: DepartmentInfoEntity[]; total: number }> {
+    async findAllDepartments(isExclude?: boolean): Promise<DepartmentInfoEntity[]> {
         const whereCondition = isExclude !== undefined ? { isExclude } : {};
 
-        const [departments, total] = await this.departmentRepository.findAndCount({
+        return await this.departmentRepository.find({
             where: whereCondition,
-            skip: (query.page - 1) * query.limit,
-            take: query.limit,
             order: { departmentName: 'ASC' },
         });
-
-        return { departments, total };
     }
 
     /**
-     * 부서 저장
+     * 부서 제외 상태 토글
      */
-    async saveDepartment(department: DepartmentInfoEntity): Promise<DepartmentInfoEntity> {
+    async toggleDepartmentExclude(departmentId: string): Promise<DepartmentInfoEntity> {
         try {
-            const savedDepartment = await this.departmentRepository.save(department);
-            this.logger.log(`부서 저장 완료: ${savedDepartment.departmentName}`);
-            return savedDepartment;
+            const department = await this.findDepartmentById(departmentId);
+            if (!department) {
+                throw new NotFoundException('부서를 찾을 수 없습니다.');
+            }
+
+            department.isExclude = !department.isExclude;
+            const updatedDepartment = await this.departmentRepository.save(department);
+            this.logger.log(
+                `부서 제외 상태 토글 완료: ${updatedDepartment.departmentName} (${updatedDepartment.isExclude})`,
+            );
+            return updatedDepartment;
         } catch (error) {
-            this.logger.error('부서 저장 실패', error.stack);
+            this.logger.error(`부서 제외 상태 토글 실패: ${departmentId}`, error.stack);
             throw error;
         }
     }
@@ -121,6 +93,13 @@ export class DepartmentDomainService {
     }
 
     /**
+     * 부서 생성
+     */
+    async saveDepartment(department: DepartmentInfoEntity): Promise<DepartmentInfoEntity> {
+        return await this.departmentRepository.save(department);
+    }
+
+    /**
      * 부서 검색
      */
     async searchDepartments(searchTerm: string): Promise<DepartmentInfoEntity[]> {
@@ -128,9 +107,5 @@ export class DepartmentDomainService {
             where: [{ departmentName: Like(`%${searchTerm}%`) }, { departmentCode: Like(`%${searchTerm}%`) }],
             order: { departmentName: 'ASC' },
         });
-    }
-
-    async deleteDepartment(departmentId: string): Promise<void> {
-        await this.departmentRepository.delete(departmentId);
     }
 }

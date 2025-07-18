@@ -10,7 +10,7 @@ import { UserRole } from '../../domain/user/enum/user.enum';
 import { EmployeeInfoEntity } from '../../domain/organization/employee/entities/employee-info.entity';
 import { DepartmentInfoEntity } from '../../domain/organization/department/entities/department-info.entity';
 import { EmployeeResponseDto } from '../dto/organization/responses/employee-response.dto';
-import { EmployeeListResponseDto } from '../dto/organization/responses/employee-list-response.dto';
+import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 import { EmployeeWithDepartmentResponseDto } from '../dto/organization/responses/employee-with-department-response.dto';
 import { DepartmentResponseDto } from '../dto/organization/responses/department-response.dto';
 
@@ -38,17 +38,13 @@ export class EmployeesController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '직원 목록이 성공적으로 조회되었습니다.',
-        type: EmployeeListResponseDto,
+        type: PaginatedResponseDto<EmployeeResponseDto>,
     })
     async getEmployees(
         @Query() paginationQuery: PaginationQueryDto,
         @Query('isExcludedFromCalculation') isExcludedFromCalculation?: boolean,
-    ): Promise<EmployeeListResponseDto> {
-        const result = await this.organizationQueryService.getEmployees(paginationQuery, isExcludedFromCalculation);
-        return new EmployeeListResponseDto({
-            employees: result.employees.map((emp) => new EmployeeResponseDto(emp)),
-            total: result.total,
-        });
+    ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
+        return await this.organizationQueryService.getEmployees(paginationQuery, isExcludedFromCalculation);
     }
 
     @Get(':employeeId')
@@ -66,22 +62,22 @@ export class EmployeesController {
         return new EmployeeResponseDto(employee);
     }
 
-    @Get('number/:employeeNumber')
-    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
-    @ApiOperation({ summary: '사번으로 직원 조회' })
-    @ApiParam({ name: 'employeeNumber', description: '직원 사번' })
-    @ApiResponse({
-        status: HttpStatus.OK,
-        description: '직원이 성공적으로 조회되었습니다.',
-        type: EmployeeResponseDto,
-    })
-    async getEmployeeByEmployeeNumber(
-        @Param('employeeNumber') employeeNumber: string,
-    ): Promise<EmployeeResponseDto | null> {
-        const employee = await this.organizationQueryService.getEmployeeByEmployeeNumber(employeeNumber);
-        if (!employee) return null;
-        return new EmployeeResponseDto(employee);
-    }
+    // @Get('number/:employeeNumber')
+    // @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    // @ApiOperation({ summary: '사번으로 직원 조회' })
+    // @ApiParam({ name: 'employeeNumber', description: '직원 사번' })
+    // @ApiResponse({
+    //     status: HttpStatus.OK,
+    //     description: '직원이 성공적으로 조회되었습니다.',
+    //     type: EmployeeResponseDto,
+    // })
+    // async getEmployeeByEmployeeNumber(
+    //     @Param('employeeNumber') employeeNumber: string,
+    // ): Promise<EmployeeResponseDto | null> {
+    //     const employee = await this.organizationQueryService.getEmployeeByEmployeeNumber(employeeNumber);
+    //     if (!employee) return null;
+    //     return new EmployeeResponseDto(employee);
+    // }
 
     @Get(':employeeId/with-department')
     @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)

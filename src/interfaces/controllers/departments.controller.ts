@@ -8,7 +8,7 @@ import { OrganizationQueryService } from '../../business/organization/services/o
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
 import { UserRole } from '../../domain/user/enum/user.enum';
 import { DepartmentResponseDto } from '../dto/organization/responses/department-response.dto';
-import { DepartmentListResponseDto } from '../dto/organization/responses/department-list-response.dto';
+import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 import {
     DepartmentWithEmployeesResponseDto,
     EmployeeInDepartmentDto,
@@ -38,17 +38,13 @@ export class DepartmentsController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: '부서 목록이 성공적으로 조회되었습니다.',
-        type: DepartmentListResponseDto,
+        type: PaginatedResponseDto<DepartmentResponseDto>,
     })
     async getDepartments(
         @Query() paginationQuery: PaginationQueryDto,
         @Query('isExclude') isExclude?: boolean,
-    ): Promise<DepartmentListResponseDto> {
-        const result = await this.organizationQueryService.getDepartments(paginationQuery, isExclude);
-        return new DepartmentListResponseDto({
-            departments: result.departments.map((dept) => new DepartmentResponseDto(dept)),
-            total: result.total,
-        });
+    ): Promise<PaginatedResponseDto<DepartmentResponseDto>> {
+        return await this.organizationQueryService.getDepartments(paginationQuery, isExclude);
     }
 
     @Get('search')

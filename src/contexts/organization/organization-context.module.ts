@@ -8,11 +8,10 @@ import { LamsUserEntity } from '../../domain/user/entities/lams-user.entity';
 import { DepartmentDomainService } from '../../domain/organization/department/services/department-domain.service';
 import { UserDomainService } from '../../domain/user/services/user-domain.service';
 import { EmployeeDomainService } from '../../domain/organization/employee/services/employee-domain.service';
+import { OrganizationDomainModule } from '@src/domain/organization/organization-domain.module';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([DepartmentInfoEntity, DepartmentEmployeeEntity, EmployeeInfoEntity, LamsUserEntity]),
-    ],
+    imports: [OrganizationDomainModule],
     providers: [OrganizationContextService, DepartmentDomainService, UserDomainService, EmployeeDomainService],
     exports: [OrganizationContextService],
 })
