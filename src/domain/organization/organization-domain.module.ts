@@ -5,7 +5,6 @@ import { DepartmentEmployeeEntity } from './department/entities/department-emplo
 import { EmployeeInfoEntity } from './employee/entities/employee-info.entity';
 import { DepartmentDomainService } from './department/services/department-domain.service';
 import { EmployeeDomainService } from './employee/services/employee-domain.service';
-import { OrganizationDomainService } from './organization-domain.service';
 import { DepartmentEmployeeDomainModule } from './department-employee/department-employee-domain.module';
 import { UserDomainModule } from '../user/user.module';
 
@@ -20,7 +19,7 @@ import { UserDomainModule } from '../user/user.module';
         DepartmentEmployeeDomainModule,
         UserDomainModule,
     ],
-    providers: [DepartmentDomainService, EmployeeDomainService, OrganizationDomainService],
-    exports: [DepartmentDomainService, EmployeeDomainService, OrganizationDomainService],
+    providers: [DepartmentDomainService, EmployeeDomainService],
+    exports: [DepartmentDomainService, EmployeeDomainService],
 })
 export class OrganizationDomainModule {}

@@ -8,6 +8,7 @@ export interface PaginationMeta {
 export interface ApiResponse<T> {
     success: boolean;
     message: string;
+    timestamp: string;
     data: T;
-    meta?: PaginationMeta | Record<string, any>; // ??명확???�??
+    meta?: PaginationMeta | Record<string, any>; // 메타 데이터
 }

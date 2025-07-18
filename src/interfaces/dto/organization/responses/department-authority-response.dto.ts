@@ -2,12 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 
 /**
- * 부??권한 관�??�답 DTO
+ * 부서 권한 관리 응답 DTO
  */
 @Exclude()
 export class DepartmentAuthorityResponse {
     @ApiProperty({
-        description: '부??ID',
+        description: '부서 ID',
         example: 'uuid-v4-string',
         format: 'uuid',
     })
@@ -15,14 +15,14 @@ export class DepartmentAuthorityResponse {
     readonly departmentId: string;
 
     @ApiProperty({
-        description: '부?�명',
-        example: '개발?�',
+        description: '부서 이름',
+        example: '개발',
     })
     @Expose()
     readonly departmentName: string;
 
     @ApiProperty({
-        description: '?�용??ID',
+        description: '사용자 ID',
         example: 'uuid-v4-string',
         format: 'uuid',
     })
@@ -30,7 +30,7 @@ export class DepartmentAuthorityResponse {
     readonly userId: string;
 
     @ApiProperty({
-        description: '권한 ?�??,
+        description: '권한 유형',
         example: 'access',
         enum: ['access', 'review'],
     })
@@ -38,7 +38,7 @@ export class DepartmentAuthorityResponse {
     readonly authorityType: 'access' | 'review';
 
     @ApiProperty({
-        description: '?�행???�업',
+        description: '액션',
         example: 'add',
         enum: ['add', 'delete'],
     })
@@ -46,7 +46,7 @@ export class DepartmentAuthorityResponse {
     readonly action: 'add' | 'delete';
 
     @ApiProperty({
-        description: '?�업 ?�공 ?��?',
+        description: '성공 여부',
         example: true,
     })
     @Expose()
@@ -54,7 +54,7 @@ export class DepartmentAuthorityResponse {
 
     @ApiProperty({
         description: '메시지',
-        example: '부???�근 권한???�공?�으�?추�??�었?�니??',
+        example: '부서 권한이 성공적으로 추가되었습니다.',
     })
     @Expose()
     readonly message: string;

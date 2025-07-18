@@ -14,7 +14,6 @@ import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@src/common/guards/roles.guard';
 import { Roles } from '@src/common/decorators/roles.decorator';
 import { UserRole } from '@src/domain/user/enum/user.enum';
-import { MMSSyncResponseDto } from '@src/interfaces/dto/organization/responses/mms-sync-response.dto';
 import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
 
 /**
