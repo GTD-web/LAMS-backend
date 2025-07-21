@@ -14,11 +14,11 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
-import { RolesGuard } from '@src/common/guards/roles.guard';
-import { ResponseInterceptor } from '@src/common/interceptors/response.interceptor';
-import { settingSwagger } from '@src/common/utils/swagger/swagger.util';
-import { LoggingInterceptor } from '@src/common/interceptors/logging.interceptor';
+import { JwtAuthGuard } from '../src/common/guards/jwt-auth.guard';
+import { RolesGuard } from '../src/common/guards/roles.guard';
+import { ResponseInterceptor } from '../src/common/interceptors/response.interceptor';
+import { settingSwagger } from '../src/common/utils/swagger/swagger.util';
+import { LoggingInterceptor } from '../src/common/interceptors/logging.interceptor';
 import { VercelRequest, VercelResponse } from '@vercel/node/dist';
 
 let app: NestExpressApplication;
