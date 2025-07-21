@@ -1,14 +1,14 @@
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { AppModule } from '../dist/app.module';
-import { GlobalExceptionFilter } from '../dist/common/filters/global-exception.filter';
-import { JwtAuthGuard } from '../dist/common/guards/jwt-auth.guard';
-import { RolesGuard } from '../dist/common/guards/roles.guard';
-import { ResponseInterceptor } from '../dist/common/interceptors/response.interceptor';
-import { settingSwagger } from '../dist/common/utils/swagger/swagger.util';
+const { NestFactory } = require('@nestjs/core');
+const { ValidationPipe } = require('@nestjs/common');
+const { Reflector } = require('@nestjs/core');
+const { AppModule } = require('../dist/app.module');
+const { GlobalExceptionFilter } = require('../dist/common/filters/global-exception.filter');
+const { JwtAuthGuard } = require('../dist/common/guards/jwt-auth.guard');
+const { RolesGuard } = require('../dist/common/guards/roles.guard');
+const { ResponseInterceptor } = require('../dist/common/interceptors/response.interceptor');
+const { settingSwagger } = require('../dist/common/utils/swagger/swagger.util');
 
-let app: any;
+let app;
 
 async function bootstrap() {
     if (!app) {
@@ -51,7 +51,7 @@ async function bootstrap() {
     return app;
 }
 
-export default async (req: any, res: any) => {
+module.exports = async (req, res) => {
     try {
         const server = await bootstrap();
         const httpAdapter = server.getHttpAdapter();
