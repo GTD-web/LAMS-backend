@@ -6,6 +6,7 @@
         "assets": ["**/*.html"],
         "watchAssets": true,
         "deleteOutDir": true,
-        "webpack": false
+        "webpack": false,
+        "tsConfigPath": "tsconfig.build.json"
     }
 }
