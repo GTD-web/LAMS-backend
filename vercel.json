@@ -2,10 +2,15 @@
     "version": 2,
     "buildCommand": "pnpm build",
     "outputDirectory": "dist",
+    "functions": {
+        "dist/main.js": {
+            "runtime": "@vercel/node"
+        }
+    },
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "/main.js"
+            "dest": "/dist/main.js"
         }
     ],
     "env": {
