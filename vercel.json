@@ -7,19 +7,11 @@
             "src": "api/index.js",
             "use": "@vercel/node",
             "config": {
-                "includeFiles": [
-                    "dist/**/*",
-                    "node_modules/**",
-                    "package.json"
-                ],
-                "excludeFiles": [
-                    "src/**",
-                    "test/**",
-                    "*.test.js",
-                    "*.spec.js"
-                ]
+                "includeFiles": ["dist/**/*", "node_modules/**", "package.json"],
+                "excludeFiles": ["src/**", "test/**", "*.test.js", "*.spec.js"]
+            }
         }
-    ]
+    ],
     "rewrites": [
         {
             "source": "/(.*)",
