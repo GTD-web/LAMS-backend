@@ -5,9 +5,18 @@
     "builds": [
         {
             "src": "api/index.js",
-            "use": "@vercel/node",
+            "use": "@vercel/node@3",
             "config": {
-                "includeFiles": "dist/**"
+                "includeFiles": [
+                    "dist/**",
+                    "package.json",
+                    "node_modules/@nestjs/**",
+                    "node_modules/reflect-metadata/**",
+                    "node_modules/rxjs/**",
+                    "node_modules/class-transformer/**",
+                    "node_modules/class-validator/**"
+                ],
+                "excludeFiles": ["src/**", "test/**", "*.md"]
             }
         }
     ],
@@ -17,6 +26,15 @@
             "destination": "/api/index.js"
         }
     ],
+    "functions": {
+        "api/index.js": {
+            "maxDuration": 30,
+            "memory": 1024
+        }
+    },
+    "env": {
+        "NODE_ENV": "production"
+    },
     "headers": [
         {
             "source": "/api/(.*)",
