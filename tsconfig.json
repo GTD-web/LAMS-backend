@@ -16,12 +16,13 @@
         "strictBindCallApply": false,
         "forceConsistentCasingInFileNames": false,
         "noFallthroughCasesInSwitch": false,
+        "incremental": true,
         "paths": {
             "*": ["./node_modules/*"],
             "@src/*": ["./src/*"],
             "@libs/*": ["./libs/*"],
             "@files/*": ["./files/*"]
-        },
-        "incremental": true
-    }
+        }
+    },
+    "include": ["./**/*", "../src/**/*"]
 }

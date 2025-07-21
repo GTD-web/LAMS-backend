@@ -1,12 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AppModule } from '@src/app.module';
-import { GlobalExceptionFilter } from '@src/common/filters/global-exception.filter';
-import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
-import { RolesGuard } from '@src/common/guards/roles.guard';
-import { ResponseInterceptor } from '@src/common/interceptors/response.interceptor';
-import { settingSwagger } from '@src/common/utils/swagger/swagger.util';
+import { AppModule } from '../src/app.module';
+import { GlobalExceptionFilter } from '../src/common/filters/global-exception.filter';
+import { JwtAuthGuard } from '../src/common/guards/jwt-auth.guard';
+import { RolesGuard } from '../src/common/guards/roles.guard';
+import { ResponseInterceptor } from '../src/common/interceptors/response.interceptor';
+import { settingSwagger } from '../src/common/utils/swagger/swagger.util';
 
 let app: any;
 
