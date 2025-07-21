@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LamsUserEntity } from './entities/lams-user.entity';
 import { UserDomainService } from './services/user-domain.service';
+import { UserEntity } from './entities/user.entity';
 
 /**
- * ?�용???�메??모듈
- * - ?�용???�메??계층??컴포?�트?�을 관�?
- * - Repository ?�턴???�거?�고 Domain Service?�서 직접 TypeORM ?�용
+ * 사용자 도메인 모듈
+ * - Repository, Domain Service, TypeORM 연동
  */
 @Module({
-    imports: [TypeOrmModule.forFeature([LamsUserEntity])],
+    imports: [TypeOrmModule.forFeature([UserEntity])],
     providers: [UserDomainService],
     exports: [UserDomainService],
 })

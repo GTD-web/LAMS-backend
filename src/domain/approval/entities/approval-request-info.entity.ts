@@ -11,8 +11,7 @@ import {
 } from 'typeorm';
 import { ApprovalHistoryInfoEntity } from './approval-history-info.entity';
 import { ApprovalStepInfoEntity } from './approval-step-info.entity';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
-
+import { UserEntity } from '@src/domain/user/entities/user.entity';
 
 @Entity()
 @TableInheritance({ column: { type: 'varchar', name: 'type' } })
@@ -20,8 +19,8 @@ export class ApprovalRequestBaseInfoEntity {
     @PrimaryGeneratedColumn('uuid')
     requestId: string;
 
-    @ManyToOne(() => LamsUserEntity, (user) => user.requests)
-    requester: LamsUserEntity;
+    @ManyToOne(() => UserEntity, (user) => user.requests)
+    requester: UserEntity;
 
     @Column({ length: 50 })
     requestType: string;

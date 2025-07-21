@@ -19,14 +19,9 @@ export class HolidayDomainService {
      * 휴일 ID로 조회
      */
     async findHolidayById(holidayId: string): Promise<HolidayInfoEntity | null> {
-        try {
-            return await this.holidayRepository.findOne({
-                where: { holidayId },
-            });
-        } catch (error) {
-            this.logger.error(`휴일 조회 실패: ${holidayId}`, error);
-            throw error;
-        }
+        return await this.holidayRepository.findOne({
+            where: { holidayId },
+        });
     }
 
     /**
@@ -38,24 +33,19 @@ export class HolidayDomainService {
         limit: number = 10,
         order?: FindOptionsOrder<HolidayInfoEntity>,
     ): Promise<{ holidays: HolidayInfoEntity[]; total: number }> {
-        try {
-            const where: FindOptionsWhere<HolidayInfoEntity> = {
-                holidayDate: `${year}-%` as any, // 연도로 시작하는 날짜 필터링
-            };
+        const where: FindOptionsWhere<HolidayInfoEntity> = {
+            holidayDate: `${year}-%` as any, // 연도로 시작하는 날짜 필터링
+        };
 
-            const skip = (page - 1) * limit;
-            const take = limit;
+        const skip = (page - 1) * limit;
+        const take = limit;
 
-            const [holidays, total] = await Promise.all([
-                this.holidayRepository.find({ where, order, skip, take }),
-                this.holidayRepository.count({ where }),
-            ]);
+        const [holidays, total] = await Promise.all([
+            this.holidayRepository.find({ where, order, skip, take }),
+            this.holidayRepository.count({ where }),
+        ]);
 
-            return { holidays, total };
-        } catch (error) {
-            this.logger.error(`연도별 휴일 목록 조회 실패: ${year}`, error);
-            throw error;
-        }
+        return { holidays, total };
     }
 
     /**
@@ -67,97 +57,62 @@ export class HolidayDomainService {
         where?: FindOptionsWhere<HolidayInfoEntity>,
         order?: FindOptionsOrder<HolidayInfoEntity>,
     ): Promise<{ holidays: HolidayInfoEntity[]; total: number }> {
-        try {
-            const skip = (page - 1) * limit;
-            const take = limit;
+        const skip = (page - 1) * limit;
+        const take = limit;
 
-            const [holidays, total] = await Promise.all([
-                this.holidayRepository.find({ where, order, skip, take }),
-                this.holidayRepository.count({ where }),
-            ]);
+        const [holidays, total] = await Promise.all([
+            this.holidayRepository.find({ where, order, skip, take }),
+            this.holidayRepository.count({ where }),
+        ]);
 
-            return { holidays, total };
-        } catch (error) {
-            this.logger.error('휴일 목록 조회 실패', error);
-            throw error;
-        }
+        return { holidays, total };
     }
 
     /**
      * 휴일 생성
      */
     async createHoliday(holidayData: Partial<HolidayInfoEntity>): Promise<HolidayInfoEntity> {
-        try {
-            const newHoliday = this.holidayRepository.create(holidayData);
-            return await this.holidayRepository.save(newHoliday);
-        } catch (error) {
-            this.logger.error('휴일 생성 실패', error);
-            throw error;
-        }
+        const newHoliday = this.holidayRepository.create(holidayData);
+        return await this.holidayRepository.save(newHoliday);
     }
 
     /**
      * 휴일 업데이트
      */
     async updateHoliday(holidayId: string, updateData: Partial<HolidayInfoEntity>): Promise<HolidayInfoEntity> {
-        try {
-            await this.holidayRepository.update(holidayId, updateData);
-            return await this.findHolidayById(holidayId);
-        } catch (error) {
-            this.logger.error(`휴일 업데이트 실패: ${holidayId}`, error);
-            throw error;
-        }
+        await this.holidayRepository.update(holidayId, updateData);
+        return await this.findHolidayById(holidayId);
     }
 
     /**
      * 휴일 삭제
      */
     async deleteHoliday(holidayId: string): Promise<boolean> {
-        try {
-            const result = await this.holidayRepository.delete(holidayId);
-            return result.affected > 0;
-        } catch (error) {
-            this.logger.error(`휴일 삭제 실패: ${holidayId}`, error);
-            throw error;
-        }
+        const result = await this.holidayRepository.delete(holidayId);
+        return result.affected > 0;
     }
 
     /**
      * 휴일 저장
      */
     async saveHoliday(holiday: HolidayInfoEntity): Promise<HolidayInfoEntity> {
-        try {
-            return await this.holidayRepository.save(holiday);
-        } catch (error) {
-            this.logger.error('휴일 저장 실패', error);
-            throw error;
-        }
+        return await this.holidayRepository.save(holiday);
     }
 
     /**
      * 모든 휴일 조회
      */
     async findAllHolidays(): Promise<HolidayInfoEntity[]> {
-        try {
-            return await this.holidayRepository.find();
-        } catch (error) {
-            this.logger.error('모든 휴일 조회 실패', error);
-            throw error;
-        }
+        return await this.holidayRepository.find();
     }
 
     /**
      * 특정 날짜의 휴일 조회
      */
     async findHolidayByDate(holidayDate: string): Promise<HolidayInfoEntity | null> {
-        try {
-            const holidays = await this.holidayRepository.find({
-                where: { holidayDate },
-            });
-            return holidays.length > 0 ? holidays[0] : null;
-        } catch (error) {
-            this.logger.error(`특정 날짜 휴일 조회 실패: ${holidayDate}`, error);
-            throw error;
-        }
+        const holidays = await this.holidayRepository.find({
+            where: { holidayDate },
+        });
+        return holidays.length > 0 ? holidays[0] : null;
     }
 }

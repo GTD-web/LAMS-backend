@@ -9,14 +9,9 @@ import {
     OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
-    Repository,
-    FindOptionsWhere,
-    FindOptionsOrder,
-    IsNull,
 } from 'typeorm';
 import { DepartmentEmployeeEntity } from './department-employee.entity';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
-import { EmployeeInfoEntity } from '../../employee/entities/employee-info.entity';
+import { UserEntity } from '@src/domain/user/entities/user.entity';
 
 @Entity()
 export class DepartmentInfoEntity {
@@ -32,24 +27,23 @@ export class DepartmentInfoEntity {
     @Column({ nullable: true })
     mmsDepartmentId: string;
 
-    // 기본값을 빈배열로 지정
-    @ManyToMany(() => LamsUserEntity, (user) => user.accessableDepartments, {
+    @ManyToMany(() => UserEntity, (user) => user.accessableDepartments, {
         cascade: true,
         eager: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
     })
     @JoinTable({ name: 'accessAuthorities' })
-    accessAuthorities: LamsUserEntity[];
+    accessAuthorities: UserEntity[];
 
-    @ManyToMany(() => LamsUserEntity, (user) => user.reviewableDepartments, {
+    @ManyToMany(() => UserEntity, (user) => user.reviewableDepartments, {
         cascade: true,
         eager: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
     })
     @JoinTable({ name: 'reviewAuthorities' })
-    reviewAuthorities: LamsUserEntity[];
+    reviewAuthorities: UserEntity[];
 
     @Column({ default: false })
     isExclude: boolean;
@@ -76,63 +70,63 @@ export class DepartmentInfoEntity {
     @UpdateDateColumn()
     updatedAt: Date;
 
-    private setAccessAuthorities(authorities: LamsUserEntity[]): void {
-        this.accessAuthorities = authorities;
-    }
-
-    private setReviewAuthorities(authorities: LamsUserEntity[]): void {
-        this.reviewAuthorities = authorities;
-    }
-
     toggleExclude() {
         this.isExclude = !this.isExclude;
     }
 
-    isAccessAuthority(user: LamsUserEntity): boolean {
+    // private setAccessAuthorities(authorities: UserEntity[]): void {
+    //     this.accessAuthorities = authorities;
+    // }
+
+    // private setReviewAuthorities(authorities: UserEntity[]): void {
+    //     this.reviewAuthorities = authorities;
+    // }
+
+    isAccessAuthority(user: UserEntity): boolean {
         return this.accessAuthorities.some((u) => u.userId === user.userId);
     }
 
-    isReviewAuthority(user: LamsUserEntity): boolean {
+    isReviewAuthority(user: UserEntity): boolean {
         return this.reviewAuthorities.some((u) => u.userId === user.userId);
     }
 
-    includeAccessAuthority(user: LamsUserEntity): void {
-        if (!this.accessAuthorities) {
-            this.accessAuthorities = [];
-        }
-        const isAccessAuthority = this.isAccessAuthority(user);
-        if (!isAccessAuthority) {
-            this.accessAuthorities.push(user);
-        }
-    }
+    // includeAccessAuthority(user: UserEntity): void {
+    //     if (!this.accessAuthorities) {
+    //         this.accessAuthorities = [];
+    //     }
+    //     const isAccessAuthority = this.isAccessAuthority(user);
+    //     if (!isAccessAuthority) {
+    //         this.accessAuthorities.push(user);
+    //     }
+    // }
 
-    includeReviewAuthority(user: LamsUserEntity): void {
-        if (!this.reviewAuthorities) {
-            this.reviewAuthorities = [];
-        }
+    // includeReviewAuthority(user: UserEntity): void {
+    //     if (!this.reviewAuthorities) {
+    //         this.reviewAuthorities = [];
+    //     }
 
-        if (!this.isReviewAuthority(user)) {
-            this.reviewAuthorities.push(user);
-        }
-    }
+    //     if (!this.isReviewAuthority(user)) {
+    //         this.reviewAuthorities.push(user);
+    //     }
+    // }
 
-    excludeAccessAuthority(user: LamsUserEntity): void {
-        try {
-            const authorities = this.accessAuthorities.filter((u) => u.userId !== user.userId);
-            this.setAccessAuthorities(authorities);
-        } catch (error) {
-            console.error(error);
-        }
-    }
+    // excludeAccessAuthority(user: UserEntity): void {
+    //     try {
+    //         const authorities = this.accessAuthorities.filter((u) => u.userId !== user.userId);
+    //         this.setAccessAuthorities(authorities);
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // }
 
-    excludeReviewAuthority(user: LamsUserEntity): void {
-        try {
-            const authorities = this.reviewAuthorities.filter((u) => u.userId !== user.userId);
-            this.setReviewAuthorities(authorities);
-        } catch (error) {
-            console.error(error);
-        }
-    }
+    // excludeReviewAuthority(user: UserEntity): void {
+    //     try {
+    //         const authorities = this.reviewAuthorities.filter((u) => u.userId !== user.userId);
+    //         this.setReviewAuthorities(authorities);
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // }
 
     // static async findDepartmentWithChildren(
     //     repository: Repository<DepartmentInfoEntity>,

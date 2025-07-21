@@ -13,14 +13,11 @@ import {
     ApiUnauthorizedResponse,
     ApiForbiddenResponse,
     ApiNotFoundResponse,
-    ApiConflictResponse,
-    ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { UserBusinessService } from '@src/business/user/user.business';
 import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@src/common/guards/roles.guard';
 import { Roles } from '@src/common/decorators/roles.decorator';
-import { GetUser } from '@src/common/decorators/get-user.decorator';
 import { UserRole } from '@src/domain/user/enum/user.enum';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { SearchUserDto } from '@src/interfaces/dto/user/requests/search-user.dto';
@@ -28,9 +25,8 @@ import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user
 import { ManageDepartmentAuthorityDto } from '@src/interfaces/dto/organization/requests/manage-department-authority.dto';
 import { DepartmentAuthorityResponse } from '@src/interfaces/dto/organization/responses/department-authority-response.dto';
 import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
-import { SuccessMessageHelper } from '@src/common/helpers/success-message.helper';
 import { PaginatedSuccessResponse, SuccessResponseWithData } from '@src/common/types/success-response.type';
+import { UserEntity } from '@src/domain/user/entities/user.entity';
 
 /**
  * 사용자 관리 컨트롤러
@@ -288,9 +284,9 @@ export class UsersController {
     async manageDepartmentAuthority(
         @Param('departmentId', ParseUUIDPipe) departmentId: string,
         @Param('type') type: 'access' | 'review',
-        @Param('action') action: 'add' | 'delete',
+        @Param('action') action: 'add' | 'remove',
         @Body() dto: ManageDepartmentAuthorityDto,
-    ): Promise<SuccessResponseWithData<LamsUserEntity>> {
+    ): Promise<SuccessResponseWithData<UserEntity>> {
         return this.userBusinessService.manageDepartmentAuthority(departmentId, dto.userId, type, action);
     }
 }

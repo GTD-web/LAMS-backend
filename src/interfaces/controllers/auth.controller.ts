@@ -1,9 +1,7 @@
-import { Body, Controller, HttpStatus, Post, Get, Put, Param, UseGuards, Headers } from '@nestjs/common';
+import { Body, Controller, Post, Get, Put, UseGuards, Headers } from '@nestjs/common';
 import {
     ApiBearerAuth,
     ApiOperation,
-    ApiParam,
-    ApiResponse,
     ApiTags,
     ApiBody,
     ApiBadRequestResponse,
@@ -13,19 +11,16 @@ import {
     ApiCreatedResponse,
 } from '@nestjs/swagger';
 import { AuthBusinessService } from '@src/business/auth/auth.business';
-import { AuthContextService } from '@src/contexts/auth/auth-user-context.service';
 import { Public } from '@src/common/decorators/public.decorator';
 import { GetUser } from '@src/common/decorators/get-user.decorator';
 import { LoginResponseDto } from '@src/interfaces/dto/auth/responses/login-response.dto';
 import { LoginDto } from '@src/interfaces/dto/auth/request/login.dto';
-import { Roles } from '@src/common/decorators/roles.decorator';
-import { UserRole } from '@src/domain/user/enum/user.enum';
 import { ChangePasswordDto } from '../dto/auth/request/change-password.dto';
 import { UserResponseDto } from '../dto/organization/responses/user-response.dto';
 import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@src/common/guards/roles.guard';
 import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
+import { UserEntity } from '@src/domain/user/entities/user.entity';
 
 /**
  * 인증 컨트롤러
@@ -34,10 +29,7 @@ import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 @Controller('admin/auth')
 @ApiTags('인증 (Authentication)')
 export class AuthController {
-    constructor(
-        private readonly authBusinessService: AuthBusinessService,
-        private readonly authContextService: AuthContextService,
-    ) {}
+    constructor(private readonly authBusinessService: AuthBusinessService) {}
 
     @Post('login')
     @Public()
@@ -88,10 +80,7 @@ export class AuthController {
         description: '서버 내부 오류',
         type: ErrorResponseDto,
     })
-    async getProfile(
-        @GetUser() user: LamsUserEntity,
-        @Headers('authorization') token: string,
-    ): Promise<UserResponseDto> {
+    async getProfile(@GetUser() user: UserEntity, @Headers('authorization') token: string): Promise<UserResponseDto> {
         return this.authBusinessService.getProfile(token, user.userId);
     }
 
@@ -123,24 +112,11 @@ export class AuthController {
         description: '토큰 검증 실패',
         type: ErrorResponseDto,
     })
-    async verifyToken(@GetUser() user: LamsUserEntity): Promise<{
+    async verifyToken(@Headers('authorization') token: string): Promise<{
         valid: boolean;
-        user: UserResponseDto;
-        sessionInfo: {
-            sessionValid: boolean;
-            roles: UserRole[];
-        };
     }> {
-        const sessionInfo = await this.authContextService.사용자의_현재_세션_정보를_조회한다(user.userId);
-        const userProfile = await this.authBusinessService.사용자의_프로필을_조회한다(user.userId);
-
         return {
-            valid: true,
-            user: userProfile,
-            sessionInfo: {
-                sessionValid: sessionInfo.sessionValid,
-                roles: sessionInfo.roles,
-            },
+            valid: this.authBusinessService.verifyToken(token),
         };
     }
 
@@ -172,7 +148,7 @@ export class AuthController {
         type: ErrorResponseDto,
     })
     async changePassword(
-        @GetUser() user: LamsUserEntity,
+        @GetUser() user: UserEntity,
         @Body() changePasswordDto: ChangePasswordDto,
     ): Promise<UserResponseDto> {
         return this.authBusinessService.비밀번호를_변경한다(

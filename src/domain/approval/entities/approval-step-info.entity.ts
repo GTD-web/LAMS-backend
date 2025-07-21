@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ApprovalRequestBaseInfoEntity } from './approval-request-info.entity';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
+import { UserEntity } from '@src/domain/user/entities/user.entity';
 
 export enum ApprovalStepStatus {
     PENDING = '대기중',
@@ -14,8 +14,8 @@ export class ApprovalStepInfoEntity {
     @PrimaryGeneratedColumn('uuid')
     stepId: string;
 
-    @ManyToOne(() => LamsUserEntity, (user) => user.approvalSteps)
-    approver: LamsUserEntity;
+    @ManyToOne(() => UserEntity, (user) => user.approvalSteps)
+    approver: UserEntity;
 
     @ManyToOne(() => ApprovalRequestBaseInfoEntity, (request) => request.steps)
     request: ApprovalRequestBaseInfoEntity;

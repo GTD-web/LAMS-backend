@@ -1,25 +1,15 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserBusinessService } from './user.business';
-import { UserDomainModule } from '@src/domain/user/user.module';
-import { OrganizationDomainModule } from '@src/domain/organization/organization-domain.module';
 import { UserContextModule } from '@src/contexts/user/user-context.module';
-import { AuthContextModule } from '@src/contexts/auth/auth-user-context.module';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
-import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
+import { OrganizationContextModule } from '@src/contexts/organization/organization-context.module';
 
 /**
- * ?�용??비즈?�스 모듈
- * - ?�용??비즈?�스 계층??컴포?�트?�을 관�?
+ * 사용자 비즈니스 모듈
+ * - 사용자 관리 비즈니스 로직을 처리
+ * - 사용자 컨텍스트 서비스를 통해 실제 작업 수행
  */
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([LamsUserEntity, DepartmentInfoEntity]),
-        UserDomainModule,
-        OrganizationDomainModule,
-        UserContextModule,
-        AuthContextModule,
-    ],
+    imports: [UserContextModule, OrganizationContextModule],
     providers: [UserBusinessService],
     exports: [UserBusinessService],
 })

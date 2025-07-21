@@ -5,8 +5,7 @@ import { DepartmentEmployeeEntity } from './department/entities/department-emplo
 import { EmployeeInfoEntity } from './employee/entities/employee-info.entity';
 import { DepartmentDomainService } from './department/services/department-domain.service';
 import { EmployeeDomainService } from './employee/services/employee-domain.service';
-import { DepartmentEmployeeDomainModule } from './department-employee/department-employee-domain.module';
-import { UserDomainModule } from '../user/user.module';
+import { DepartmentEmployeeDomainService } from './department-employee/department-employee-domain.service';
 
 /**
  * 조직 도메인 모듈
@@ -14,12 +13,8 @@ import { UserDomainModule } from '../user/user.module';
  * - 부서, 직원, 조직도, 부서-직원 관계 포함
  */
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([DepartmentInfoEntity, DepartmentEmployeeEntity, EmployeeInfoEntity]),
-        DepartmentEmployeeDomainModule,
-        UserDomainModule,
-    ],
-    providers: [DepartmentDomainService, EmployeeDomainService],
-    exports: [DepartmentDomainService, EmployeeDomainService],
+    imports: [TypeOrmModule.forFeature([DepartmentInfoEntity, DepartmentEmployeeEntity, EmployeeInfoEntity])],
+    providers: [DepartmentDomainService, EmployeeDomainService, DepartmentEmployeeDomainService],
+    exports: [DepartmentDomainService, EmployeeDomainService, DepartmentEmployeeDomainService],
 })
 export class OrganizationDomainModule {}

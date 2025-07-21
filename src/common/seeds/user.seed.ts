@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 import { UserRole } from '@src/domain/user/enum/user.enum';
+import { UserEntity } from '@src/domain/user/entities/user.entity';
 
 /**
  * ?¨Ïö©???úÎìú ?∞Ïù¥???úÎπÑ??
@@ -13,8 +13,8 @@ export class UserSeedService {
     private readonly logger = new Logger(UserSeedService.name);
 
     constructor(
-        @InjectRepository(LamsUserEntity)
-        private readonly lamsUserRepository: Repository<LamsUserEntity>,
+        @InjectRepository(UserEntity)
+        private readonly lamsUserRepository: Repository<UserEntity>,
     ) {}
 
     /**
@@ -34,7 +34,7 @@ export class UserSeedService {
             }
 
             // Í¥ÄÎ¶¨Ïûê Í≥ÑÏ†ï ?ùÏÑ±
-            const adminUser = new LamsUserEntity();
+            const adminUser = new UserEntity();
             adminUser.username = 'admin';
             adminUser.password = 'fnalfmdjemals'; // BeforeInsert?êÏÑú ?êÎèô ?¥Ïã±??
             adminUser.email = 'admin@lams.space';
@@ -48,7 +48,7 @@ export class UserSeedService {
             adminUser.isIntegrated = false;
             adminUser.hasAccessAuthority = true;
             adminUser.hasReviewAuthority = true;
-            adminUser.type = 'LamsUserEntity';
+            adminUser.type = 'UserEntity';
 
             await this.lamsUserRepository.save(adminUser);
 

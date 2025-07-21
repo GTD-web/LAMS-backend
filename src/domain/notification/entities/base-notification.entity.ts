@@ -1,4 +1,4 @@
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
+import { UserEntity } from '@src/domain/user/entities/user.entity';
 import {
     Column,
     CreateDateColumn,
@@ -27,9 +27,9 @@ export class BaseNotificationEntity {
     @Column({ nullable: false, default: false })
     isRead: boolean;
 
-    @ManyToOne(() => LamsUserEntity, { lazy: true })
+    @ManyToOne(() => UserEntity, { lazy: true })
     @JoinColumn({ name: 'userId' })
-    recipient: LamsUserEntity;
+    recipient: UserEntity;
 
     read() {
         this.isRead = true;

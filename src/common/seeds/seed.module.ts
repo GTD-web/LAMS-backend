@@ -1,15 +1,15 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserSeedService } from './user.seed';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
+import { UserEntity } from '@src/domain/user/entities/user.entity';
 import { UserDomainModule } from '@src/domain/user/user.module';
 
 /**
- * ?�드 ?�이??모듈
- * - ?�플리�??�션 ?�작 ??초기 ?�이?��? ?�성
+ * 시드 모듈
+ * - 시드 데이터 초기화 및 관리
  */
 @Module({
-    imports: [UserDomainModule, TypeOrmModule.forFeature([LamsUserEntity, LamsUserEntity])],
+    imports: [UserDomainModule, TypeOrmModule.forFeature([UserEntity, UserEntity])],
     providers: [UserSeedService],
     exports: [UserSeedService],
 })
@@ -17,7 +17,7 @@ export class SeedModule implements OnModuleInit {
     constructor(private readonly userSeedService: UserSeedService) {}
 
     /**
-     * 모듈 초기?????�드 ?�이???�행
+     * 시드 데이터 초기화
      */
     async onModuleInit(): Promise<void> {
         await this.userSeedService.seedAdminUser();

@@ -1,15 +1,12 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { DepartmentDomainService } from '../../domain/organization/department/services/department-domain.service';
-import { UserDomainService } from '../../domain/user/services/user-domain.service';
 import { EmployeeDomainService } from '../../domain/organization/employee/services/employee-domain.service';
 import { DepartmentEmployeeDomainService } from '../../domain/organization/department-employee/department-employee-domain.service';
 import { MMSDepartmentResponseDto } from '../../interfaces/dto/organization/requests/mms-department-import.dto';
 import { MMSEmployeeResponseDto } from '../../interfaces/dto/organization/requests/mms-employee-import.dto';
-import { LamsUserEntity } from '../../domain/user/entities/lams-user.entity';
 import { DepartmentInfoEntity } from '../../domain/organization/department/entities/department-info.entity';
 import { EmployeeInfoEntity } from '../../domain/organization/employee/entities/employee-info.entity';
-import { DepartmentEmployeeEntity } from '@src/domain/organization/department/entities/department-employee.entity';
 
 /**
  * 조직 컨텍스트 서비스
@@ -24,7 +21,6 @@ export class OrganizationContextService {
 
     constructor(
         private readonly departmentDomainService: DepartmentDomainService,
-        private readonly userDomainService: UserDomainService,
         private readonly employeeDomainService: EmployeeDomainService,
         private readonly departmentEmployeeDomainService: DepartmentEmployeeDomainService,
     ) {}
@@ -34,8 +30,7 @@ export class OrganizationContextService {
      */
     private async getDepartmentsFromMMS(): Promise<MMSDepartmentResponseDto[]> {
         try {
-            const url = 'https://lumir-metadata-manager.vercel.app';
-            const department = await axios.get(`${url}/api/departments?hierarchy=true`);
+            const department = await axios.get(`${this.MMS_BASE_URL}/api/departments?hierarchy=true`);
             console.log('department:', department.data);
             return department.data;
         } catch (error) {
@@ -49,8 +44,7 @@ export class OrganizationContextService {
      */
     private async getEmployeesFromMMS(): Promise<MMSEmployeeResponseDto[]> {
         try {
-            const url = 'https://lumir-metadata-manager.vercel.app';
-            const employee = await axios.get(`${url}/api/employees`);
+            const employee = await axios.get(`${this.MMS_BASE_URL}/api/employees`);
             console.log('employee:', employee.data);
             return employee.data;
         } catch (error) {
@@ -199,5 +193,9 @@ export class OrganizationContextService {
     async 퇴사데이터가_있는_직원을_제외한_부서의_직원을_조회한다(departmentId: string): Promise<EmployeeInfoEntity[]> {
         // 실제 구현에서는 findActiveEmployeesByDepartment 메서드를 Employee Domain Service에 추가해야 함
         return [];
+    }
+
+    async findDepartmentById(departmentId: string): Promise<DepartmentInfoEntity> {
+        return await this.departmentDomainService.findDepartmentById(departmentId);
     }
 }

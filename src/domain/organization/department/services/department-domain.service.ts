@@ -18,7 +18,6 @@ export class DepartmentDomainService {
     constructor(
         @InjectRepository(DepartmentInfoEntity)
         private readonly departmentRepository: Repository<DepartmentInfoEntity>,
-        private readonly userDomainService: UserDomainService,
     ) {}
 
     /**
@@ -212,11 +211,6 @@ export class DepartmentDomainService {
             throw new NotFoundException('부서를 찾을 수 없습니다.');
         }
 
-        const user = await this.userDomainService.findUserById(userId);
-        if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
-        }
-
         // 이미 권한이 있는지 확인
         const hasAuthority = department.reviewAuthorities?.some((auth) => auth.userId === userId);
         if (hasAuthority) {
@@ -227,10 +221,6 @@ export class DepartmentDomainService {
         if (!department.reviewAuthorities) {
             department.reviewAuthorities = [];
         }
-
-        // 실제로는 중간테이블 엔티티를 생성해야 함
-        // 여기서는 간단히 로깅만 처리
-        this.logger.log(`검토 권한 추가: ${user.email} -> ${department.departmentName}`);
 
         return department;
     }
@@ -266,14 +256,6 @@ export class DepartmentDomainService {
         if (!department) {
             throw new NotFoundException('부서를 찾을 수 없습니다.');
         }
-
-        const user = await this.userDomainService.findUserById(userId);
-        if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
-        }
-
-        // 접근 권한 추가 로직
-        this.logger.log(`접근 권한 추가: ${user.email} -> ${department.departmentName}`);
 
         return department;
     }

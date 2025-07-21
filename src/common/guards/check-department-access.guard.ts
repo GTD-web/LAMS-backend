@@ -11,17 +11,17 @@ export class CheckDepartmentAccessGuard implements CanActivate {
         const departmentId = request.params.departmentId;
 
         if (!user) {
-            throw new ForbiddenException('?¬ìš©???•ë³´ë¥?ì°¾ì„ ???†ìŠµ?ˆë‹¤.');
+            throw new ForbiddenException('???? ????.');
         }
 
         if (!departmentId) {
-            throw new ForbiddenException('ë¶€??IDê°€ ?œê³µ?˜ì? ?Šì•˜?µë‹ˆ??');
+            throw new ForbiddenException('?? ID? ????.');
         }
 
         const department = await this.departmentService.findDepartmentById(departmentId);
 
         if (!department) {
-            throw new ForbiddenException('?´ë‹¹ ë¶€?œë? ì°¾ì„ ???†ìŠµ?ˆë‹¤.');
+            throw new ForbiddenException('??? ?? ? ????.');
         }
 
         if (department.isAccessAuthority(user.sub) || user.roles.includes('SYSTEM_ADMIN')) {
@@ -29,6 +29,6 @@ export class CheckDepartmentAccessGuard implements CanActivate {
             return true;
         }
 
-        throw new ForbiddenException('??ë¶€?œì— ?€???‘ê·¼ ê¶Œí•œ???†ìŠµ?ˆë‹¤.');
+        throw new ForbiddenException('?? ?? ??? ????.');
     }
 }

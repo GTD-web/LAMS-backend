@@ -1,7 +1,7 @@
 import { AfterLoad, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ApprovalRequestBaseInfoEntity } from './approval-request-info.entity';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
 import { DateHelper } from '@src/common/utils/helpers/date.helper';
+import { UserEntity } from '@src/domain/user/entities/user.entity';
 
 export enum ApprovalHistoryAction {
     APPROVE = '승인',
@@ -18,8 +18,8 @@ export class ApprovalHistoryInfoEntity {
     @Column({ length: 20 })
     action: ApprovalHistoryAction;
 
-    @ManyToOne(() => LamsUserEntity)
-    actionBy: LamsUserEntity;
+    @ManyToOne(() => UserEntity)
+    actionBy: UserEntity;
 
     @ManyToOne(() => ApprovalRequestBaseInfoEntity)
     request: ApprovalRequestBaseInfoEntity;

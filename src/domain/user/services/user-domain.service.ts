@@ -1,7 +1,8 @@
 import { Injectable, Logger, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Repository, FindOptionsWhere, ILike, Or } from 'typeorm';
-import { LamsUserEntity } from '../entities/lams-user.entity';
+import { UserEntity } from '../entities/user.entity';
+import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 
 /**
  * 사용자 도메인 서비스
@@ -14,14 +15,14 @@ export class UserDomainService {
     private readonly logger = new Logger(UserDomainService.name);
 
     constructor(
-        @InjectRepository(LamsUserEntity)
-        private readonly userRepository: Repository<LamsUserEntity>,
+        @InjectRepository(UserEntity)
+        private readonly userRepository: Repository<UserEntity>,
     ) {}
 
     /**
      * 사용자 비밀번호 변경
      */
-    async changeUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<LamsUserEntity> {
+    async changeUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<UserEntity> {
         if (!userId || !currentPassword || !newPassword || currentPassword === newPassword) {
             throw new BadRequestException('유효하지 않은 비밀번호 변경 정보입니다.');
         }
@@ -47,7 +48,7 @@ export class UserDomainService {
     /**
      * 사용자 인증 검증
      */
-    async validateUserCredentials(email: string, password: string): Promise<LamsUserEntity | null> {
+    async validateUserCredentials(email: string, password: string): Promise<UserEntity | null> {
         if (!email || !password || email.trim().length === 0 || password.trim().length === 0) {
             throw new BadRequestException('유효하지 않은 로그인 정보입니다.');
         }
@@ -68,7 +69,7 @@ export class UserDomainService {
     /**
      * 사용자 ID로 조회
      */
-    async findUserById(userId: string): Promise<LamsUserEntity | null> {
+    async findUserById(userId: string): Promise<UserEntity | null> {
         if (!userId || userId.trim().length === 0) {
             throw new BadRequestException('사용자 ID가 필요합니다.');
         }
@@ -81,7 +82,7 @@ export class UserDomainService {
     /**
      * 이메일로 사용자 조회
      */
-    async findUserByEmail(email: string): Promise<LamsUserEntity | null> {
+    async findUserByEmail(email: string): Promise<UserEntity | null> {
         if (!email || email.trim().length === 0) {
             throw new BadRequestException('이메일이 필요합니다.');
         }
@@ -94,7 +95,7 @@ export class UserDomainService {
     /**
      * 사용자 생성
      */
-    async createUser(userData: Partial<LamsUserEntity>): Promise<LamsUserEntity> {
+    async createUser(userData: Partial<UserEntity>): Promise<UserEntity> {
         if (!userData.email || !userData.password) {
             throw new BadRequestException('이메일과 비밀번호가 필요합니다.');
         }
@@ -114,7 +115,7 @@ export class UserDomainService {
     /**
      * 사용자 정보 수정
      */
-    async updateUser(userId: string, updateData: Partial<LamsUserEntity>): Promise<LamsUserEntity> {
+    async updateUser(userId: string, updateData: Partial<UserEntity>): Promise<UserEntity> {
         if (!userId || userId.trim().length === 0) {
             throw new BadRequestException('사용자 ID가 필요합니다.');
         }
@@ -128,6 +129,31 @@ export class UserDomainService {
         const updatedUser = await this.userRepository.save(user);
 
         this.logger.log(`사용자 정보 수정 완료: ${updatedUser.email}`);
+        return updatedUser;
+    }
+
+    async updateUserAuthority(
+        user: UserEntity,
+        department: DepartmentInfoEntity,
+        type: 'access' | 'review',
+        action: 'add' | 'remove',
+    ): Promise<UserEntity> {
+        if (type === 'access') {
+            if (action === 'add') {
+                user.includeAccessableDepartment(department);
+            } else {
+                user.excludeAccessableDepartment(department);
+            }
+        } else {
+            if (action === 'add') {
+                user.includeReviewableDepartment(department);
+            } else {
+                user.excludeReviewableDepartment(department);
+            }
+        }
+
+        const updatedUser = await this.userRepository.save(user);
+        this.logger.log(`사용자 접근 권한 수정 완료: ${updatedUser.email}`);
         return updatedUser;
     }
 
@@ -151,7 +177,7 @@ export class UserDomainService {
     /**
      * 페이지네이션된 사용자 목록 조회
      */
-    async findPaginatedUsers(page: number, limit: number): Promise<{ users: LamsUserEntity[]; total: number }> {
+    async findPaginatedUsers(page: number, limit: number): Promise<{ users: UserEntity[]; total: number }> {
         const skip = (page - 1) * limit;
 
         const [users, total] = await this.userRepository.findAndCount({
@@ -175,11 +201,11 @@ export class UserDomainService {
         keyword?: string;
         limit?: number;
         offset?: number;
-    }): Promise<{ users: LamsUserEntity[]; total: number }> {
+    }): Promise<{ users: UserEntity[]; total: number }> {
         const { userId, email, name, loginId, keyword, limit = 10, offset = 0 } = searchCriteria;
 
         // 검색 조건 구성
-        const whereConditions: FindOptionsWhere<LamsUserEntity>[] = [];
+        const whereConditions: FindOptionsWhere<UserEntity>[] = [];
 
         // 키워드 통합 검색이 있는 경우
         if (keyword) {
@@ -191,7 +217,7 @@ export class UserDomainService {
             });
         } else {
             // 개별 필드 검색
-            const individualConditions: FindOptionsWhere<LamsUserEntity> = {};
+            const individualConditions: FindOptionsWhere<UserEntity> = {};
 
             if (userId) {
                 individualConditions.userId = userId;
@@ -212,7 +238,7 @@ export class UserDomainService {
         }
 
         // 검색 조건이 없으면 전체 조회
-        const findOptions: FindManyOptions<LamsUserEntity> = {
+        const findOptions: FindManyOptions<UserEntity> = {
             where: whereConditions.length > 0 ? whereConditions : undefined,
             order: { createdAt: 'DESC' },
             skip: offset,
@@ -229,7 +255,7 @@ export class UserDomainService {
     /**
      * 사용자 ID로 단일 검색
      */
-    async searchUserById(userId: string): Promise<LamsUserEntity | null> {
+    async searchUserById(userId: string): Promise<UserEntity | null> {
         if (!userId || userId.trim().length === 0) {
             throw new BadRequestException('사용자 ID가 필요합니다.');
         }
@@ -245,7 +271,7 @@ export class UserDomainService {
     /**
      * 이메일로 사용자 검색
      */
-    async searchUsersByEmail(email: string): Promise<LamsUserEntity[]> {
+    async searchUsersByEmail(email: string): Promise<UserEntity[]> {
         if (!email || email.trim().length === 0) {
             throw new BadRequestException('이메일이 필요합니다.');
         }
@@ -262,7 +288,7 @@ export class UserDomainService {
     /**
      * 이름으로 사용자 검색
      */
-    async searchUsersByName(name: string): Promise<LamsUserEntity[]> {
+    async searchUsersByName(name: string): Promise<UserEntity[]> {
         if (!name || name.trim().length === 0) {
             throw new BadRequestException('이름이 필요합니다.');
         }

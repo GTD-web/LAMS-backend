@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
+import { UserEntity } from '@src/domain/user/entities/user.entity';
 
 @Entity()
 export class ExcelImportProcessEntity {
@@ -71,7 +71,7 @@ export class ExcelImportProcessEntity {
     createdAt: Date;
 
     // user 관계설정
-    @ManyToOne(() => LamsUserEntity)
+    @ManyToOne(() => UserEntity)
     @JoinColumn({ name: 'userId' })
-    user: LamsUserEntity;
+    user: UserEntity;
 }

@@ -55,7 +55,7 @@ export class UserResponseDto {
 
     @ApiProperty({
         description: '사용자 유형',
-        example: 'LamsUserEntity',
+        example: 'UserEntity',
     })
     @Expose()
     readonly type: string;

@@ -1,14 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { UserContextService } from '@src/contexts/user/user-context.service';
-import { AuthContextService } from '@src/contexts/auth/auth-user-context.service';
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 import { SearchUserDto } from '@src/interfaces/dto/user/requests/search-user.dto';
-import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 import { SuccessMessageHelper } from '@src/common/helpers/success-message.helper';
 import { PaginatedSuccessResponse, SuccessResponseWithData } from '@src/common/types/success-response.type';
-import { LamsUserEntity } from '@src/domain/user/entities/lams-user.entity';
+import { UserEntity } from '@src/domain/user/entities/user.entity';
+import { OrganizationContextService } from '@src/contexts/organization/organization-context.service';
 
 /**
  * 사용자 비즈니스 서비스
@@ -21,19 +19,18 @@ export class UserBusinessService {
 
     constructor(
         private readonly userContextService: UserContextService,
-        private readonly authContextService: AuthContextService,
+        private readonly organizationContextService: OrganizationContextService,
     ) {}
 
     /**
      * 사용자 목록 조회
-     * docs: getUserList(limit: number, page: number)
      */
     async getUserList(paginationQuery: PaginationQueryDto): Promise<PaginatedSuccessResponse<UserResponseDto>> {
         if (!paginationQuery.page || !paginationQuery.limit) {
             throw new Error('페이지 정보가 필요합니다.');
         }
 
-        const result = await this.authContextService.페이지네이션된_사용자_목록을_조회한다(paginationQuery);
+        const result = await this.userContextService.페이지네이션된_사용자_목록을_조회한다(paginationQuery);
 
         return SuccessMessageHelper.createPaginatedSuccessResponse(
             SuccessMessageHelper.MESSAGES.USER_LIST_RETRIEVED,
@@ -76,7 +73,6 @@ export class UserBusinessService {
 
     /**
      * 사용자 프로필 조회
-     * docs: getProfile(userId: string)
      */
     async getUserProfile(userId: string): Promise<SuccessResponseWithData<UserResponseDto>> {
         if (!userId || userId.trim().length === 0) {
@@ -93,102 +89,33 @@ export class UserBusinessService {
 
     /**
      * 사용자 프로필 조회
-     * docs: getProfile(token: string)
      */
     async getProfile(userId: string): Promise<UserResponseDto> {
-        return this.authContextService.자신의_프로필을_조회한다(userId);
-    }
-
-    /**
-     * 사용자 검토 권한 추가
-     * docs: addUserReviewPermission(departmentId: string, userId: string)
-     */
-    async addUserReviewPermission(departmentId: string, userId: string): Promise<void> {
-        if (!departmentId || !userId) {
-            throw new Error('부서 ID와 사용자 ID가 필요합니다.');
-        }
-
-        await this.userContextService.부서의_검토_권한에_사용자를_추가한다(departmentId, userId);
-    }
-
-    /**
-     * 사용자 검토 권한 삭제
-     * docs: removeUserReviewPermission(departmentId: string, userId: string)
-     */
-    async removeUserReviewPermission(departmentId: string, userId: string): Promise<void> {
-        if (!departmentId || !userId) {
-            throw new Error('부서 ID와 사용자 ID가 필요합니다.');
-        }
-
-        await this.userContextService.부서의_검토_권한에서_사용자를_삭제한다(departmentId, userId);
-    }
-
-    /**
-     * 사용자 접근 권한 추가
-     * docs: addUserApprovalPermission(departmentId: string, userId: string)
-     */
-    async addUserApprovalPermission(departmentId: string, userId: string): Promise<void> {
-        if (!departmentId || !userId) {
-            throw new Error('부서 ID와 사용자 ID가 필요합니다.');
-        }
-
-        await this.userContextService.부서의_접근_권한에_사용자를_추가한다(departmentId, userId);
-    }
-
-    /**
-     * 사용자 접근 권한 삭제
-     * docs: removeUserApprovalPermission(departmentId: string, userId: string)
-     */
-    async removeUserApprovalPermission(departmentId: string, userId: string): Promise<void> {
-        if (!departmentId || !userId) {
-            throw new Error('부서 ID와 사용자 ID가 필요합니다.');
-        }
-
-        await this.userContextService.부서의_접근_권한에서_사용자를_삭제한다(departmentId, userId);
+        return this.userContextService.자신의_프로필을_조회한다(userId);
     }
 
     /**
      * 부서 권한 관리 (복잡한 비즈니스 로직이므로 try-catch 유지)
-     * docs: manageDepartmentAuthority(departmentId: string, userId: string, type: string, action: string)
      */
     async manageDepartmentAuthority(
         departmentId: string,
         userId: string,
         type: 'access' | 'review',
-        action: 'add' | 'delete',
-    ): Promise<SuccessResponseWithData<LamsUserEntity>> {
+        action: 'add' | 'remove',
+    ): Promise<SuccessResponseWithData<UserEntity>> {
         try {
             if (!departmentId || !userId) {
                 throw new Error('부서 ID와 사용자 ID가 필요합니다.');
             }
 
-            let updatedUser: LamsUserEntity;
+            const department = await this.organizationContextService.findDepartmentById(departmentId);
 
-            if (type === 'access') {
-                if (action === 'add') {
-                    updatedUser = await this.userContextService.부서의_접근_권한에_사용자를_추가한다(
-                        departmentId,
-                        userId,
-                    );
-                } else {
-                    updatedUser = await this.userContextService.부서의_접근_권한에서_사용자를_삭제한다(
-                        departmentId,
-                        userId,
-                    );
-                }
-            } else {
-                if (action === 'add') {
-                    updatedUser = await this.userContextService.부서의_검토_권한에_사용자를_추가한다(
-                        departmentId,
-                        userId,
-                    );
-                } else {
-                    updatedUser = await this.userContextService.부서의_검토_권한에서_사용자를_삭제한다(
-                        departmentId,
-                        userId,
-                    );
-                }
-            }
+            const updatedUser = await this.userContextService.사용자의_부서_권한을_변경한다(
+                userId,
+                department,
+                type,
+                action,
+            );
 
             return SuccessMessageHelper.createUpdateSuccessResponse(
                 SuccessMessageHelper.MESSAGES.DEPARTMENT_AUTHORITY_UPDATED,
