@@ -3,20 +3,17 @@
     "builds": [
         {
             "src": "package.json",
-            "use": "@vercel/node",
-            "config": {
-                "includeFiles": ["dist/**", "api/**"]
-            }
+            "use": "@vercel/node"
         }
     ],
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "/api/index.js"
+            "destination": "/dist/main.js"
         },
         {
             "source": "/(.*)",
-            "destination": "/api/index.js"
+            "destination": "/dist/main.js"
         }
     ],
     "env": {
