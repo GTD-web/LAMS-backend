@@ -1,25 +1,34 @@
-const { NestFactory } = require('@nestjs/core');
+const { NestFactory, Reflector } = require('@nestjs/core');
 const { ValidationPipe } = require('@nestjs/common');
-const { GlobalExceptionFilter } = require('../dist/common/filters/global-exception.filter');
-const { LoggingInterceptor } = require('../dist/common/interceptors/logging.interceptor');
-const { settingSwagger } = require('../dist/common/utils/swagger/swagger.util');
+const path = require('path');
 
 let app;
 
-async function createNestApp() {
-    if (!app) {
-        // dist 폴더에서 import
-        const { AppModule } = require('../dist/app.module');
-        const { JwtAuthGuard } = require('../dist/common/guards/jwt-auth.guard');
-        const { RolesGuard } = require('../dist/common/guards/roles.guard');
-        const { ResponseInterceptor } = require('../dist/common/interceptors/response.interceptor');
+async function getApp() {
+    if (app) return app;
 
-        app = await NestFactory.create(AppModule);
+    try {
+        console.log('🚀 Starting NestJS app initialization...');
+        console.log('Working directory:', process.cwd());
+        console.log('__dirname:', __dirname);
+        console.log('NODE_ENV:', process.env.NODE_ENV);
 
-        // 글로벌 가드 및 인터셉터 설정
-        app.useGlobalGuards(new JwtAuthGuard(), new RolesGuard());
-        app.useGlobalInterceptors(new ResponseInterceptor(), new LoggingInterceptor());
-        app.useGlobalFilters(new GlobalExceptionFilter());
+        // 모듈 경로 확인
+        const distPath = path.resolve(process.cwd(), 'dist');
+        console.log('Dist path:', distPath);
+
+        // AppModule 로드
+        console.log('Loading AppModule...');
+        const { AppModule } = require(path.join(distPath, 'app.module.js'));
+        console.log('✅ AppModule loaded successfully');
+
+        // NestJS 앱 생성
+        console.log('Creating NestJS app...');
+        app = await NestFactory.create(AppModule, {
+            logger: ['error', 'warn', 'log'],
+        });
+
+        // 기본 설정
         app.setGlobalPrefix('api');
         app.useGlobalPipes(
             new ValidationPipe({
@@ -29,22 +38,74 @@ async function createNestApp() {
             }),
         );
 
-        if (process.env.NODE_ENV !== 'production') {
-            settingSwagger(app);
+        // CORS 설정
+        app.enableCors({
+            origin: '*',
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization'],
+        });
+
+        // 글로벌 설정들 (선택적 로딩)
+        try {
+            const { ResponseInterceptor } = require(path.join(distPath, 'common/interceptors/response.interceptor.js'));
+            app.useGlobalInterceptors(new ResponseInterceptor());
+            console.log('✅ ResponseInterceptor loaded');
+        } catch (error) {
+            console.log('⚠️ ResponseInterceptor not found, skipping');
         }
 
+        try {
+            const { GlobalExceptionFilter } = require(path.join(distPath, 'common/filters/global-exception.filter.js'));
+            app.useGlobalFilters(new GlobalExceptionFilter());
+            console.log('✅ GlobalExceptionFilter loaded');
+        } catch (error) {
+            console.log('⚠️ GlobalExceptionFilter not found, skipping');
+        }
+
+        try {
+            const { JwtAuthGuard } = require(path.join(distPath, 'common/guards/jwt-auth.guard.js'));
+            const { RolesGuard } = require(path.join(distPath, 'common/guards/roles.guard.js'));
+            const reflector = app.get(Reflector);
+            app.useGlobalGuards(new JwtAuthGuard(reflector), new RolesGuard(reflector));
+            console.log('✅ Guards loaded');
+        } catch (error) {
+            console.log('⚠️ Guards not found, skipping');
+        }
+
+        // 앱 초기화
         await app.init();
+        console.log('✅ NestJS app initialized successfully');
+
+        return app;
+    } catch (error) {
+        console.error('❌ Failed to initialize NestJS app:', error);
+        console.error('Error stack:', error.stack);
+        throw error;
     }
-    return app;
 }
 
 module.exports = async (req, res) => {
+    console.log(`📨 ${req.method} ${req.url}`);
+
     try {
-        const nestApp = await createNestApp();
-        const expressApp = nestApp.getHttpAdapter().getInstance();
-        return expressApp(req, res);
+        const nestApp = await getApp();
+        const httpAdapter = nestApp.getHttpAdapter();
+        const instance = httpAdapter.getInstance();
+
+        // Express 인스턴스로 요청 처리
+        return instance(req, res);
     } catch (error) {
-        console.error('Serverless function error:', error);
-        res.status(500).json({ error: error.message });
+        console.error('❌ Request handling error:', error);
+
+        // 기본 에러 응답
+        if (!res.headersSent) {
+            res.status(500).json({
+                success: false,
+                message: 'Internal Server Error',
+                error: error.message,
+                timestamp: new Date().toISOString(),
+                path: req.url,
+            });
+        }
     }
 };
