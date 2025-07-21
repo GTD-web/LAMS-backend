@@ -8,15 +8,8 @@
     ],
     "rewrites": [
         {
-            "source": "/api/(.*)",
-            "destination": "/dist/main.js"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/dist/main.js"
+            "src": "/api/(.*)",
+            "dest": "/dist/main.js"
         }
-    ],
-    "env": {
-        "NODE_ENV": "production"
-    }
+    ]
 }
