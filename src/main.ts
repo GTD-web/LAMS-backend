@@ -7,8 +7,12 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
-async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+let app: any;
+
+async function getApp() {
+    if (app) return app;
+
+    app = await NestFactory.create(AppModule);
 
     app.useGlobalInterceptors(new ResponseInterceptor(), new LoggingInterceptor());
     app.useGlobalFilters(new GlobalExceptionFilter());
@@ -23,16 +27,38 @@ async function bootstrap() {
         }),
     );
 
-    // CORS 설정
     app.enableCors({
         origin: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     });
-    const port = process.env.PORT || 5000;
-    await app.listen(port);
-    console.log(`Application is running on: http://localhost:${port}`);
 
+    await app.init();
     return app;
 }
-bootstrap();
+
+// 서버리스 함수 export
+module.exports = async (req: any, res: any) => {
+    try {
+        const nestApp = await getApp();
+        const httpAdapter = nestApp.getHttpAdapter();
+        const instance = httpAdapter.getInstance();
+        return instance(req, res);
+    } catch (error) {
+        console.error('Serverless function error:', error);
+        res.status(500).json({
+            error: 'Internal Server Error',
+            message: error.message,
+        });
+    }
+};
+
+// 로컬 개발용
+if (require.main === module) {
+    (async () => {
+        const app = await getApp();
+        const port = process.env.PORT || 5000;
+        await app.listen(port);
+        console.log(`🚀 Application is running on: http://localhost:${port}`);
+    })();
+}
