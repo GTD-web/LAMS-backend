@@ -34,11 +34,11 @@ async function getApp() {
             }),
         );
 
-        // CORS 설정
-        app.enableCors({
-            origin: process.env.ALLOWED_ORIGINS?.split(',') || ['*'],
-            credentials: true,
-        });
+        // // CORS 설정
+        // app.enableCors({
+        //     origin: process.env.ALLOWED_ORIGINS?.split(',') || ['*'],
+        //     credentials: true,
+        // });
 
         // Swagger 설정 (개발 환경에서만)
         if (process.env.NODE_ENV !== 'production') {
