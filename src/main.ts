@@ -37,8 +37,8 @@ async function getApp() {
     return app;
 }
 
-// 서버리스 함수 export
-module.exports = async (req: any, res: any) => {
+// Vercel 서버리스 함수
+const handler = async (req: any, res: any) => {
     try {
         const nestApp = await getApp();
         const httpAdapter = nestApp.getHttpAdapter();
@@ -52,6 +52,10 @@ module.exports = async (req: any, res: any) => {
         });
     }
 };
+
+// Export 방식을 명확히
+module.exports = handler;
+module.exports.default = handler;
 
 // 로컬 개발용
 if (require.main === module) {
