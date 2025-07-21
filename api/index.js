@@ -1,4 +1,4 @@
-const { NestFactory } = require('@nestjs/core');
+const { NestFactory, Reflector } = require('@nestjs/core');
 const { ValidationPipe } = require('@nestjs/common');
 const path = require('path');
 const fs = require('fs');
@@ -27,28 +27,70 @@ async function getApp() {
             throw new Error('dist folder not found');
         }
 
-        // AppModule 로드 시도
-        const appModulePath = path.join(distPath, 'app.module.js');
-        if (fs.existsSync(appModulePath)) {
-            console.log('✅ app.module.js found');
-            const { AppModule } = require(appModulePath);
-            console.log('✅ AppModule loaded successfully');
+        // 모듈들 로드
+        const { AppModule } = require(path.join(distPath, 'app.module.js'));
+        console.log('✅ AppModule loaded successfully');
 
-            // NestJS 앱 생성
-            app = await NestFactory.create(AppModule);
+        // NestJS 앱 생성
+        app = await NestFactory.create(AppModule);
 
-            // 기본 설정
-            app.setGlobalPrefix('api');
-            app.useGlobalPipes(new ValidationPipe({ transform: true }));
-            app.enableCors({ origin: '*' });
-
-            await app.init();
-            console.log('✅ NestJS app initialized successfully');
-
-            return app;
-        } else {
-            throw new Error(`app.module.js not found at ${appModulePath}`);
+        // 글로벌 설정들 추가
+        try {
+            // ResponseInterceptor 추가
+            const { ResponseInterceptor } = require(path.join(distPath, 'common/interceptors/response.interceptor.js'));
+            app.useGlobalInterceptors(new ResponseInterceptor());
+            console.log('✅ ResponseInterceptor applied');
+        } catch (error) {
+            console.log('⚠️ ResponseInterceptor not found, skipping');
         }
+
+        try {
+            // GlobalExceptionFilter 추가
+            const { GlobalExceptionFilter } = require(path.join(distPath, 'common/filters/global-exception.filter.js'));
+            app.useGlobalFilters(new GlobalExceptionFilter());
+            console.log('✅ GlobalExceptionFilter applied');
+        } catch (error) {
+            console.log('⚠️ GlobalExceptionFilter not found, skipping');
+        }
+
+        try {
+            // Guards 추가
+            const { JwtAuthGuard } = require(path.join(distPath, 'common/guards/jwt-auth.guard.js'));
+            const { RolesGuard } = require(path.join(distPath, 'common/guards/roles.guard.js'));
+
+            const reflector = app.get(Reflector);
+            app.useGlobalGuards(new JwtAuthGuard(reflector), new RolesGuard(reflector));
+            console.log('✅ JwtAuthGuard and RolesGuard applied');
+        } catch (error) {
+            console.log('⚠️ Guards not found, skipping');
+        }
+
+        // 기본 설정
+        app.setGlobalPrefix('api');
+        app.useGlobalPipes(
+            new ValidationPipe({
+                whitelist: true,
+                forbidNonWhitelisted: true,
+                transform: true,
+            }),
+        );
+        app.enableCors({ origin: '*' });
+
+        // Swagger 설정 (개발 환경에서만)
+        if (process.env.NODE_ENV !== 'production') {
+            try {
+                const { settingSwagger } = require(path.join(distPath, 'common/utils/swagger/swagger.util.js'));
+                await settingSwagger(app);
+                console.log('✅ Swagger configured');
+            } catch (error) {
+                console.log('⚠️ Swagger setup failed, skipping');
+            }
+        }
+
+        await app.init();
+        console.log('✅ NestJS app initialized successfully');
+
+        return app;
     } catch (error) {
         console.error('❌ Failed to create NestJS app:', error);
         throw error;
