@@ -40,24 +40,6 @@ import databaseConfig, { JWT_CONFIG } from './common/configs/env.config';
         WorkStandardModule,
     ],
     controllers: [AppController],
-    providers: [
-        AppService,
-        {
-            provide: APP_FILTER,
-            useClass: GlobalExceptionFilter,
-        },
-        {
-            provide: APP_GUARD,
-            useClass: JwtAuthGuard,
-        },
-        {
-            provide: APP_INTERCEPTOR,
-            useClass: LoggingInterceptor,
-        },
-        {
-            provide: APP_INTERCEPTOR,
-            useClass: ResponseInterceptor,
-        },
-    ],
+    providers: [AppService],
 })
 export class AppModule {}
