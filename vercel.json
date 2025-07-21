@@ -1,24 +1,43 @@
 {
     "version": 2,
-    "env": {
-        "NODE_ENV": "production"
-    },
+    "buildCommand": "npm run vercel-build",
     "builds": [
         {
-            "src": "api/index.ts",
-            "use": "@vercel/node",
+            "src": "api/index.js",
+            "use": "@vercel/node@3",
             "config": {
-                "includeFiles": ["dist/**"],
-                "bundle": false,
-                "helpers": false
+                "includeFiles": ["dist/**", "package.json"]
             }
         }
     ],
-    "routes": [
+    "rewrites": [
         {
-            "src": "/(.*)",
-            "dest": "api/index.ts",
-            "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+            "source": "/(.*)",
+            "destination": "/api/index.js"
+        }
+    ],
+    "functions": {
+        "api/index.js": {
+            "maxDuration": 30
+        }
+    },
+    "headers": [
+        {
+            "source": "/api/(.*)",
+            "headers": [
+                {
+                    "key": "Access-Control-Allow-Origin",
+                    "value": "*"
+                },
+                {
+                    "key": "Access-Control-Allow-Methods",
+                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                },
+                {
+                    "key": "Access-Control-Allow-Headers",
+                    "value": "Content-Type, Authorization"
+                }
+            ]
         }
     ]
 }

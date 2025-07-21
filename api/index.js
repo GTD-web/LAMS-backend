@@ -1,4 +1,4 @@
-const { NestFactory } = require('@nestjs/core');
+const { NestFactory, Reflector } = require('@nestjs/core');
 const { ValidationPipe } = require('@nestjs/common');
 const { AppModule } = require('../dist/app.module');
 const { GlobalExceptionFilter } = require('../dist/common/filters/global-exception.filter');
@@ -12,36 +12,67 @@ let app;
 async function getApp() {
     if (app) return app;
 
-    // NestJS 앱 생성
-    app = await NestFactory.create(AppModule);
+    try {
+        console.log('🚀 Creating NestJS app...');
 
-    app.useGlobalInterceptors(new ResponseInterceptor());
-    app.useGlobalFilters(new GlobalExceptionFilter());
-    app.useGlobalGuards(new JwtAuthGuard(app.get(Reflector)), new RolesGuard(app.get(Reflector)));
+        // NestJS 앱 생성
+        app = await NestFactory.create(AppModule);
 
-    app.setGlobalPrefix('api');
-    app.useGlobalPipes(
-        new ValidationPipe({
-            whitelist: true,
-            forbidNonWhitelisted: true,
-            transform: true,
-        }),
-    );
+        // Global 설정
+        app.useGlobalInterceptors(new ResponseInterceptor());
+        app.useGlobalFilters(new GlobalExceptionFilter());
 
-    await settingSwagger(app);
+        const reflector = app.get(Reflector);
+        app.useGlobalGuards(new JwtAuthGuard(reflector), new RolesGuard(reflector));
 
-    await app.init();
-    console.log('✅ App ready');
+        app.setGlobalPrefix('api');
+        app.useGlobalPipes(
+            new ValidationPipe({
+                whitelist: true,
+                forbidNonWhitelisted: true,
+                transform: true,
+            }),
+        );
 
-    return app;
+        // CORS 설정
+        app.enableCors({
+            origin: process.env.ALLOWED_ORIGINS?.split(',') || ['*'],
+            credentials: true,
+        });
+
+        // Swagger 설정 (개발 환경에서만)
+        if (process.env.NODE_ENV !== 'production') {
+            await settingSwagger(app);
+        }
+
+        await app.init();
+        console.log('✅ NestJS app initialized successfully');
+
+        return app;
+    } catch (error) {
+        console.error('❌ Failed to create NestJS app:', error);
+        throw error;
+    }
 }
 
 module.exports = async (req, res) => {
     try {
+        console.log(`📨 ${req.method} ${req.url}`);
+
         const nestApp = await getApp();
-        return nestApp.getHttpAdapter().getInstance()(req, res);
+        const httpAdapter = nestApp.getHttpAdapter();
+        const instance = httpAdapter.getInstance();
+
+        return instance(req, res);
     } catch (error) {
-        console.error('❌ Error:', error.message);
-        res.status(500).json({ error: error.message });
+        console.error('❌ Serverless function error:', error);
+
+        if (!res.headersSent) {
+            res.status(500).json({
+                error: 'Internal Server Error',
+                message: error.message,
+                timestamp: new Date().toISOString(),
+            });
+        }
     }
 };
