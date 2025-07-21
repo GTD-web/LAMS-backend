@@ -1,19 +1,20 @@
-import { NestFactory, Reflector } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ResponseInterceptor } from './common/interceptors/response.interceptor';
-import { ValidationPipe } from '@nestjs/common';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { RolesGuard } from './common/guards/roles.guard';
-import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+const { NestFactory, Reflector } = require('@nestjs/core');
+const { AppModule } = require('./app.module');
+const { ResponseInterceptor } = require('./common/interceptors/response.interceptor');
+const { ValidationPipe } = require('@nestjs/common');
+const { JwtAuthGuard } = require('./common/guards/jwt-auth.guard');
+const { RolesGuard } = require('./common/guards/roles.guard');
+const { GlobalExceptionFilter } = require('./common/filters/global-exception.filter');
+const { LoggingInterceptor } = require('./common/interceptors/logging.interceptor');
 
-let app: any;
+let app;
 
-async function getApp() {
+async function createNestApp() {
     if (app) return app;
 
     app = await NestFactory.create(AppModule);
 
+    // 글로벌 설정
     app.useGlobalInterceptors(new ResponseInterceptor(), new LoggingInterceptor());
     app.useGlobalFilters(new GlobalExceptionFilter());
     app.useGlobalGuards(new JwtAuthGuard(app.get(Reflector)), new RolesGuard(app.get(Reflector)));
@@ -33,36 +34,37 @@ async function getApp() {
         credentials: true,
     });
 
+    // Vercel에서는 listen 대신 init만 호출
     await app.init();
     return app;
 }
 
-// Vercel 서버리스 함수
-const handler = async (req: any, res: any) => {
+// Vercel 서버리스 함수 핸들러
+module.exports = async function handler(req, res) {
     try {
-        const nestApp = await getApp();
+        const nestApp = await createNestApp();
         const httpAdapter = nestApp.getHttpAdapter();
         const instance = httpAdapter.getInstance();
+
+        // Express 인스턴스를 사용하여 요청 처리
         return instance(req, res);
     } catch (error) {
         console.error('Serverless function error:', error);
-        res.status(500).json({
+        return res.status(500).json({
+            success: false,
             error: 'Internal Server Error',
             message: error.message,
         });
     }
 };
 
-// Export 방식을 명확히
-module.exports = handler;
-module.exports.default = handler;
-
 // 로컬 개발용
 if (require.main === module) {
-    (async () => {
-        const app = await getApp();
-        const port = process.env.PORT || 5000;
-        await app.listen(port);
-        console.log(`🚀 Application is running on: http://localhost:${port}`);
-    })();
+    createNestApp()
+        .then(async (app) => {
+            const port = process.env.PORT || 5000;
+            await app.listen(port);
+            console.log(`🚀 Application is running on: http://localhost:${port}`);
+        })
+        .catch(console.error);
 }

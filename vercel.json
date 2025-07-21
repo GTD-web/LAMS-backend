@@ -1,6 +1,5 @@
 {
     "version": 2,
-    "buildCommand": "pnpm build",
     "builds": [
         {
             "src": "dist/main.js",
@@ -9,11 +8,12 @@
     ],
     "routes": [
         {
+            "src": "/api/(.*)",
+            "dest": "dist/main.js"
+        },
+        {
             "src": "/(.*)",
             "dest": "dist/main.js"
         }
-    ],
-    "env": {
-        "NODE_ENV": "production"
-    }
+    ]
 }
