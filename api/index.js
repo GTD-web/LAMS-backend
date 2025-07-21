@@ -1,66 +1,56 @@
-const { NestFactory, Reflector } = require('@nestjs/core');
+const { NestFactory } = require('@nestjs/core');
 const { ValidationPipe } = require('@nestjs/common');
 const path = require('path');
+const fs = require('fs');
 
 let app;
-
-// 안전한 모듈 로딩 함수
-function safeRequire(modulePath) {
-    const possiblePaths = [
-        modulePath,
-        path.join(process.cwd(), modulePath.replace('../', '')),
-        path.join(__dirname, modulePath),
-        path.join('/var/task', modulePath.replace('../', '')),
-    ];
-
-    for (const tryPath of possiblePaths) {
-        try {
-            console.log(`🔍 Trying to load: ${tryPath}`);
-            return require(tryPath);
-        } catch (error) {
-            console.log(`❌ Failed to load ${tryPath}: ${error.message}`);
-            continue;
-        }
-    }
-
-    throw new Error(`Could not load module: ${modulePath}`);
-}
 
 async function getApp() {
     if (app) return app;
 
     try {
-        console.log('🚀 Creating NestJS app...');
+        console.log('🚀 Starting NestJS app creation...');
         console.log('Current working directory:', process.cwd());
         console.log('__dirname:', __dirname);
 
-        // 모듈들을 안전하게 로드
-        const { AppModule } = safeRequire('../dist/app.module');
-        console.log('✅ AppModule loaded');
+        // 현재 디렉토리 내용 확인
+        const currentDir = process.cwd();
+        console.log('Current directory contents:', fs.readdirSync(currentDir));
 
-        // NestJS 앱 생성
-        app = await NestFactory.create(AppModule);
+        // dist 폴더 확인
+        const distPath = path.join(currentDir, 'dist');
+        if (fs.existsSync(distPath)) {
+            console.log('✅ dist folder found');
+            console.log('dist contents:', fs.readdirSync(distPath));
+        } else {
+            console.log('❌ dist folder not found');
+            throw new Error('dist folder not found');
+        }
 
-        // 기본 설정만 (에러 발생 가능성 최소화)
-        app.setGlobalPrefix('api');
-        app.useGlobalPipes(
-            new ValidationPipe({
-                whitelist: true,
-                forbidNonWhitelisted: true,
-                transform: true,
-            }),
-        );
+        // AppModule 로드 시도
+        const appModulePath = path.join(distPath, 'app.module.js');
+        if (fs.existsSync(appModulePath)) {
+            console.log('✅ app.module.js found');
+            const { AppModule } = require(appModulePath);
+            console.log('✅ AppModule loaded successfully');
 
-        // CORS 설정 (간단하게)
-        app.enableCors({ origin: '*' });
+            // NestJS 앱 생성
+            app = await NestFactory.create(AppModule);
 
-        await app.init();
-        console.log('✅ NestJS app initialized successfully');
+            // 기본 설정
+            app.setGlobalPrefix('api');
+            app.useGlobalPipes(new ValidationPipe({ transform: true }));
+            app.enableCors({ origin: '*' });
 
-        return app;
+            await app.init();
+            console.log('✅ NestJS app initialized successfully');
+
+            return app;
+        } else {
+            throw new Error(`app.module.js not found at ${appModulePath}`);
+        }
     } catch (error) {
         console.error('❌ Failed to create NestJS app:', error);
-        console.error('Stack trace:', error.stack);
         throw error;
     }
 }
@@ -70,21 +60,15 @@ module.exports = async (req, res) => {
         console.log(`📨 ${req.method} ${req.url}`);
 
         const nestApp = await getApp();
-        const httpAdapter = nestApp.getHttpAdapter();
-        const instance = httpAdapter.getInstance();
-
-        return instance(req, res);
+        return nestApp.getHttpAdapter().getInstance()(req, res);
     } catch (error) {
         console.error('❌ Serverless function error:', error);
-        console.error('Stack trace:', error.stack);
 
-        if (!res.headersSent) {
-            res.status(500).json({
-                error: 'Internal Server Error',
-                message: error.message,
-                stack: error.stack,
-                timestamp: new Date().toISOString(),
-            });
-        }
+        res.status(500).json({
+            error: 'Internal Server Error',
+            message: error.message,
+            stack: error.stack,
+            timestamp: new Date().toISOString(),
+        });
     }
 };
