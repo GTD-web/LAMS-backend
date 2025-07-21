@@ -7,9 +7,8 @@ import {
     ManyToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
-} from 'typeorm';import { AttendanceTypeEntity } from '../../attendance-type/entities/attendance-type.entity';
-;
-
+} from 'typeorm';
+import { AttendanceTypeEntity } from '../../../attendance-type/entities/attendance-type.entity';
 @Entity()
 export class UsedAttendanceEntity {
     @PrimaryGeneratedColumn('uuid')
