@@ -1,5 +1,7 @@
 import { Repository } from 'typeorm';
 import { EmployeeInfoEntity } from '../entities/employee-info.entity';
+import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { EmployeeResponseDto } from '@src/interfaces/dto/organization/responses/employee-response.dto';
 export declare class EmployeeDomainService {
     private readonly employeeRepository;
     private readonly logger;
@@ -18,11 +20,8 @@ export declare class EmployeeDomainService {
         isExcludedFromCalculation?: boolean;
         keyword?: string;
         limit?: number;
-        offset?: number;
-    }): Promise<{
-        employees: EmployeeInfoEntity[];
-        total: number;
-    }>;
+        page?: number;
+    }): Promise<PaginatedResponseDto<EmployeeResponseDto>>;
     searchEmployees(searchTerm: string): Promise<EmployeeInfoEntity[]>;
     searchEmployeesByNumber(employeeNumber: string): Promise<EmployeeInfoEntity[]>;
     findActiveEmployeesByDepartment(departmentId: string): Promise<EmployeeInfoEntity[]>;

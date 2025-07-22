@@ -8,7 +8,6 @@ export declare class AuthController {
     private readonly authBusinessService;
     constructor(authBusinessService: AuthBusinessService);
     login(loginDto: LoginDto): Promise<LoginResponseDto>;
-    getProfile(user: UserEntity, token: string): Promise<UserResponseDto>;
     verifyToken(token: string): Promise<{
         valid: boolean;
     }>;

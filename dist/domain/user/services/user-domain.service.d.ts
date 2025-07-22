@@ -1,6 +1,9 @@
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
+import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
+import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
 export declare class UserDomainService {
     private readonly userRepository;
     private readonly logger;
@@ -8,15 +11,15 @@ export declare class UserDomainService {
     changeUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<UserEntity>;
     validateUserCredentials(email: string, password: string): Promise<UserEntity | null>;
     findUserById(userId: string): Promise<UserEntity | null>;
-    findUserByEmail(email: string): Promise<UserEntity | null>;
+    getUserById(userId: string): Promise<UserEntity>;
+    findUserAuthority(userId: string): Promise<UserEntity>;
     createUser(userData: Partial<UserEntity>): Promise<UserEntity>;
-    updateUser(userId: string, updateData: Partial<UserEntity>): Promise<UserEntity>;
     updateUserAuthority(user: UserEntity, department: DepartmentInfoEntity, type: 'access' | 'review', action: 'add' | 'remove'): Promise<UserEntity>;
-    deleteUser(userId: string): Promise<void>;
-    findPaginatedUsers(page: number, limit: number): Promise<{
-        users: UserEntity[];
-        total: number;
-    }>;
-    searchUserById(userId: string): Promise<UserEntity | null>;
-    comparePassword(user: UserEntity, password: string): Promise<boolean>;
+    findPaginatedUsers(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>>;
+    private includeAccessableDepartment;
+    private includeReviewableDepartment;
+    private excludeAccessableDepartment;
+    private excludeReviewableDepartment;
+    private validatePassword;
+    private updateHashedPassword;
 }

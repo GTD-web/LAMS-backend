@@ -44,10 +44,6 @@ let UserSeedService = UserSeedService_1 = class UserSeedService {
                 user_enum_1.UserRole.LRIM_ADMIN,
             ];
             adminUser.isActive = true;
-            adminUser.isIntegrated = false;
-            adminUser.hasAccessAuthority = true;
-            adminUser.hasReviewAuthority = true;
-            adminUser.type = 'UserEntity';
             await this.lamsUserRepository.save(adminUser);
             this.logger.log('Admin user seeded successfully');
             this.logger.log(`Username: admin`);

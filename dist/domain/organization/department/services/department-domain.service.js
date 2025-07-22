@@ -18,6 +18,9 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const department_info_entity_1 = require("../entities/department-info.entity");
+const pagination_response_dto_1 = require("../../../../common/dtos/pagination/pagination-response.dto");
+const department_response_dto_1 = require("../../../../interfaces/dto/organization/responses/department-response.dto");
+const types_1 = require("class-transformer/types");
 let DepartmentDomainService = DepartmentDomainService_1 = class DepartmentDomainService {
     constructor(departmentRepository) {
         this.departmentRepository = departmentRepository;
@@ -43,17 +46,20 @@ let DepartmentDomainService = DepartmentDomainService_1 = class DepartmentDomain
         });
     }
     async findPaginatedDepartments(page, limit, isExclude) {
-        const skip = (page - 1) * limit;
         const whereCondition = isExclude !== undefined ? { isExclude } : {};
-        const [departments, total] = await this.departmentRepository.findAndCount({
+        const findOptions = {
             where: whereCondition,
-            skip,
-            take: limit,
             order: { createdAt: 'DESC' },
+            skip: (page - 1) * limit,
+            take: limit,
             relations: ['employees', 'employees.employee'],
-        });
+        };
+        const [departments, total] = await this.departmentRepository.findAndCount(findOptions);
+        const meta = new pagination_response_dto_1.PaginationMetaDto(page, limit, total);
+        const departmentDtos = departments.map((department) => (0, types_1.plainToInstance)(department_response_dto_1.DepartmentResponseDto, department));
+        const paginatedResult = new pagination_response_dto_1.PaginatedResponseDto(departmentDtos, meta);
         this.logger.log(`페이지네이션된 부서 목록 조회: ${departments.length}개 조회`);
-        return { departments, total };
+        return paginatedResult;
     }
     async updateDepartment(departmentId, updateData) {
         if (!departmentId || departmentId.trim().length === 0) {

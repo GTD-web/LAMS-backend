@@ -13,7 +13,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthBusinessService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
-const auth_payload_dto_1 = require("../../interfaces/dto/auth/responses/auth-payload.dto");
 const class_transformer_1 = require("class-transformer");
 const user_response_dto_1 = require("../../interfaces/dto/organization/responses/user-response.dto");
 const user_context_service_1 = require("../../contexts/user/user-context.service");
@@ -24,23 +23,14 @@ let AuthBusinessService = AuthBusinessService_1 = class AuthBusinessService {
         this.logger = new common_1.Logger(AuthBusinessService_1.name);
     }
     async login(loginId, password) {
-        try {
-            await this.사용자는_아이디와_패스워드를_검증한다(loginId, password);
-            await this.사용자의_활성화_상태를_검증한다(user.userId);
-            const token = await this.사용자의_토큰을_제공한다(user.userId);
-            this.logger.log(`로그인 성공: ${loginId} (사용자 ID: ${user.userId})`);
-            return {
-                token,
-                user: (0, class_transformer_1.plainToInstance)(user_response_dto_1.UserResponseDto, user),
-            };
-        }
-        catch (error) {
-            this.logger.error(`로그인 실패: ${loginId}`, error.stack);
-            throw error;
-        }
+        const user = await this.userContextService.아이디와_패스워드를_검증하고_활성화_상태를_검증한다(loginId, password);
+        const token = await this.userContextService.사용자의_토큰을_제공한다(user);
+        return {
+            token,
+            user: (0, class_transformer_1.plainToInstance)(user_response_dto_1.UserResponseDto, user),
+        };
     }
     async getProfile(token, userId) {
-        await this.userContextService.사용자는_토큰을_검증받는다(token);
         return this.userContextService.자신의_프로필을_조회한다(userId);
     }
     verifyToken(token) {
@@ -57,21 +47,10 @@ let AuthBusinessService = AuthBusinessService_1 = class AuthBusinessService {
             return false;
         }
     }
-    async 사용자의_프로필을_조회한다(userId) {
-        return this.userContextService.자신의_프로필을_조회한다(userId);
-    }
-    async 비밀번호를_변경한다(userId, currentPassword, newPassword) {
-        const updatedUser = await this.userContextService.changeUserPassword(userId, currentPassword, newPassword);
+    async changeUserPassword(userId, currentPassword, newPassword) {
+        const updatedUser = await this.userContextService.사용자_비밀번호를_변경한다(userId, currentPassword, newPassword);
         this.logger.log(`비밀번호 변경 성공: ${updatedUser.email}`);
         return (0, class_transformer_1.plainToInstance)(user_response_dto_1.UserResponseDto, updatedUser);
-    }
-    async validateUser(email, password) {
-        const user = await this.사용자는_아이디와_패스워드를_검증한다(email, password);
-        if (!user) {
-            return null;
-        }
-        await this.사용자의_활성화_상태를_검증한다(user.userId);
-        return new auth_payload_dto_1.AuthPayloadDto(user.userId, user.roles);
     }
 };
 exports.AuthBusinessService = AuthBusinessService;

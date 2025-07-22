@@ -8,6 +8,9 @@ import { MMSEmployeeResponseDto } from '../../interfaces/dto/organization/reques
 import { DepartmentInfoEntity } from '../../domain/organization/department/entities/department-info.entity';
 import { EmployeeInfoEntity } from '../../domain/organization/employee/entities/employee-info.entity';
 import { DepartmentEmployeeEntity } from '@src/domain/organization/department-employee/entities/department-employee.entity';
+import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
+import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';
 
 /**
  * 조직 컨텍스트 서비스
@@ -157,18 +160,14 @@ export class OrganizationContextService {
     /**
      * 페이지네이션된 부서 목록을 조회한다
      */
-    async 페이지네이션된_부서_목록을_조회한다(limit: number, page: number): Promise<{ data: any[]; meta: any }> {
-        const result = await this.departmentDomainService.findPaginatedDepartments(page, limit);
+    async 페이지네이션된_부서_목록을_조회한다(
+        paginationQuery: PaginationQueryDto,
+    ): Promise<PaginatedResponseDto<DepartmentResponseDto>> {
+        return await this.departmentDomainService.findPaginatedDepartments(paginationQuery.page, paginationQuery.limit);
+    }
 
-        return {
-            data: result.departments,
-            meta: {
-                page,
-                limit,
-                total: result.total,
-                totalPages: Math.ceil(result.total / limit),
-            },
-        };
+    async 권한이_있는_부서_조회(userId: string): Promise<DepartmentInfoEntity[]> {
+        return await this.departmentDomainService.findAllDepartments();
     }
 
     /**
@@ -183,26 +182,12 @@ export class OrganizationContextService {
      */
     async 해당_부서_직원의_페이지네이션된_목록을_조회한다(
         departmentId: string,
-        limit: number,
-        page: number,
+        paginationQuery: PaginationQueryDto,
     ): Promise<{ data: any[]; meta: any }> {
-        const offset = (page - 1) * limit;
-
-        const result = await this.employeeDomainService.searchEmployeesWithCriteria({
+        return await this.employeeDomainService.searchEmployeesWithCriteria({
             departmentId,
-            limit,
-            offset,
+            paginationQuery,
         });
-
-        return {
-            data: result.employees,
-            meta: {
-                page,
-                limit,
-                total: result.total,
-                totalPages: Math.ceil(result.total / limit),
-            },
-        };
     }
 
     /**

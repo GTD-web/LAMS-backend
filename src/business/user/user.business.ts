@@ -1,11 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { UserContextService } from '@src/contexts/user/user-context.service';
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { SearchUserDto } from '@src/interfaces/dto/user/requests/search-user.dto';
 import { UserEntity } from '@src/domain/user/entities/user.entity';
 import { OrganizationContextService } from '@src/contexts/organization/organization-context.service';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { Injectable, Logger } from '@nestjs/common';
 
 /**
  * 사용자 비즈니스 서비스
@@ -25,10 +24,6 @@ export class UserBusinessService {
      * 사용자 목록 조회
      */
     async getUserList(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>> {
-        if (!paginationQuery.page || !paginationQuery.limit) {
-            throw new Error('페이지 정보가 필요합니다.');
-        }
-
         return await this.userContextService.페이지네이션된_사용자_목록을_조회한다(paginationQuery);
     }
 

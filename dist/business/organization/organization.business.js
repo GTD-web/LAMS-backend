@@ -8,7 +8,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var OrganizationBusinessService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrganizationBusinessService = void 0;
 const common_1 = require("@nestjs/common");
@@ -17,44 +16,37 @@ const department_response_dto_1 = require("../../interfaces/dto/organization/res
 const employee_response_dto_1 = require("../../interfaces/dto/organization/responses/employee-response.dto");
 const sync_organization_response_dto_1 = require("../../interfaces/dto/organization/responses/sync-organization-response.dto");
 const class_transformer_1 = require("class-transformer");
-let OrganizationBusinessService = OrganizationBusinessService_1 = class OrganizationBusinessService {
-    constructor(organizationContextService) {
+const user_context_service_1 = require("../../contexts/user/user-context.service");
+let OrganizationBusinessService = class OrganizationBusinessService {
+    constructor(organizationContextService, userContextService) {
         this.organizationContextService = organizationContextService;
-        this.logger = new common_1.Logger(OrganizationBusinessService_1.name);
+        this.userContextService = userContextService;
     }
     async syncOrganization() {
-        try {
-            const mmsDepartments = await this.organizationContextService.getDepartmentsFromMMS();
-            const mmsEmployees = await this.organizationContextService.getEmployeesFromMMS();
-            await this.organizationContextService.부서를_업데이트하고_없는부서는_삭제한다(mmsDepartments);
-            for (const mmsEmployee of mmsEmployees) {
-                const employee = await this.organizationContextService.직원을_업데이트한다(mmsEmployee);
-                if (mmsEmployee.department && mmsEmployee.status === '재직중') {
-                    await this.organizationContextService.직원_부서_중간테이블_데이터를_삭제_갱신한다(employee, mmsEmployee.department._id);
-                }
+        const mmsDepartments = await this.organizationContextService.getDepartmentsFromMMS();
+        const mmsEmployees = await this.organizationContextService.getEmployeesFromMMS();
+        await this.organizationContextService.부서를_업데이트하고_없는부서는_삭제한다(mmsDepartments);
+        for (const mmsEmployee of mmsEmployees) {
+            const employee = await this.organizationContextService.직원을_업데이트한다(mmsEmployee);
+            if (mmsEmployee.department && mmsEmployee.status === '재직중') {
+                await this.organizationContextService.직원_부서_중간테이블_데이터를_삭제_갱신한다(employee, mmsEmployee.department._id);
             }
-            this.logger.log('조직 동기화 완료');
-            return new sync_organization_response_dto_1.SyncOrganizationResponseDto();
         }
-        catch (error) {
-            this.logger.error('조직 동기화 실패', error.stack);
-            throw new Error('조직 동기화 중 오류가 발생했습니다. 관리자에게 문의하세요.');
-        }
+        return new sync_organization_response_dto_1.SyncOrganizationResponseDto();
     }
     async getDepartmentList(paginationQuery) {
         const { page = 1, limit = 10 } = paginationQuery;
         return await this.organizationContextService.페이지네이션된_부서_목록을_조회한다(limit, page);
+    }
+    async getDepartmentListByUser(userId) {
+        return await this.organizationContextService.권한이_있는_부서_조회(userId);
     }
     async toggleDepartmentExclusion(departmentId) {
         const result = await this.organizationContextService.부서의_제외_여부를_변경한다(departmentId);
         return (0, class_transformer_1.plainToInstance)(department_response_dto_1.DepartmentResponseDto, result);
     }
     async getEmployeeListByDepartment(departmentId, paginationQuery) {
-        if (!departmentId || departmentId.trim().length === 0) {
-            throw new Error('부서 ID가 필요합니다.');
-        }
-        const { page = 1, limit = 10 } = paginationQuery;
-        const result = await this.organizationContextService.해당_부서_직원의_페이지네이션된_목록을_조회한다(departmentId, limit, page);
+        const result = await this.organizationContextService.해당_부서_직원의_페이지네이션된_목록을_조회한다(departmentId, paginationQuery);
         await this.organizationContextService.직원들의_연차_정보를_갱신해서_보여준다();
         return result;
     }
@@ -71,8 +63,9 @@ let OrganizationBusinessService = OrganizationBusinessService_1 = class Organiza
     }
 };
 exports.OrganizationBusinessService = OrganizationBusinessService;
-exports.OrganizationBusinessService = OrganizationBusinessService = OrganizationBusinessService_1 = __decorate([
+exports.OrganizationBusinessService = OrganizationBusinessService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [organization_context_service_1.OrganizationContextService])
+    __metadata("design:paramtypes", [organization_context_service_1.OrganizationContextService,
+        user_context_service_1.UserContextService])
 ], OrganizationBusinessService);
 //# sourceMappingURL=organization.business.js.map

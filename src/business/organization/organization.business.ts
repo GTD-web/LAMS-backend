@@ -5,6 +5,7 @@ import { EmployeeResponseDto } from '@src/interfaces/dto/organization/responses/
 import { SyncOrganizationResponseDto } from '@src/interfaces/dto/organization/responses/sync-organization-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { plainToInstance } from 'class-transformer';
+import { UserContextService } from '@src/contexts/user/user-context.service';
 
 /**
  * 조직관리 비즈니스 서비스
@@ -13,39 +14,34 @@ import { plainToInstance } from 'class-transformer';
  */
 @Injectable()
 export class OrganizationBusinessService {
-    private readonly logger = new Logger(OrganizationBusinessService.name);
-
-    constructor(private readonly organizationContextService: OrganizationContextService) {}
+    constructor(
+        private readonly organizationContextService: OrganizationContextService,
+        private readonly userContextService: UserContextService,
+    ) {}
 
     /**
      * 조직 동기화 (외부 시스템 연동이므로 try-catch 유지)
      */
     async syncOrganization(): Promise<SyncOrganizationResponseDto> {
-        try {
-            const mmsDepartments = await this.organizationContextService.getDepartmentsFromMMS();
-            const mmsEmployees = await this.organizationContextService.getEmployeesFromMMS();
+        const mmsDepartments = await this.organizationContextService.getDepartmentsFromMMS();
+        const mmsEmployees = await this.organizationContextService.getEmployeesFromMMS();
 
-            // 1. 부서를 업데이트하고 없는 부서는 삭제한다
-            await this.organizationContextService.부서를_업데이트하고_없는부서는_삭제한다(mmsDepartments);
+        // 1. 부서를 업데이트하고 없는 부서는 삭제한다
+        await this.organizationContextService.부서를_업데이트하고_없는부서는_삭제한다(mmsDepartments);
 
-            for (const mmsEmployee of mmsEmployees) {
-                // 2. 직원을 업데이트한다
-                const employee = await this.organizationContextService.직원을_업데이트한다(mmsEmployee);
-                // 3. 직원 부서 중간테이블 데이터를 삭제 갱신한다
-                if (mmsEmployee.department && mmsEmployee.status === '재직중') {
-                    await this.organizationContextService.직원_부서_중간테이블_데이터를_삭제_갱신한다(
-                        employee,
-                        mmsEmployee.department._id,
-                    );
-                }
+        for (const mmsEmployee of mmsEmployees) {
+            // 2. 직원을 업데이트한다
+            const employee = await this.organizationContextService.직원을_업데이트한다(mmsEmployee);
+            // 3. 직원 부서 중간테이블 데이터를 삭제 갱신한다
+            if (mmsEmployee.department && mmsEmployee.status === '재직중') {
+                await this.organizationContextService.직원_부서_중간테이블_데이터를_삭제_갱신한다(
+                    employee,
+                    mmsEmployee.department._id,
+                );
             }
-
-            this.logger.log('조직 동기화 완료');
-            return new SyncOrganizationResponseDto();
-        } catch (error) {
-            this.logger.error('조직 동기화 실패', error.stack);
-            throw new Error('조직 동기화 중 오류가 발생했습니다. 관리자에게 문의하세요.');
         }
+
+        return new SyncOrganizationResponseDto();
     }
 
     /**
@@ -54,6 +50,13 @@ export class OrganizationBusinessService {
     async getDepartmentList(paginationQuery: PaginationQueryDto) {
         const { page = 1, limit = 10 } = paginationQuery;
         return await this.organizationContextService.페이지네이션된_부서_목록을_조회한다(limit, page);
+    }
+
+    /**
+     * 권한이 있는 부서 조회
+     */
+    async getDepartmentListByUser(userId: string) {
+        return await this.organizationContextService.권한이_있는_부서_조회(userId);
     }
 
     /**
@@ -68,17 +71,10 @@ export class OrganizationBusinessService {
      * 부서별 직원 목록 조회
      */
     async getEmployeeListByDepartment(departmentId: string, paginationQuery: PaginationQueryDto) {
-        if (!departmentId || departmentId.trim().length === 0) {
-            throw new Error('부서 ID가 필요합니다.');
-        }
-
-        const { page = 1, limit = 10 } = paginationQuery;
-
         // 1. 부서에 해당하는 직원 페이지네이션된 목록을 조회한다
         const result = await this.organizationContextService.해당_부서_직원의_페이지네이션된_목록을_조회한다(
             departmentId,
-            limit,
-            page,
+            paginationQuery,
         );
 
         // 2. 직원들의 연차 정보를 갱신해서 보여준다

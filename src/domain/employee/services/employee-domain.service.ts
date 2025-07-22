@@ -2,6 +2,9 @@ import { Injectable, Logger, BadRequestException, NotFoundException } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Not, IsNull, FindOptionsWhere, FindManyOptions, ILike } from 'typeorm';
 import { EmployeeInfoEntity } from '../entities/employee-info.entity';
+import { PaginatedResponseDto, PaginationMetaDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { EmployeeResponseDto } from '@src/interfaces/dto/organization/responses/employee-response.dto';
+import { plainToInstance } from 'class-transformer/types';
 
 /**
  * 직원 도메인 서비스
@@ -112,8 +115,8 @@ export class EmployeeDomainService {
         isExcludedFromCalculation?: boolean;
         keyword?: string;
         limit?: number;
-        offset?: number;
-    }): Promise<{ employees: EmployeeInfoEntity[]; total: number }> {
+        page?: number;
+    }): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
         const {
             employeeName,
             employeeNumber,
@@ -121,7 +124,7 @@ export class EmployeeDomainService {
             isExcludedFromCalculation,
             keyword,
             limit = 10,
-            offset = 0,
+            page = 1,
         } = searchCriteria;
 
         // 검색 조건 구성
@@ -177,16 +180,19 @@ export class EmployeeDomainService {
         const findOptions: FindManyOptions<EmployeeInfoEntity> = {
             where: whereConditions.length > 0 ? whereConditions : undefined,
             order: { employeeName: 'ASC' },
-            skip: offset,
+            skip: (page - 1) * limit,
             take: limit,
             relations: ['department'],
         };
 
         // 총 개수와 데이터 조회
         const [employees, total] = await this.employeeRepository.findAndCount(findOptions);
+        const meta = new PaginationMetaDto(page, limit, total);
+        const employeeDtos = employees.map((employee) => plainToInstance(EmployeeResponseDto, employee));
+        const paginatedResult = new PaginatedResponseDto(employeeDtos, meta);
 
         this.logger.log(`직원 검색 완료: ${employees.length}명 조회 (총 ${total}명)`);
-        return { employees, total };
+        return paginatedResult;
     }
 
     /**

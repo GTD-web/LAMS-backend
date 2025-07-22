@@ -5,6 +5,9 @@ import { MMSDepartmentResponseDto } from '../../interfaces/dto/organization/requ
 import { MMSEmployeeResponseDto } from '../../interfaces/dto/organization/requests/mms-employee-import.dto';
 import { DepartmentInfoEntity } from '../../domain/organization/department/entities/department-info.entity';
 import { EmployeeInfoEntity } from '../../domain/organization/employee/entities/employee-info.entity';
+import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
+import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';
 export declare class OrganizationContextService {
     private readonly departmentDomainService;
     private readonly employeeDomainService;
@@ -17,12 +20,10 @@ export declare class OrganizationContextService {
     부서를_업데이트하고_없는부서는_삭제한다(mmsDepartments: MMSDepartmentResponseDto[]): Promise<void>;
     직원을_업데이트한다(mmsEmployee: MMSEmployeeResponseDto): Promise<EmployeeInfoEntity>;
     직원_부서_중간테이블_데이터를_삭제_갱신한다(employee: EmployeeInfoEntity, departmentId: string): Promise<void>;
-    페이지네이션된_부서_목록을_조회한다(limit: number, page: number): Promise<{
-        data: any[];
-        meta: any;
-    }>;
+    페이지네이션된_부서_목록을_조회한다(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<DepartmentResponseDto>>;
+    권한이_있는_부서_조회(userId: string): Promise<DepartmentInfoEntity[]>;
     부서의_제외_여부를_변경한다(departmentId: string): Promise<DepartmentInfoEntity>;
-    해당_부서_직원의_페이지네이션된_목록을_조회한다(departmentId: string, limit: number, page: number): Promise<{
+    해당_부서_직원의_페이지네이션된_목록을_조회한다(departmentId: string, paginationQuery: PaginationQueryDto): Promise<{
         data: any[];
         meta: any;
     }>;

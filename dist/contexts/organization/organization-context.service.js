@@ -113,37 +113,20 @@ let OrganizationContextService = OrganizationContextService_1 = class Organizati
         departmentEmployee.employee = employee;
         await this.departmentEmployeeDomainService.saveDepartmentEmployee(employee.department, employee);
     }
-    async 페이지네이션된_부서_목록을_조회한다(limit, page) {
-        const result = await this.departmentDomainService.findPaginatedDepartments(page, limit);
-        return {
-            data: result.departments,
-            meta: {
-                page,
-                limit,
-                total: result.total,
-                totalPages: Math.ceil(result.total / limit),
-            },
-        };
+    async 페이지네이션된_부서_목록을_조회한다(paginationQuery) {
+        return await this.departmentDomainService.findPaginatedDepartments(paginationQuery.page, paginationQuery.limit);
+    }
+    async 권한이_있는_부서_조회(userId) {
+        return await this.departmentDomainService.findAllDepartments();
     }
     async 부서의_제외_여부를_변경한다(departmentId) {
         return await this.departmentDomainService.toggleDepartmentExclusion(departmentId);
     }
-    async 해당_부서_직원의_페이지네이션된_목록을_조회한다(departmentId, limit, page) {
-        const offset = (page - 1) * limit;
-        const result = await this.employeeDomainService.searchEmployeesWithCriteria({
+    async 해당_부서_직원의_페이지네이션된_목록을_조회한다(departmentId, paginationQuery) {
+        return await this.employeeDomainService.searchEmployeesWithCriteria({
             departmentId,
-            limit,
-            offset,
+            paginationQuery,
         });
-        return {
-            data: result.employees,
-            meta: {
-                page,
-                limit,
-                total: result.total,
-                totalPages: Math.ceil(result.total / limit),
-            },
-        };
     }
     async 직원들의_연차_정보를_갱신해서_보여준다() {
         this.logger.log('직원들의 연차 정보 갱신 완료');

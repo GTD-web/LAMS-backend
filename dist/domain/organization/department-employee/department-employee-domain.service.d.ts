@@ -8,7 +8,6 @@ export declare class DepartmentEmployeeDomainService {
     constructor(departmentEmployeeRepository: Repository<DepartmentEmployeeEntity>);
     saveDepartmentEmployee(department: DepartmentInfoEntity, employee: EmployeeInfoEntity): Promise<DepartmentEmployeeEntity>;
     deleteDepartmentEmployeeByEmployeeId(employeeId: string): Promise<void>;
-    deleteDepartmentEmployeeByDepartmentId(departmentId: string): Promise<void>;
     findDepartmentEmployeesByDepartmentId(departmentId: string): Promise<DepartmentEmployeeEntity[]>;
     findDepartmentEmployeesByEmployeeId(employeeId: string): Promise<DepartmentEmployeeEntity[]>;
     deleteAllDepartmentEmployees(): Promise<void>;

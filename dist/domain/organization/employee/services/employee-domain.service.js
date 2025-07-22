@@ -18,6 +18,9 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const employee_info_entity_1 = require("../entities/employee-info.entity");
+const pagination_response_dto_1 = require("../../../../common/dtos/pagination/pagination-response.dto");
+const employee_response_dto_1 = require("../../../../interfaces/dto/organization/responses/employee-response.dto");
+const types_1 = require("class-transformer/types");
 let EmployeeDomainService = EmployeeDomainService_1 = class EmployeeDomainService {
     constructor(employeeRepository) {
         this.employeeRepository = employeeRepository;
@@ -77,7 +80,7 @@ let EmployeeDomainService = EmployeeDomainService_1 = class EmployeeDomainServic
         });
     }
     async searchEmployeesWithCriteria(searchCriteria) {
-        const { employeeName, employeeNumber, departmentId, isExcludedFromCalculation, keyword, limit = 10, offset = 0, } = searchCriteria;
+        const { employeeName, employeeNumber, departmentId, isExcludedFromCalculation, keyword, limit = 10, page = 1, } = searchCriteria;
         const whereConditions = [];
         if (keyword) {
             const keywordConditions = {
@@ -122,13 +125,16 @@ let EmployeeDomainService = EmployeeDomainService_1 = class EmployeeDomainServic
         const findOptions = {
             where: whereConditions.length > 0 ? whereConditions : undefined,
             order: { employeeName: 'ASC' },
-            skip: offset,
+            skip: (page - 1) * limit,
             take: limit,
             relations: ['department'],
         };
         const [employees, total] = await this.employeeRepository.findAndCount(findOptions);
+        const meta = new pagination_response_dto_1.PaginationMetaDto(page, limit, total);
+        const employeeDtos = employees.map((employee) => (0, types_1.plainToInstance)(employee_response_dto_1.EmployeeResponseDto, employee));
+        const paginatedResult = new pagination_response_dto_1.PaginatedResponseDto(employeeDtos, meta);
         this.logger.log(`직원 검색 완료: ${employees.length}명 조회 (총 ${total}명)`);
-        return { employees, total };
+        return paginatedResult;
     }
     async searchEmployees(searchTerm) {
         return await this.employeeRepository.find({

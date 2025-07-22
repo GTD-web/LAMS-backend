@@ -16,65 +16,71 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserDomainService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
+const bcrypt = require("bcrypt");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("../entities/user.entity");
+const pagination_response_dto_1 = require("../../../common/dtos/pagination/pagination-response.dto");
+const user_response_dto_1 = require("../../../interfaces/dto/organization/responses/user-response.dto");
+const class_transformer_1 = require("class-transformer");
 let UserDomainService = UserDomainService_1 = class UserDomainService {
     constructor(userRepository) {
         this.userRepository = userRepository;
         this.logger = new common_1.Logger(UserDomainService_1.name);
     }
     async changeUserPassword(userId, currentPassword, newPassword) {
-        if (!userId || !currentPassword || !newPassword || currentPassword === newPassword) {
-            throw new common_1.BadRequestException('유효하지 않은 비밀번호 변경 정보입니다.');
-        }
-        const user = await this.findUserById(userId);
+        const user = await this.userRepository.findOne({
+            where: { userId },
+        });
         if (!user) {
-            throw new common_1.NotFoundException('사용자를 찾을 수 없습니다.');
+            throw new common_1.NotFoundException('ID에 해당하는 사용자를 찾을 수 없습니다.');
         }
-        if (!user.validatePassword(currentPassword)) {
+        if (!this.validatePassword(user, currentPassword)) {
             throw new common_1.BadRequestException('현재 비밀번호가 올바르지 않습니다.');
         }
-        const hashedPassword = user.updateHashedPassword(newPassword);
+        const hashedPassword = this.updateHashedPassword(newPassword);
         user.password = hashedPassword;
         const updatedUser = await this.userRepository.save(user);
         this.logger.log(`비밀번호 변경 완료: ${updatedUser.email}`);
         return updatedUser;
     }
     async validateUserCredentials(email, password) {
-        if (!email || !password) {
-            throw new common_1.BadRequestException('유효하지 않은 로그인 정보입니다.');
-        }
         const user = await this.userRepository.findOne({
             where: { email: email.toLowerCase().trim() },
         });
-        if (!user || !user.validatePassword(password)) {
-            this.logger.warn(`로그인 실패: ${email}`);
-            return null;
+        if (!user) {
+            throw new common_1.NotFoundException('이메일에 해당하는 사용자를 찾을 수 없습니다.');
+        }
+        if (!this.validatePassword(user, password)) {
+            throw new common_1.UnauthorizedException('비밀번호가 일치하지 않습니다.');
         }
         this.logger.log(`로그인 성공: ${user.email}`);
         return user;
     }
     async findUserById(userId) {
-        if (!userId || userId.trim().length === 0) {
-            throw new common_1.BadRequestException('사용자 ID가 필요합니다.');
-        }
         return await this.userRepository.findOne({
             where: { userId },
         });
     }
-    async findUserByEmail(email) {
-        if (!email || email.trim().length === 0) {
-            throw new common_1.BadRequestException('이메일이 필요합니다.');
-        }
-        return await this.userRepository.findOne({
-            where: { email: email.toLowerCase().trim() },
+    async getUserById(userId) {
+        const user = await this.userRepository.findOne({
+            where: { userId },
         });
+        if (!user) {
+            throw new common_1.NotFoundException('ID에 해당하는 사용자를 찾을 수 없습니다.');
+        }
+        return user;
+    }
+    async findUserAuthority(userId) {
+        const user = await this.userRepository.findOne({
+            where: { userId },
+            relations: ['accessableDepartments', 'reviewableDepartments'],
+        });
+        return user;
     }
     async createUser(userData) {
-        if (!userData.email || !userData.password) {
-            throw new common_1.BadRequestException('이메일과 비밀번호가 필요합니다.');
-        }
-        const existingUser = await this.findUserByEmail(userData.email);
+        const existingUser = await this.userRepository.findOne({
+            where: { email: userData.email },
+        });
         if (existingUser) {
             throw new common_1.ConflictException('이미 존재하는 이메일입니다.');
         }
@@ -83,73 +89,73 @@ let UserDomainService = UserDomainService_1 = class UserDomainService {
         this.logger.log(`사용자 생성 완료: ${savedUser.email}`);
         return savedUser;
     }
-    async updateUser(userId, updateData) {
-        if (!userId || userId.trim().length === 0) {
-            throw new common_1.BadRequestException('사용자 ID가 필요합니다.');
-        }
-        const user = await this.findUserById(userId);
-        if (!user) {
-            throw new common_1.NotFoundException('사용자를 찾을 수 없습니다.');
-        }
-        Object.assign(user, updateData);
-        const updatedUser = await this.userRepository.save(user);
-        this.logger.log(`사용자 정보 수정 완료: ${updatedUser.email}`);
-        return updatedUser;
-    }
     async updateUserAuthority(user, department, type, action) {
         if (type === 'access') {
             if (action === 'add') {
-                user.includeAccessableDepartment(department);
+                this.includeAccessableDepartment(user, department);
             }
             else {
-                user.excludeAccessableDepartment(department);
+                this.excludeAccessableDepartment(user, department);
             }
         }
         else {
             if (action === 'add') {
-                user.includeReviewableDepartment(department);
+                this.includeReviewableDepartment(user, department);
             }
             else {
-                user.excludeReviewableDepartment(department);
+                this.excludeReviewableDepartment(user, department);
             }
         }
         const updatedUser = await this.userRepository.save(user);
         this.logger.log(`사용자 접근 권한 수정 완료: ${updatedUser.email}`);
         return updatedUser;
     }
-    async deleteUser(userId) {
-        if (!userId || userId.trim().length === 0) {
-            throw new common_1.BadRequestException('사용자 ID가 필요합니다.');
-        }
-        const user = await this.findUserById(userId);
-        if (!user) {
-            throw new common_1.NotFoundException('사용자를 찾을 수 없습니다.');
-        }
-        await this.userRepository.remove(user);
-        this.logger.log(`사용자 삭제 완료: ${user.email}`);
-    }
-    async findPaginatedUsers(page, limit) {
+    async findPaginatedUsers(paginationQuery) {
+        const { page, limit } = paginationQuery;
         const skip = (page - 1) * limit;
         const [users, total] = await this.userRepository.findAndCount({
             skip,
             take: limit,
             order: { createdAt: 'DESC' },
         });
-        this.logger.log(`페이지네이션된 사용자 목록 조회: ${users.length}명 조회`);
-        return { users, total };
+        const meta = new pagination_response_dto_1.PaginationMetaDto(page, limit, total);
+        const userDtos = users.map((user) => (0, class_transformer_1.plainToInstance)(user_response_dto_1.UserResponseDto, user));
+        const paginatedResult = new pagination_response_dto_1.PaginatedResponseDto(userDtos, meta);
+        return paginatedResult;
     }
-    async searchUserById(userId) {
-        if (!userId || userId.trim().length === 0) {
-            throw new common_1.BadRequestException('사용자 ID가 필요합니다.');
+    includeAccessableDepartment(user, department) {
+        if (!user.accessableDepartments) {
+            user.accessableDepartments = [];
         }
-        const user = await this.userRepository.findOne({
-            where: { userId },
-        });
-        this.logger.log(`사용자 ID 검색 완료: ${user ? '발견' : '없음'}`);
+        const isAccessableDepartment = user.accessableDepartments.some((dept) => dept.departmentId === department.departmentId);
+        if (isAccessableDepartment) {
+            throw new common_1.ConflictException('이미 존재하는 접근 가능 부서입니다.');
+        }
+        user.accessableDepartments.push(department);
         return user;
     }
-    async comparePassword(user, password) {
-        return await bcrypt.compare(password, user.password);
+    includeReviewableDepartment(user, department) {
+        if (!user.reviewableDepartments) {
+            user.reviewableDepartments = [];
+        }
+        const isReviewableDepartment = user.reviewableDepartments.some((dept) => dept.departmentId === department.departmentId);
+        if (isReviewableDepartment) {
+            throw new common_1.ConflictException('이미 존재하는 리뷰 가능 부서입니다.');
+        }
+        user.reviewableDepartments.push(department);
+        return user;
+    }
+    excludeAccessableDepartment(user, department) {
+        user.accessableDepartments = user.accessableDepartments.filter((dept) => dept.departmentId !== department.departmentId);
+    }
+    excludeReviewableDepartment(user, department) {
+        user.reviewableDepartments = user.reviewableDepartments.filter((dept) => dept.departmentId !== department.departmentId);
+    }
+    validatePassword(user, password) {
+        return bcrypt.compareSync(password, user.password);
+    }
+    updateHashedPassword(password) {
+        return bcrypt.hashSync(password, 10);
     }
 };
 exports.UserDomainService = UserDomainService;

@@ -35,10 +35,6 @@ let DepartmentEmployeeDomainService = DepartmentEmployeeDomainService_1 = class 
         await this.departmentEmployeeRepository.delete({ employee: { employeeId } });
         this.logger.log(`직원 ID로 부서-직원 관계 삭제: ${employeeId}`);
     }
-    async deleteDepartmentEmployeeByDepartmentId(departmentId) {
-        await this.departmentEmployeeRepository.delete({ department: { departmentId } });
-        this.logger.log(`부서 ID로 부서-직원 관계 삭제: ${departmentId}`);
-    }
     async findDepartmentEmployeesByDepartmentId(departmentId) {
         const relations = await this.departmentEmployeeRepository.find({
             where: { department: { departmentId } },

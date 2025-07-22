@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, FindManyOptions, ILike } from 'typeorm';
 import { DepartmentInfoEntity } from '../entities/department-info.entity';
 import { MMSDepartmentResponseDto } from '@src/interfaces/dto/organization/requests/mms-department-import.dto';
+import { PaginationMetaDto, PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';
+import { plainToInstance } from 'class-transformer/types';
 
 /**
  * 부서 도메인 서비스
@@ -58,20 +61,23 @@ export class DepartmentDomainService {
         page: number,
         limit: number,
         isExclude?: boolean,
-    ): Promise<{ departments: DepartmentInfoEntity[]; total: number }> {
-        const skip = (page - 1) * limit;
+    ): Promise<PaginatedResponseDto<DepartmentResponseDto>> {
         const whereCondition = isExclude !== undefined ? { isExclude } : {};
-
-        const [departments, total] = await this.departmentRepository.findAndCount({
+        const findOptions: FindManyOptions<DepartmentInfoEntity> = {
             where: whereCondition,
-            skip,
-            take: limit,
             order: { createdAt: 'DESC' },
+            skip: (page - 1) * limit,
+            take: limit,
             relations: ['employees', 'employees.employee'],
-        });
+        };
+        const [departments, total] = await this.departmentRepository.findAndCount(findOptions);
+
+        const meta = new PaginationMetaDto(page, limit, total);
+        const departmentDtos = departments.map((department) => plainToInstance(DepartmentResponseDto, department));
+        const paginatedResult = new PaginatedResponseDto(departmentDtos, meta);
 
         this.logger.log(`페이지네이션된 부서 목록 조회: ${departments.length}개 조회`);
-        return { departments, total };
+        return paginatedResult;
     }
 
     /**

@@ -11,9 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var UserBusinessService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserBusinessService = void 0;
-const common_1 = require("@nestjs/common");
 const user_context_service_1 = require("../../contexts/user/user-context.service");
 const organization_context_service_1 = require("../../contexts/organization/organization-context.service");
+const common_1 = require("@nestjs/common");
 let UserBusinessService = UserBusinessService_1 = class UserBusinessService {
     constructor(userContextService, organizationContextService) {
         this.userContextService = userContextService;
@@ -21,9 +21,6 @@ let UserBusinessService = UserBusinessService_1 = class UserBusinessService {
         this.logger = new common_1.Logger(UserBusinessService_1.name);
     }
     async getUserList(paginationQuery) {
-        if (!paginationQuery.page || !paginationQuery.limit) {
-            throw new Error('페이지 정보가 필요합니다.');
-        }
         return await this.userContextService.페이지네이션된_사용자_목록을_조회한다(paginationQuery);
     }
     async getUserProfile(userId) {

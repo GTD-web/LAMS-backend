@@ -33,16 +33,13 @@ let AuthController = class AuthController {
     async login(loginDto) {
         return this.authBusinessService.login(loginDto.email, loginDto.password);
     }
-    async getProfile(user, token) {
-        return this.authBusinessService.getProfile(token, user.userId);
-    }
     async verifyToken(token) {
         return {
             valid: this.authBusinessService.verifyToken(token),
         };
     }
     async changePassword(user, changePasswordDto) {
-        return this.authBusinessService.비밀번호를_변경한다(user.userId, changePasswordDto.currentPassword, changePasswordDto.newPassword);
+        return this.authBusinessService.changeUserPassword(user.userId, changePasswordDto.currentPassword, changePasswordDto.newPassword);
     }
 };
 exports.AuthController = AuthController;
@@ -78,32 +75,6 @@ __decorate([
     __metadata("design:paramtypes", [login_dto_1.LoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
-__decorate([
-    (0, common_1.Get)('profile'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({
-        summary: '사용자 프로필 조회',
-        description: '현재 로그인된 사용자의 프로필 정보를 조회합니다.',
-    }),
-    (0, swagger_1.ApiOkResponse)({
-        description: '프로필 조회 성공',
-        type: user_response_dto_1.UserResponseDto,
-    }),
-    (0, swagger_1.ApiUnauthorizedResponse)({
-        description: '인증 실패 - 유효하지 않은 토큰',
-        type: error_response_dto_1.ErrorResponseDto,
-    }),
-    (0, swagger_1.ApiInternalServerErrorResponse)({
-        description: '서버 내부 오류',
-        type: error_response_dto_1.ErrorResponseDto,
-    }),
-    __param(0, (0, get_user_decorator_1.GetUser)()),
-    __param(1, (0, common_1.Headers)('authorization')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_entity_1.UserEntity, String]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "getProfile", null);
 __decorate([
     (0, common_1.Get)('verify'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

@@ -1,8 +1,20 @@
-import { Injectable, Logger, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+    Injectable,
+    Logger,
+    BadRequestException,
+    NotFoundException,
+    ConflictException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
+import { PaginatedResponseDto, PaginationMetaDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
+import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 /**
  * 사용자 도메인 서비스
@@ -23,21 +35,20 @@ export class UserDomainService {
      * 사용자 비밀번호 변경
      */
     async changeUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<UserEntity> {
-        if (!userId || !currentPassword || !newPassword || currentPassword === newPassword) {
-            throw new BadRequestException('유효하지 않은 비밀번호 변경 정보입니다.');
-        }
+        const user = await this.userRepository.findOne({
+            where: { userId },
+        });
 
-        const user = await this.findUserById(userId);
         if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
+            throw new NotFoundException('ID에 해당하는 사용자를 찾을 수 없습니다.');
         }
 
         // 현재 비밀번호 확인
-        if (!user.validatePassword(currentPassword)) {
+        if (!this.validatePassword(user, currentPassword)) {
             throw new BadRequestException('현재 비밀번호가 올바르지 않습니다.');
         }
 
-        const hashedPassword = user.updateHashedPassword(newPassword);
+        const hashedPassword = this.updateHashedPassword(newPassword);
         user.password = hashedPassword;
 
         const updatedUser = await this.userRepository.save(user);
@@ -49,17 +60,16 @@ export class UserDomainService {
      * 사용자 인증 검증
      */
     async validateUserCredentials(email: string, password: string): Promise<UserEntity | null> {
-        if (!email || !password) {
-            throw new BadRequestException('유효하지 않은 로그인 정보입니다.');
-        }
-
         const user = await this.userRepository.findOne({
             where: { email: email.toLowerCase().trim() },
         });
 
-        if (!user || !user.validatePassword(password)) {
-            this.logger.warn(`로그인 실패: ${email}`);
-            return null;
+        if (!user) {
+            throw new NotFoundException('이메일에 해당하는 사용자를 찾을 수 없습니다.');
+        }
+
+        if (!this.validatePassword(user, password)) {
+            throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
         }
 
         this.logger.log(`로그인 성공: ${user.email}`);
@@ -70,37 +80,42 @@ export class UserDomainService {
      * 사용자 ID로 조회
      */
     async findUserById(userId: string): Promise<UserEntity | null> {
-        if (!userId || userId.trim().length === 0) {
-            throw new BadRequestException('사용자 ID가 필요합니다.');
-        }
-
         return await this.userRepository.findOne({
             where: { userId },
         });
     }
 
     /**
-     * 이메일로 사용자 조회
+     * 사용자 ID로 조회
      */
-    async findUserByEmail(email: string): Promise<UserEntity | null> {
-        if (!email || email.trim().length === 0) {
-            throw new BadRequestException('이메일이 필요합니다.');
+    async getUserById(userId: string): Promise<UserEntity> {
+        const user = await this.userRepository.findOne({
+            where: { userId },
+        });
+
+        if (!user) {
+            throw new NotFoundException('ID에 해당하는 사용자를 찾을 수 없습니다.');
         }
 
-        return await this.userRepository.findOne({
-            where: { email: email.toLowerCase().trim() },
+        return user;
+    }
+
+    async findUserAuthority(userId: string): Promise<UserEntity> {
+        const user = await this.userRepository.findOne({
+            where: { userId },
+            relations: ['accessableDepartments', 'reviewableDepartments'],
         });
+        return user;
     }
 
     /**
      * 사용자 생성
      */
     async createUser(userData: Partial<UserEntity>): Promise<UserEntity> {
-        if (!userData.email || !userData.password) {
-            throw new BadRequestException('이메일과 비밀번호가 필요합니다.');
-        }
+        const existingUser = await this.userRepository.findOne({
+            where: { email: userData.email },
+        });
 
-        const existingUser = await this.findUserByEmail(userData.email);
         if (existingUser) {
             throw new ConflictException('이미 존재하는 이메일입니다.');
         }
@@ -112,26 +127,6 @@ export class UserDomainService {
         return savedUser;
     }
 
-    /**
-     * 사용자 정보 수정
-     */
-    async updateUser(userId: string, updateData: Partial<UserEntity>): Promise<UserEntity> {
-        if (!userId || userId.trim().length === 0) {
-            throw new BadRequestException('사용자 ID가 필요합니다.');
-        }
-
-        const user = await this.findUserById(userId);
-        if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
-        }
-
-        Object.assign(user, updateData);
-        const updatedUser = await this.userRepository.save(user);
-
-        this.logger.log(`사용자 정보 수정 완료: ${updatedUser.email}`);
-        return updatedUser;
-    }
-
     async updateUserAuthority(
         user: UserEntity,
         department: DepartmentInfoEntity,
@@ -140,15 +135,15 @@ export class UserDomainService {
     ): Promise<UserEntity> {
         if (type === 'access') {
             if (action === 'add') {
-                user.includeAccessableDepartment(department);
+                this.includeAccessableDepartment(user, department);
             } else {
-                user.excludeAccessableDepartment(department);
+                this.excludeAccessableDepartment(user, department);
             }
         } else {
             if (action === 'add') {
-                user.includeReviewableDepartment(department);
+                this.includeReviewableDepartment(user, department);
             } else {
-                user.excludeReviewableDepartment(department);
+                this.excludeReviewableDepartment(user, department);
             }
         }
 
@@ -158,26 +153,10 @@ export class UserDomainService {
     }
 
     /**
-     * 사용자 삭제
-     */
-    async deleteUser(userId: string): Promise<void> {
-        if (!userId || userId.trim().length === 0) {
-            throw new BadRequestException('사용자 ID가 필요합니다.');
-        }
-
-        const user = await this.findUserById(userId);
-        if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
-        }
-
-        await this.userRepository.remove(user);
-        this.logger.log(`사용자 삭제 완료: ${user.email}`);
-    }
-
-    /**
      * 페이지네이션된 사용자 목록 조회
      */
-    async findPaginatedUsers(page: number, limit: number): Promise<{ users: UserEntity[]; total: number }> {
+    async findPaginatedUsers(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>> {
+        const { page, limit } = paginationQuery;
         const skip = (page - 1) * limit;
 
         const [users, total] = await this.userRepository.findAndCount({
@@ -186,27 +165,68 @@ export class UserDomainService {
             order: { createdAt: 'DESC' },
         });
 
-        this.logger.log(`페이지네이션된 사용자 목록 조회: ${users.length}명 조회`);
-        return { users, total };
+        const meta = new PaginationMetaDto(page, limit, total);
+        const userDtos = users.map((user) => plainToInstance(UserResponseDto, user));
+        const paginatedResult = new PaginatedResponseDto(userDtos, meta);
+
+        return paginatedResult;
     }
 
-    /**
-     * 사용자 ID로 단일 검색
-     */
-    async searchUserById(userId: string): Promise<UserEntity | null> {
-        if (!userId || userId.trim().length === 0) {
-            throw new BadRequestException('사용자 ID가 필요합니다.');
+    // ==================== 사용자 Entity 메서드 ====================
+
+    private includeAccessableDepartment(user: UserEntity, department: DepartmentInfoEntity): UserEntity {
+        if (!user.accessableDepartments) {
+            user.accessableDepartments = [];
         }
 
-        const user = await this.userRepository.findOne({
-            where: { userId },
-        });
+        const isAccessableDepartment = user.accessableDepartments.some(
+            (dept) => dept.departmentId === department.departmentId,
+        );
 
-        this.logger.log(`사용자 ID 검색 완료: ${user ? '발견' : '없음'}`);
+        if (isAccessableDepartment) {
+            throw new ConflictException('이미 존재하는 접근 가능 부서입니다.');
+        }
+
+        user.accessableDepartments.push(department);
+
         return user;
     }
 
-    async comparePassword(user: UserEntity, password: string): Promise<boolean> {
-        return await bcrypt.compare(password, user.password);
+    private includeReviewableDepartment(user: UserEntity, department: DepartmentInfoEntity) {
+        if (!user.reviewableDepartments) {
+            user.reviewableDepartments = [];
+        }
+
+        const isReviewableDepartment = user.reviewableDepartments.some(
+            (dept) => dept.departmentId === department.departmentId,
+        );
+
+        if (isReviewableDepartment) {
+            throw new ConflictException('이미 존재하는 리뷰 가능 부서입니다.');
+        }
+
+        user.reviewableDepartments.push(department);
+
+        return user;
+    }
+
+    private excludeAccessableDepartment(user: UserEntity, department: DepartmentInfoEntity) {
+        user.accessableDepartments = user.accessableDepartments.filter(
+            (dept) => dept.departmentId !== department.departmentId,
+        );
+    }
+
+    private excludeReviewableDepartment(user: UserEntity, department: DepartmentInfoEntity) {
+        user.reviewableDepartments = user.reviewableDepartments.filter(
+            (dept) => dept.departmentId !== department.departmentId,
+        );
+    }
+
+    private validatePassword(user: UserEntity, password: string) {
+        return bcrypt.compareSync(password, user.password);
+    }
+
+    private updateHashedPassword(password: string) {
+        return bcrypt.hashSync(password, 10);
     }
 }

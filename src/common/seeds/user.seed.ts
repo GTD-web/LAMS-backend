@@ -4,10 +4,6 @@ import { Repository } from 'typeorm';
 import { UserRole } from '@src/domain/user/enum/user.enum';
 import { UserEntity } from '@src/domain/user/entities/user.entity';
 
-/**
- * ?�용???�드 ?�이???�비??
- * - 초기 관리자 계정 ?�성
- */
 @Injectable()
 export class UserSeedService {
     private readonly logger = new Logger(UserSeedService.name);
@@ -17,13 +13,8 @@ export class UserSeedService {
         private readonly lamsUserRepository: Repository<UserEntity>,
     ) {}
 
-    /**
-     * 관리자 계정 ?�드 ?�이???�성
-     * - 중복 방�?�??�해 기존 계정 존재 ?��? ?�인
-     */
     async seedAdminUser(): Promise<void> {
         try {
-            // 기존 admin 계정 존재 ?��? ?�인
             const existingAdmin = await this.lamsUserRepository.findOne({
                 where: { username: 'admin' },
             });
@@ -36,7 +27,7 @@ export class UserSeedService {
             // 관리자 계정 ?�성
             const adminUser = new UserEntity();
             adminUser.username = 'admin';
-            adminUser.password = 'fnalfmdjemals'; // BeforeInsert?�서 ?�동 ?�싱??
+            adminUser.password = 'fnalfmdjemals';
             adminUser.email = 'admin@lams.space';
             adminUser.roles = [
                 UserRole.SYSTEM_ADMIN,
@@ -45,10 +36,6 @@ export class UserSeedService {
                 UserRole.LRIM_ADMIN,
             ];
             adminUser.isActive = true;
-            adminUser.isIntegrated = false;
-            adminUser.hasAccessAuthority = true;
-            adminUser.hasReviewAuthority = true;
-            adminUser.type = 'UserEntity';
 
             await this.lamsUserRepository.save(adminUser);
 

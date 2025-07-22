@@ -45,14 +45,6 @@ export class DepartmentEmployeeDomainService {
     }
 
     /**
-     * 부서 ID로 부서-직원 관계 삭제
-     */
-    async deleteDepartmentEmployeeByDepartmentId(departmentId: string): Promise<void> {
-        await this.departmentEmployeeRepository.delete({ department: { departmentId } });
-        this.logger.log(`부서 ID로 부서-직원 관계 삭제: ${departmentId}`);
-    }
-
-    /**
      * 부서별 직원 관계 조회
      */
     async findDepartmentEmployeesByDepartmentId(departmentId: string): Promise<DepartmentEmployeeEntity[]> {

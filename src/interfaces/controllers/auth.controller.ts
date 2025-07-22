@@ -61,29 +61,6 @@ export class AuthController {
         return this.authBusinessService.login(loginDto.email, loginDto.password);
     }
 
-    @Get('profile')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @ApiBearerAuth()
-    @ApiOperation({
-        summary: '사용자 프로필 조회',
-        description: '현재 로그인된 사용자의 프로필 정보를 조회합니다.',
-    })
-    @ApiOkResponse({
-        description: '프로필 조회 성공',
-        type: UserResponseDto,
-    })
-    @ApiUnauthorizedResponse({
-        description: '인증 실패 - 유효하지 않은 토큰',
-        type: ErrorResponseDto,
-    })
-    @ApiInternalServerErrorResponse({
-        description: '서버 내부 오류',
-        type: ErrorResponseDto,
-    })
-    async getProfile(@GetUser() user: UserEntity, @Headers('authorization') token: string): Promise<UserResponseDto> {
-        return this.authBusinessService.getProfile(token, user.userId);
-    }
-
     @Get('verify')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @ApiBearerAuth()
@@ -151,7 +128,7 @@ export class AuthController {
         @GetUser() user: UserEntity,
         @Body() changePasswordDto: ChangePasswordDto,
     ): Promise<UserResponseDto> {
-        return this.authBusinessService.비밀번호를_변경한다(
+        return this.authBusinessService.changeUserPassword(
             user.userId,
             changePasswordDto.currentPassword,
             changePasswordDto.newPassword,
