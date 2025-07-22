@@ -153,13 +153,19 @@ export class OrganizationContextService {
     /**
      * 부서에 해당하는 직원 페이지네이션된 목록을 조회한다
      */
-    async 부서에_해당하는_직원_페이지네이션된_목록을_조회한다(
+    async 해당_부서_직원의_페이지네이션된_목록을_조회한다(
         departmentId: string,
         limit: number,
         page: number,
     ): Promise<{ data: any[]; meta: any }> {
-        // 실제 구현에서는 findPaginatedEmployeesByDepartment 메서드를 Employee Domain Service에 추가해야 함
-        const result = { employees: [], total: 0 };
+        const offset = (page - 1) * limit;
+
+        // searchEmployeesWithCriteria를 사용하여 해당 부서의 직원들을 조회
+        const result = await this.employeeDomainService.searchEmployeesWithCriteria({
+            departmentId,
+            limit,
+            offset,
+        });
 
         return {
             data: result.employees,
