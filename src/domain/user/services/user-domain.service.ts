@@ -1,6 +1,6 @@
 import { Injectable, Logger, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Repository, FindOptionsWhere, ILike, Or } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 
@@ -49,7 +49,7 @@ export class UserDomainService {
      * 사용자 인증 검증
      */
     async validateUserCredentials(email: string, password: string): Promise<UserEntity | null> {
-        if (!email || !password || email.trim().length === 0 || password.trim().length === 0) {
+        if (!email || !password) {
             throw new BadRequestException('유효하지 않은 로그인 정보입니다.');
         }
 
@@ -206,37 +206,7 @@ export class UserDomainService {
         return user;
     }
 
-    /**
-     * 이메일로 사용자 검색
-     */
-    async searchUsersByEmail(email: string): Promise<UserEntity[]> {
-        if (!email || email.trim().length === 0) {
-            throw new BadRequestException('이메일이 필요합니다.');
-        }
-
-        const users = await this.userRepository.find({
-            where: { email: ILike(`%${email}%`) },
-            order: { createdAt: 'DESC' },
-        });
-
-        this.logger.log(`이메일 검색 완료: ${users.length}명 조회`);
-        return users;
-    }
-
-    /**
-     * 이름으로 사용자 검색
-     */
-    async searchUsersByName(name: string): Promise<UserEntity[]> {
-        if (!name || name.trim().length === 0) {
-            throw new BadRequestException('이름이 필요합니다.');
-        }
-
-        const users = await this.userRepository.find({
-            where: { username: ILike(`%${name}%`) },
-            order: { createdAt: 'DESC' },
-        });
-
-        this.logger.log(`이름 검색 완료: ${users.length}명 조회`);
-        return users;
+    async comparePassword(user: UserEntity, password: string): Promise<boolean> {
+        return await bcrypt.compare(password, user.password);
     }
 }

@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Param, Query, UseGuards, ParseUUIDPipe, Ht
 import {
     ApiTags,
     ApiOperation,
-    ApiResponse,
     ApiBody,
     ApiParam,
     ApiQuery,
@@ -20,10 +19,8 @@ import { RolesGuard } from '@src/common/guards/roles.guard';
 import { Roles } from '@src/common/decorators/roles.decorator';
 import { UserRole } from '@src/domain/user/enum/user.enum';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { SearchUserDto } from '@src/interfaces/dto/user/requests/search-user.dto';
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
 import { ManageDepartmentAuthorityDto } from '@src/interfaces/dto/organization/requests/manage-department-authority.dto';
-import { DepartmentAuthorityResponse } from '@src/interfaces/dto/organization/responses/department-authority-response.dto';
 import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
 import { UserEntity } from '@src/domain/user/entities/user.entity';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';

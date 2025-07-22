@@ -26,10 +26,7 @@ export class AuthBusinessService {
     async login(loginId: string, password: string): Promise<LoginResponseDto> {
         try {
             // 1. 사용자 아이디와 패스워드 검증
-            const user = await this.사용자는_아이디와_패스워드를_검증한다(loginId, password);
-            if (!user) {
-                throw new UnauthorizedException('잘못된 사용자명 또는 비밀번호입니다.');
-            }
+            await this.사용자는_아이디와_패스워드를_검증한다(loginId, password);
 
             // 2. 사용자 활성화 상태 검증
             await this.사용자의_활성화_상태를_검증한다(user.userId);
@@ -59,72 +56,6 @@ export class AuthBusinessService {
 
         // 2. 프로필 조회
         return this.userContextService.자신의_프로필을_조회한다(userId);
-    }
-
-    /**
-     * 사용자는 아이디와 패스워드를 검증한다 (복잡한 인증 로직이므로 try-catch 유지)
-     */
-    async 사용자는_아이디와_패스워드를_검증한다(loginId: string, password: string): Promise<UserEntity | null> {
-        try {
-            if (!loginId || !password || loginId.trim().length === 0 || password.trim().length === 0) {
-                throw new BadRequestException('유효하지 않은 로그인 정보입니다.');
-            }
-
-            const user = await this.userContextService.findUserByEmail(loginId);
-            if (!user) {
-                this.logger.warn(`존재하지 않는 사용자 로그인 시도: ${loginId}`);
-                return null;
-            }
-
-            const isPasswordValid = user.validatePassword(password);
-            if (!isPasswordValid) {
-                this.logger.warn(`잘못된 패스워드 로그인 시도: ${loginId}`);
-                return null;
-            }
-
-            this.logger.log(`사용자 인증 성공: ${loginId}`);
-            return user;
-        } catch (error) {
-            this.logger.error(`사용자 인증 검증 실패: ${loginId}`, error.stack);
-            throw error;
-        }
-    }
-
-    /**
-     * 사용자의 활성화 상태를 검증한다
-     */
-    async 사용자의_활성화_상태를_검증한다(userId: string): Promise<boolean> {
-        const user = await this.userContextService.findUserById(userId);
-        if (!user) {
-            throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
-        }
-
-        if (!user.isActive) {
-            this.logger.warn(`비활성화된 사용자 로그인 시도: ${user.email}`);
-            throw new UnauthorizedException('비활성화된 사용자입니다.');
-        }
-
-        this.logger.log(`사용자 활성화 상태 검증 성공: ${user.email}`);
-        return true;
-    }
-
-    /**
-     * 사용자의 토큰을 제공한다
-     */
-    async 사용자의_토큰을_제공한다(userId: string): Promise<string> {
-        const user = await this.userContextService.findUserById(userId);
-        if (!user) {
-            throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
-        }
-
-        const payload: AuthPayloadDto = new AuthPayloadDto(user.userId, user.roles as UserRole[]);
-        const token = this.jwtService.sign({
-            sub: payload.sub,
-            roles: payload.roles,
-        });
-
-        this.logger.log(`토큰 생성 성공: ${user.email}`);
-        return token;
     }
 
     /**

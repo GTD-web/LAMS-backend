@@ -24,10 +24,48 @@ export class UserContextService {
     // ==================== 인증 관련 메서드 ====================
 
     /**
+     * 사용자는 아이디와 패스워드를 검증한다
+     */
+    async 사용자는_아이디와_패스워드를_검증한다(loginId: string, password: string): Promise<UserEntity> {
+        const user = await this.userDomainService.findUserByEmail(loginId);
+        if (!user) {
+            throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+        }
+
+        const isPasswordValid = await this.userDomainService.comparePassword(user, password);
+        if (!isPasswordValid) {
+            throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+        }
+
+        if (!user.isActive) {
+            throw new UnauthorizedException('비활성화된 사용자입니다.');
+        }
+
+        return user;
+    }
+
+    /**
+     * 사용자의 활성화 상태를 검증한다
+     */
+    async 사용자의_활성화_상태를_검증한다(user: UserEntity): Promise<void> {
+        if (!user.isActive) {
+            throw new UnauthorizedException('비활성화된 사용자입니다.');
+        }
+    }
+
+    /**
+     * 사용자의 토큰을 제공한다
+     */
+    async 사용자의_토큰을_제공한다(userId: string): Promise<string> {
+        const user = await this.userDomainService.findUserById(userId);
+        return user;
+    }
+
+    /**
      * 사용자는 토큰을 검증받는다
      */
     async 사용자는_토큰을_검증받는다(token: string): Promise<UserEntity> {
-        if (!token || token.trim().length === 0) {
+        if (!token) {
             throw new UnauthorizedException('토큰이 제공되지 않았습니다.');
         }
 
@@ -35,14 +73,11 @@ export class UserContextService {
         const cleanToken = token.startsWith('Bearer ') ? token.substring(7) : token;
 
         let payload: any;
-        try {
-            payload = this.jwtService.verify(cleanToken);
-        } catch (error) {
-            this.logger.warn(`토큰 검증 실패: ${error.message}`);
-            throw new UnauthorizedException('유효하지 않은 토큰입니다.');
-        }
+
+        payload = this.jwtService.verify(cleanToken);
 
         const user = await this.userDomainService.findUserById(payload.sub);
+
         if (!user) {
             this.logger.warn(`토큰의 사용자를 찾을 수 없음: ${payload.sub}`);
             throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
