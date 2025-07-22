@@ -11,8 +11,6 @@ const common_1 = require("@nestjs/common");
 const organization_business_1 = require("./organization.business");
 const organization_context_module_1 = require("../../contexts/organization/organization-context.module");
 const organization_controller_1 = require("../../interfaces/controllers/organization.controller");
-const departments_controller_1 = require("../../interfaces/controllers/departments.controller");
-const employees_controller_1 = require("../../interfaces/controllers/employees.controller");
 let OrganizationBusinessModule = class OrganizationBusinessModule {
 };
 exports.OrganizationBusinessModule = OrganizationBusinessModule;
@@ -20,7 +18,7 @@ exports.OrganizationBusinessModule = OrganizationBusinessModule = __decorate([
     (0, common_1.Module)({
         imports: [organization_context_module_1.OrganizationContextModule],
         providers: [organization_business_1.OrganizationBusinessService],
-        controllers: [organization_controller_1.OrganizationController, departments_controller_1.DepartmentsController, employees_controller_1.EmployeesController],
+        controllers: [organization_controller_1.OrganizationController],
         exports: [organization_business_1.OrganizationBusinessService],
     })
 ], OrganizationBusinessModule);

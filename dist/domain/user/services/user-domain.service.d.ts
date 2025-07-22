@@ -18,6 +18,5 @@ export declare class UserDomainService {
         total: number;
     }>;
     searchUserById(userId: string): Promise<UserEntity | null>;
-    searchUsersByEmail(email: string): Promise<UserEntity[]>;
-    searchUsersByName(name: string): Promise<UserEntity[]>;
+    comparePassword(user: UserEntity, password: string): Promise<boolean>;
 }

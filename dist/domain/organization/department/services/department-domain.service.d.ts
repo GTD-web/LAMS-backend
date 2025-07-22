@@ -12,18 +12,11 @@ export declare class DepartmentDomainService {
         departments: DepartmentInfoEntity[];
         total: number;
     }>;
-    createDepartment(departmentData: Partial<DepartmentInfoEntity>): Promise<DepartmentInfoEntity>;
     updateDepartment(departmentId: string, updateData: Partial<DepartmentInfoEntity>): Promise<DepartmentInfoEntity>;
     toggleDepartmentExclusion(departmentId: string): Promise<DepartmentInfoEntity>;
     findDepartmentByMMSDepartmentId(mmsDepartmentId: string): Promise<DepartmentInfoEntity | null>;
-    createOrUpdateDepartment(departmentData: MMSDepartmentResponseDto): Promise<DepartmentInfoEntity>;
+    createOrUpdateDepartment(departmentData: MMSDepartmentResponseDto, parentDepartment?: DepartmentInfoEntity): Promise<DepartmentInfoEntity>;
     removeDepartment(departmentId: string): Promise<void>;
-    addReviewAuthority(departmentId: string, userId: string): Promise<DepartmentInfoEntity>;
-    removeReviewAuthority(departmentId: string, userId: string): Promise<DepartmentInfoEntity>;
-    addAccessAuthority(departmentId: string, userId: string): Promise<DepartmentInfoEntity>;
-    removeAccessAuthority(departmentId: string, userId: string): Promise<DepartmentInfoEntity>;
-    findDepartmentsByReviewAuthority(userId: string): Promise<DepartmentInfoEntity[]>;
-    findDepartmentsByAccessAuthority(userId: string): Promise<DepartmentInfoEntity[]>;
     searchDepartments(searchCriteria: {
         departmentName?: string;
         departmentCode?: string;
@@ -35,8 +28,4 @@ export declare class DepartmentDomainService {
         departments: DepartmentInfoEntity[];
         total: number;
     }>;
-    searchDepartmentsByName(departmentName: string): Promise<DepartmentInfoEntity[]>;
-    searchDepartmentsByCode(departmentCode: string): Promise<DepartmentInfoEntity[]>;
-    findActiveDepartments(): Promise<DepartmentInfoEntity[]>;
-    findExcludedDepartments(): Promise<DepartmentInfoEntity[]>;
 }

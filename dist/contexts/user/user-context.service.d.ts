@@ -12,6 +12,9 @@ export declare class UserContextService {
     private readonly jwtService;
     private readonly logger;
     constructor(userDomainService: UserDomainService, jwtService: JwtService);
+    사용자는_아이디와_패스워드를_검증한다(loginId: string, password: string): Promise<UserEntity>;
+    사용자의_활성화_상태를_검증한다(user: UserEntity): Promise<void>;
+    사용자의_토큰을_제공한다(userId: string): Promise<string>;
     사용자는_토큰을_검증받는다(token: string): Promise<UserEntity>;
     사용자의_현재_세션_정보를_조회한다(userId: string): Promise<{
         user: UserEntity;

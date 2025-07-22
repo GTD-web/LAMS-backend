@@ -15,6 +15,7 @@ const common_1 = require("@nestjs/common");
 const organization_context_service_1 = require("../../contexts/organization/organization-context.service");
 const department_response_dto_1 = require("../../interfaces/dto/organization/responses/department-response.dto");
 const employee_response_dto_1 = require("../../interfaces/dto/organization/responses/employee-response.dto");
+const sync_organization_response_dto_1 = require("../../interfaces/dto/organization/responses/sync-organization-response.dto");
 const class_transformer_1 = require("class-transformer");
 let OrganizationBusinessService = OrganizationBusinessService_1 = class OrganizationBusinessService {
     constructor(organizationContextService) {
@@ -33,6 +34,7 @@ let OrganizationBusinessService = OrganizationBusinessService_1 = class Organiza
                 }
             }
             this.logger.log('조직 동기화 완료');
+            return new sync_organization_response_dto_1.SyncOrganizationResponseDto();
         }
         catch (error) {
             this.logger.error('조직 동기화 실패', error.stack);

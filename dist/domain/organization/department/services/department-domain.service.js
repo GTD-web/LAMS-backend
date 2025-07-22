@@ -55,19 +55,6 @@ let DepartmentDomainService = DepartmentDomainService_1 = class DepartmentDomain
         this.logger.log(`페이지네이션된 부서 목록 조회: ${departments.length}개 조회`);
         return { departments, total };
     }
-    async createDepartment(departmentData) {
-        if (!departmentData.departmentName || !departmentData.departmentCode) {
-            throw new common_1.BadRequestException('부서명과 부서코드가 필요합니다.');
-        }
-        const existingDepartment = await this.findDepartmentByCode(departmentData.departmentCode);
-        if (existingDepartment) {
-            throw new common_1.BadRequestException('이미 존재하는 부서코드입니다.');
-        }
-        const department = this.departmentRepository.create(departmentData);
-        const savedDepartment = await this.departmentRepository.save(department);
-        this.logger.log(`부서 생성 완료: ${savedDepartment.departmentName}`);
-        return savedDepartment;
-    }
     async updateDepartment(departmentId, updateData) {
         if (!departmentId || departmentId.trim().length === 0) {
             throw new common_1.BadRequestException('부서 ID가 필요합니다.');
@@ -99,31 +86,30 @@ let DepartmentDomainService = DepartmentDomainService_1 = class DepartmentDomain
             where: { mmsDepartmentId },
         });
     }
-    async createOrUpdateDepartment(departmentData) {
-        const existingDepartment = await this.findDepartmentByMMSDepartmentId(departmentData.id);
-        if (existingDepartment) {
-            Object.assign(existingDepartment, {
-                departmentName: departmentData.department_name,
-                departmentCode: departmentData.department_code,
-                parentDepartmentId: departmentData.parent_department_id,
-                isExclude: false,
-            });
-            const updatedDepartment = await this.departmentRepository.save(existingDepartment);
-            this.logger.log(`MMS 부서 정보 업데이트: ${updatedDepartment.departmentName}`);
-            return updatedDepartment;
+    async createOrUpdateDepartment(departmentData, parentDepartment) {
+        let department = await this.findDepartmentByMMSDepartmentId(departmentData.id);
+        if (department) {
+            department.departmentName = departmentData.department_name;
+            department.departmentCode = departmentData.department_code;
         }
         else {
-            const newDepartment = this.departmentRepository.create({
-                mmsDepartmentId: departmentData.id,
+            department = this.departmentRepository.create({
+                departmentId: departmentData.id,
                 departmentName: departmentData.department_name,
                 departmentCode: departmentData.department_code,
-                parentDepartmentId: departmentData.parent_department_id,
-                isExclude: false,
             });
-            const savedDepartment = await this.departmentRepository.save(newDepartment);
-            this.logger.log(`MMS 부서 생성: ${savedDepartment.departmentName}`);
-            return savedDepartment;
         }
+        if (parentDepartment) {
+            department.parent = parentDepartment;
+        }
+        if (departmentData.child_departments && departmentData.child_departments.length > 0) {
+            for (const childDepartment of departmentData.child_departments) {
+                await this.createOrUpdateDepartment(childDepartment, department);
+            }
+        }
+        const savedDepartment = await this.departmentRepository.save(department);
+        this.logger.log(`MMS 부서 생성: ${savedDepartment.departmentName}`);
+        return savedDepartment;
     }
     async removeDepartment(departmentId) {
         if (!departmentId || departmentId.trim().length === 0) {
@@ -135,69 +121,6 @@ let DepartmentDomainService = DepartmentDomainService_1 = class DepartmentDomain
         }
         await this.departmentRepository.remove(department);
         this.logger.log(`부서 삭제 완료: ${department.departmentName}`);
-    }
-    async addReviewAuthority(departmentId, userId) {
-        if (!departmentId || !userId) {
-            throw new common_1.BadRequestException('부서 ID와 사용자 ID가 필요합니다.');
-        }
-        const department = await this.findDepartmentById(departmentId);
-        if (!department) {
-            throw new common_1.NotFoundException('부서를 찾을 수 없습니다.');
-        }
-        const hasAuthority = department.reviewAuthorities?.some((auth) => auth.userId === userId);
-        if (hasAuthority) {
-            throw new common_1.BadRequestException('이미 검토 권한이 있는 사용자입니다.');
-        }
-        if (!department.reviewAuthorities) {
-            department.reviewAuthorities = [];
-        }
-        return department;
-    }
-    async removeReviewAuthority(departmentId, userId) {
-        if (!departmentId || !userId) {
-            throw new common_1.BadRequestException('부서 ID와 사용자 ID가 필요합니다.');
-        }
-        const department = await this.findDepartmentById(departmentId);
-        if (!department) {
-            throw new common_1.NotFoundException('부서를 찾을 수 없습니다.');
-        }
-        this.logger.log(`검토 권한 제거: ${userId} -> ${department.departmentName}`);
-        return department;
-    }
-    async addAccessAuthority(departmentId, userId) {
-        if (!departmentId || !userId) {
-            throw new common_1.BadRequestException('부서 ID와 사용자 ID가 필요합니다.');
-        }
-        const department = await this.findDepartmentById(departmentId);
-        if (!department) {
-            throw new common_1.NotFoundException('부서를 찾을 수 없습니다.');
-        }
-        return department;
-    }
-    async removeAccessAuthority(departmentId, userId) {
-        if (!departmentId || !userId) {
-            throw new common_1.BadRequestException('부서 ID와 사용자 ID가 필요합니다.');
-        }
-        const department = await this.findDepartmentById(departmentId);
-        if (!department) {
-            throw new common_1.NotFoundException('부서를 찾을 수 없습니다.');
-        }
-        this.logger.log(`접근 권한 제거: ${userId} -> ${department.departmentName}`);
-        return department;
-    }
-    async findDepartmentsByReviewAuthority(userId) {
-        if (!userId) {
-            throw new common_1.BadRequestException('사용자 ID가 필요합니다.');
-        }
-        this.logger.log(`검토 권한 부서 조회: ${userId}`);
-        return [];
-    }
-    async findDepartmentsByAccessAuthority(userId) {
-        if (!userId) {
-            throw new common_1.BadRequestException('사용자 ID가 필요합니다.');
-        }
-        this.logger.log(`접근 권한 부서 조회: ${userId}`);
-        return [];
     }
     async searchDepartments(searchCriteria) {
         const { departmentName, departmentCode, isExclude, keyword, limit = 10, offset = 0 } = searchCriteria;
@@ -243,48 +166,6 @@ let DepartmentDomainService = DepartmentDomainService_1 = class DepartmentDomain
         const [departments, total] = await this.departmentRepository.findAndCount(findOptions);
         this.logger.log(`부서 검색 완료: ${departments.length}개 조회 (총 ${total}개)`);
         return { departments, total };
-    }
-    async searchDepartmentsByName(departmentName) {
-        if (!departmentName || departmentName.trim().length === 0) {
-            throw new common_1.BadRequestException('부서명이 필요합니다.');
-        }
-        const departments = await this.departmentRepository.find({
-            where: { departmentName: (0, typeorm_2.ILike)(`%${departmentName}%`) },
-            order: { departmentName: 'ASC' },
-            relations: ['employees', 'employees.employee'],
-        });
-        this.logger.log(`부서명 검색 완료: ${departments.length}개 조회`);
-        return departments;
-    }
-    async searchDepartmentsByCode(departmentCode) {
-        if (!departmentCode || departmentCode.trim().length === 0) {
-            throw new common_1.BadRequestException('부서 코드가 필요합니다.');
-        }
-        const departments = await this.departmentRepository.find({
-            where: { departmentCode: (0, typeorm_2.ILike)(`%${departmentCode}%`) },
-            order: { departmentName: 'ASC' },
-            relations: ['employees', 'employees.employee'],
-        });
-        this.logger.log(`부서 코드 검색 완료: ${departments.length}개 조회`);
-        return departments;
-    }
-    async findActiveDepartments() {
-        const departments = await this.departmentRepository.find({
-            where: { isExclude: false },
-            order: { departmentName: 'ASC' },
-            relations: ['employees', 'employees.employee'],
-        });
-        this.logger.log(`활성 부서 조회 완료: ${departments.length}개 조회`);
-        return departments;
-    }
-    async findExcludedDepartments() {
-        const departments = await this.departmentRepository.find({
-            where: { isExclude: true },
-            order: { departmentName: 'ASC' },
-            relations: ['employees', 'employees.employee'],
-        });
-        this.logger.log(`제외된 부서 조회 완료: ${departments.length}개 조회`);
-        return departments;
     }
 };
 exports.DepartmentDomainService = DepartmentDomainService;

@@ -24,19 +24,36 @@ let UserContextService = UserContextService_1 = class UserContextService {
         this.jwtService = jwtService;
         this.logger = new common_1.Logger(UserContextService_1.name);
     }
+    async 사용자는_아이디와_패스워드를_검증한다(loginId, password) {
+        const user = await this.userDomainService.findUserByEmail(loginId);
+        if (!user) {
+            throw new common_1.UnauthorizedException('사용자를 찾을 수 없습니다.');
+        }
+        const isPasswordValid = await this.userDomainService.comparePassword(user, password);
+        if (!isPasswordValid) {
+            throw new common_1.UnauthorizedException('비밀번호가 일치하지 않습니다.');
+        }
+        if (!user.isActive) {
+            throw new common_1.UnauthorizedException('비활성화된 사용자입니다.');
+        }
+        return user;
+    }
+    async 사용자의_활성화_상태를_검증한다(user) {
+        if (!user.isActive) {
+            throw new common_1.UnauthorizedException('비활성화된 사용자입니다.');
+        }
+    }
+    async 사용자의_토큰을_제공한다(userId) {
+        const user = await this.userDomainService.findUserById(userId);
+        return user;
+    }
     async 사용자는_토큰을_검증받는다(token) {
-        if (!token || token.trim().length === 0) {
+        if (!token) {
             throw new common_1.UnauthorizedException('토큰이 제공되지 않았습니다.');
         }
         const cleanToken = token.startsWith('Bearer ') ? token.substring(7) : token;
         let payload;
-        try {
-            payload = this.jwtService.verify(cleanToken);
-        }
-        catch (error) {
-            this.logger.warn(`토큰 검증 실패: ${error.message}`);
-            throw new common_1.UnauthorizedException('유효하지 않은 토큰입니다.');
-        }
+        payload = this.jwtService.verify(cleanToken);
         const user = await this.userDomainService.findUserById(payload.sub);
         if (!user) {
             this.logger.warn(`토큰의 사용자를 찾을 수 없음: ${payload.sub}`);

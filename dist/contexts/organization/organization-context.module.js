@@ -9,13 +9,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrganizationContextModule = void 0;
 const common_1 = require("@nestjs/common");
 const organization_context_service_1 = require("./organization-context.service");
-const organization_domain_module_1 = require("../../domain/organization/organization-domain.module");
+const department_domain_module_1 = require("../../domain/organization/department/department-domain.module");
+const employee_domain_module_1 = require("../../domain/organization/employee/employee-domain.module");
+const department_employee_domain_moodule_1 = require("../../domain/organization/department-employee/department-employee-domain.moodule");
 let OrganizationContextModule = class OrganizationContextModule {
 };
 exports.OrganizationContextModule = OrganizationContextModule;
 exports.OrganizationContextModule = OrganizationContextModule = __decorate([
     (0, common_1.Module)({
-        imports: [organization_domain_module_1.OrganizationDomainModule],
+        imports: [department_domain_module_1.DepartmentDomainModule, employee_domain_module_1.EmployeeDomainModule, department_employee_domain_moodule_1.DepartmentEmployeeDomainModule],
         providers: [organization_context_service_1.OrganizationContextService],
         exports: [organization_context_service_1.OrganizationContextService],
     })

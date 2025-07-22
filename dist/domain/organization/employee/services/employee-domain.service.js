@@ -137,18 +137,6 @@ let EmployeeDomainService = EmployeeDomainService_1 = class EmployeeDomainServic
             order: { employeeName: 'ASC' },
         });
     }
-    async searchEmployeesByName(employeeName) {
-        if (!employeeName || employeeName.trim().length === 0) {
-            throw new common_1.BadRequestException('직원명이 필요합니다.');
-        }
-        const employees = await this.employeeRepository.find({
-            where: { employeeName: (0, typeorm_2.ILike)(`%${employeeName}%`) },
-            order: { employeeName: 'ASC' },
-            relations: ['department'],
-        });
-        this.logger.log(`직원명 검색 완료: ${employees.length}명 조회`);
-        return employees;
-    }
     async searchEmployeesByNumber(employeeNumber) {
         if (!employeeNumber || employeeNumber.trim().length === 0) {
             throw new common_1.BadRequestException('사원번호가 필요합니다.');

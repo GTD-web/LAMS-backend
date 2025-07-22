@@ -9,6 +9,7 @@ const roles_guard_1 = require("./common/guards/roles.guard");
 const response_interceptor_1 = require("./common/interceptors/response.interceptor");
 const swagger_util_1 = require("./common/utils/swagger/swagger.util");
 const logging_interceptor_1 = require("./common/interceptors/logging.interceptor");
+const error_logging_interceptor_1 = require("./common/interceptors/error-logging.interceptor");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
@@ -18,7 +19,7 @@ async function bootstrap() {
     });
     app.setGlobalPrefix('api');
     app.useGlobalGuards(new jwt_auth_guard_1.JwtAuthGuard(app.get(core_1.Reflector)), new roles_guard_1.RolesGuard(app.get(core_1.Reflector)));
-    app.useGlobalInterceptors(new response_interceptor_1.ResponseInterceptor(), new logging_interceptor_1.LoggingInterceptor());
+    app.useGlobalInterceptors(new error_logging_interceptor_1.ErrorLoggingInterceptor(), new response_interceptor_1.ResponseInterceptor(), new logging_interceptor_1.LoggingInterceptor());
     app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
     const uploadPath = (0, path_1.join)(process.cwd(), 'public');
     app.useStaticAssets(uploadPath, {
@@ -27,7 +28,9 @@ async function bootstrap() {
         fallthrough: false,
     });
     (0, swagger_util_1.settingSwagger)(app);
-    await app.listen(process.env.PORT || 5000);
+    const port = process.env.PORT || 5000;
+    await app.listen(port);
+    console.log(`🚀 Application is running on: http://localhost:${port}`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

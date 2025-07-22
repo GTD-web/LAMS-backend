@@ -41,7 +41,7 @@ let UserDomainService = UserDomainService_1 = class UserDomainService {
         return updatedUser;
     }
     async validateUserCredentials(email, password) {
-        if (!email || !password || email.trim().length === 0 || password.trim().length === 0) {
+        if (!email || !password) {
             throw new common_1.BadRequestException('유효하지 않은 로그인 정보입니다.');
         }
         const user = await this.userRepository.findOne({
@@ -148,27 +148,8 @@ let UserDomainService = UserDomainService_1 = class UserDomainService {
         this.logger.log(`사용자 ID 검색 완료: ${user ? '발견' : '없음'}`);
         return user;
     }
-    async searchUsersByEmail(email) {
-        if (!email || email.trim().length === 0) {
-            throw new common_1.BadRequestException('이메일이 필요합니다.');
-        }
-        const users = await this.userRepository.find({
-            where: { email: (0, typeorm_2.ILike)(`%${email}%`) },
-            order: { createdAt: 'DESC' },
-        });
-        this.logger.log(`이메일 검색 완료: ${users.length}명 조회`);
-        return users;
-    }
-    async searchUsersByName(name) {
-        if (!name || name.trim().length === 0) {
-            throw new common_1.BadRequestException('이름이 필요합니다.');
-        }
-        const users = await this.userRepository.find({
-            where: { username: (0, typeorm_2.ILike)(`%${name}%`) },
-            order: { createdAt: 'DESC' },
-        });
-        this.logger.log(`이름 검색 완료: ${users.length}명 조회`);
-        return users;
+    async comparePassword(user, password) {
+        return await bcrypt.compare(password, user.password);
     }
 };
 exports.UserDomainService = UserDomainService;

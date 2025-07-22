@@ -20,6 +20,7 @@ const auth_business_module_1 = require("./business/auth/auth-business.module");
 const user_business_module_1 = require("./business/user/user-business.module");
 const organization_business_module_1 = require("./business/organization/organization-business.module");
 const work_standard_module_1 = require("./business/work-standard/work-standard.module");
+const organization_module_1 = require("./interfaces/controllers/organization.module");
 const env_config_1 = require("./common/configs/env.config");
 let AppModule = class AppModule {
 };
@@ -44,6 +45,7 @@ exports.AppModule = AppModule = __decorate([
             auth_business_module_1.AuthBusinessModule,
             user_business_module_1.UserBusinessModule,
             organization_business_module_1.OrganizationBusinessModule,
+            organization_module_1.OrganizationModule,
             work_standard_module_1.WorkStandardModule,
         ],
         controllers: [app_controller_1.AppController],

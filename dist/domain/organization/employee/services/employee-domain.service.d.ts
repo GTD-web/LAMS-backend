@@ -24,7 +24,6 @@ export declare class EmployeeDomainService {
         total: number;
     }>;
     searchEmployees(searchTerm: string): Promise<EmployeeInfoEntity[]>;
-    searchEmployeesByName(employeeName: string): Promise<EmployeeInfoEntity[]>;
     searchEmployeesByNumber(employeeNumber: string): Promise<EmployeeInfoEntity[]>;
     findActiveEmployeesByDepartment(departmentId: string): Promise<EmployeeInfoEntity[]>;
     findIncludedEmployees(): Promise<EmployeeInfoEntity[]>;

@@ -1,20 +1,7 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Put,
-    Delete,
-    Body,
-    Param,
-    Query,
-    HttpStatus,
-    ParseUUIDPipe,
-    ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, ParseUUIDPipe, ParseIntPipe } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
-    ApiResponse,
     ApiParam,
     ApiQuery,
     ApiBearerAuth,

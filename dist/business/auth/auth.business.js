@@ -25,10 +25,7 @@ let AuthBusinessService = AuthBusinessService_1 = class AuthBusinessService {
     }
     async login(loginId, password) {
         try {
-            const user = await this.사용자는_아이디와_패스워드를_검증한다(loginId, password);
-            if (!user) {
-                throw new common_1.UnauthorizedException('잘못된 사용자명 또는 비밀번호입니다.');
-            }
+            await this.사용자는_아이디와_패스워드를_검증한다(loginId, password);
             await this.사용자의_활성화_상태를_검증한다(user.userId);
             const token = await this.사용자의_토큰을_제공한다(user.userId);
             this.logger.log(`로그인 성공: ${loginId} (사용자 ID: ${user.userId})`);
@@ -45,54 +42,6 @@ let AuthBusinessService = AuthBusinessService_1 = class AuthBusinessService {
     async getProfile(token, userId) {
         await this.userContextService.사용자는_토큰을_검증받는다(token);
         return this.userContextService.자신의_프로필을_조회한다(userId);
-    }
-    async 사용자는_아이디와_패스워드를_검증한다(loginId, password) {
-        try {
-            if (!loginId || !password || loginId.trim().length === 0 || password.trim().length === 0) {
-                throw new common_1.BadRequestException('유효하지 않은 로그인 정보입니다.');
-            }
-            const user = await this.userContextService.findUserByEmail(loginId);
-            if (!user) {
-                this.logger.warn(`존재하지 않는 사용자 로그인 시도: ${loginId}`);
-                return null;
-            }
-            const isPasswordValid = user.validatePassword(password);
-            if (!isPasswordValid) {
-                this.logger.warn(`잘못된 패스워드 로그인 시도: ${loginId}`);
-                return null;
-            }
-            this.logger.log(`사용자 인증 성공: ${loginId}`);
-            return user;
-        }
-        catch (error) {
-            this.logger.error(`사용자 인증 검증 실패: ${loginId}`, error.stack);
-            throw error;
-        }
-    }
-    async 사용자의_활성화_상태를_검증한다(userId) {
-        const user = await this.userContextService.findUserById(userId);
-        if (!user) {
-            throw new common_1.UnauthorizedException('사용자를 찾을 수 없습니다.');
-        }
-        if (!user.isActive) {
-            this.logger.warn(`비활성화된 사용자 로그인 시도: ${user.email}`);
-            throw new common_1.UnauthorizedException('비활성화된 사용자입니다.');
-        }
-        this.logger.log(`사용자 활성화 상태 검증 성공: ${user.email}`);
-        return true;
-    }
-    async 사용자의_토큰을_제공한다(userId) {
-        const user = await this.userContextService.findUserById(userId);
-        if (!user) {
-            throw new common_1.UnauthorizedException('사용자를 찾을 수 없습니다.');
-        }
-        const payload = new auth_payload_dto_1.AuthPayloadDto(user.userId, user.roles);
-        const token = this.jwtService.sign({
-            sub: payload.sub,
-            roles: payload.roles,
-        });
-        this.logger.log(`토큰 생성 성공: ${user.email}`);
-        return token;
     }
     verifyToken(token) {
         try {

@@ -201,24 +201,6 @@ export class EmployeeDomainService {
     }
 
     /**
-     * 직원명으로 직원 검색
-     */
-    async searchEmployeesByName(employeeName: string): Promise<EmployeeInfoEntity[]> {
-        if (!employeeName || employeeName.trim().length === 0) {
-            throw new BadRequestException('직원명이 필요합니다.');
-        }
-
-        const employees = await this.employeeRepository.find({
-            where: { employeeName: ILike(`%${employeeName}%`) },
-            order: { employeeName: 'ASC' },
-            relations: ['department'],
-        });
-
-        this.logger.log(`직원명 검색 완료: ${employees.length}명 조회`);
-        return employees;
-    }
-
-    /**
      * 사원번호로 직원 검색
      */
     async searchEmployeesByNumber(employeeNumber: string): Promise<EmployeeInfoEntity[]> {
