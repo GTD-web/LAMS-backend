@@ -8,6 +8,7 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { settingSwagger } from './common/utils/swagger/swagger.util';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { ErrorLoggingInterceptor } from './common/interceptors/error-logging.interceptor';
 
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -19,8 +20,8 @@ async function bootstrap() {
     });
     app.setGlobalPrefix('api');
     app.useGlobalGuards(new JwtAuthGuard(app.get(Reflector)), new RolesGuard(app.get(Reflector)));
-    // 전역 인터셉터 등록
-    app.useGlobalInterceptors(new ResponseInterceptor(), new LoggingInterceptor());
+    // 전역 인터셉터 등록 (ErrorLoggingInterceptor 추가)
+    app.useGlobalInterceptors(new ErrorLoggingInterceptor(), new ResponseInterceptor(), new LoggingInterceptor());
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     // 파일 업로드 설정
     const uploadPath = join(process.cwd(), 'public');
@@ -31,6 +32,8 @@ async function bootstrap() {
     });
 
     settingSwagger(app);
-    await app.listen(process.env.PORT || 5000);
+    const port = process.env.PORT || 5000;
+    await app.listen(port);
+    console.log(`🚀 Application is running on: http://localhost:${port}`);
 }
 bootstrap();
