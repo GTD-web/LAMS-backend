@@ -25,8 +25,8 @@ import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user
 import { ManageDepartmentAuthorityDto } from '@src/interfaces/dto/organization/requests/manage-department-authority.dto';
 import { DepartmentAuthorityResponse } from '@src/interfaces/dto/organization/responses/department-authority-response.dto';
 import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
-import { PaginatedSuccessResponse, SuccessResponseWithData } from '@src/common/types/success-response.type';
 import { UserEntity } from '@src/domain/user/entities/user.entity';
+import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 
 /**
  * 사용자 관리 컨트롤러
@@ -62,27 +62,7 @@ export class UsersController {
     })
     @ApiOkResponse({
         description: '사용자 목록 조회 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                success: { type: 'boolean', example: true },
-                message: { type: 'string', example: '사용자 목록이 성공적으로 조회되었습니다.' },
-                data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/UserResponseDto' },
-                },
-                meta: {
-                    type: 'object',
-                    properties: {
-                        page: { type: 'integer', example: 1 },
-                        limit: { type: 'integer', example: 10 },
-                        total: { type: 'integer', example: 100 },
-                        totalPages: { type: 'integer', example: 10 },
-                    },
-                },
-                timestamp: { type: 'string', format: 'date-time' },
-            },
-        },
+        type: PaginatedResponseDto,
     })
     @ApiUnauthorizedResponse({
         description: '인증 실패',
@@ -92,9 +72,7 @@ export class UsersController {
         description: '접근 권한 없음 - 관리자 권한 필요',
         type: ErrorResponseDto,
     })
-    async getUserList(
-        @Query() paginationQuery: PaginationQueryDto,
-    ): Promise<PaginatedSuccessResponse<UserResponseDto>> {
+    async getUserList(@Query() paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>> {
         return this.userBusinessService.getUserList(paginationQuery);
     }
 
@@ -150,27 +128,7 @@ export class UsersController {
     })
     @ApiOkResponse({
         description: '사용자 검색 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                success: { type: 'boolean', example: true },
-                message: { type: 'string', example: '사용자 검색이 성공적으로 완료되었습니다.' },
-                data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/UserResponseDto' },
-                },
-                meta: {
-                    type: 'object',
-                    properties: {
-                        page: { type: 'integer', example: 1 },
-                        limit: { type: 'integer', example: 10 },
-                        total: { type: 'integer', example: 5 },
-                        totalPages: { type: 'integer', example: 1 },
-                    },
-                },
-                timestamp: { type: 'string', format: 'date-time' },
-            },
-        },
+        type: PaginatedResponseDto,
     })
     @ApiUnauthorizedResponse({
         description: '인증 실패',
@@ -187,7 +145,7 @@ export class UsersController {
     async searchUsers(
         @Query() searchDto: SearchUserDto,
         @Query() paginationQuery: PaginationQueryDto,
-    ): Promise<PaginatedSuccessResponse<UserResponseDto>> {
+    ): Promise<PaginatedResponseDto<UserResponseDto>> {
         return this.userBusinessService.searchUsers(searchDto, paginationQuery);
     }
 
@@ -206,15 +164,7 @@ export class UsersController {
     })
     @ApiOkResponse({
         description: '사용자 상세 조회 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                success: { type: 'boolean', example: true },
-                message: { type: 'string', example: '사용자 프로필이 성공적으로 조회되었습니다.' },
-                data: { $ref: '#/components/schemas/UserResponseDto' },
-                timestamp: { type: 'string', format: 'date-time' },
-            },
-        },
+        type: UserResponseDto,
     })
     @ApiUnauthorizedResponse({
         description: '인증 실패',
@@ -228,7 +178,7 @@ export class UsersController {
         description: '사용자를 찾을 수 없음',
         type: ErrorResponseDto,
     })
-    async getUserById(@Param('id', ParseUUIDPipe) id: string): Promise<SuccessResponseWithData<UserResponseDto>> {
+    async getUserById(@Param('id', ParseUUIDPipe) id: string): Promise<UserResponseDto> {
         return this.userBusinessService.getUserProfile(id);
     }
 
@@ -263,7 +213,7 @@ export class UsersController {
     })
     @ApiCreatedResponse({
         description: '부서 권한 관리 성공',
-        type: DepartmentAuthorityResponse,
+        type: UserEntity,
     })
     @ApiUnauthorizedResponse({
         description: '인증 실패',
@@ -286,7 +236,7 @@ export class UsersController {
         @Param('type') type: 'access' | 'review',
         @Param('action') action: 'add' | 'remove',
         @Body() dto: ManageDepartmentAuthorityDto,
-    ): Promise<SuccessResponseWithData<UserEntity>> {
+    ): Promise<UserEntity> {
         return this.userBusinessService.manageDepartmentAuthority(departmentId, dto.userId, type, action);
     }
 }

@@ -91,9 +91,51 @@ export class OrganizationContextService {
             const mmsEmployees = await this.getEmployeesFromMMS();
 
             for (const mmsEmp of mmsEmployees) {
-                // MMS 직원 데이터를 기반으로 직원 정보 업데이트
-                // 실제 구현에서는 createOrUpdateEmployee 메서드를 Employee Domain Service에 추가해야 함
-                this.logger.log(`직원 데이터 처리: ${mmsEmp.name}`);
+                // 기존 직원 조회 (사원번호로)
+                const existingEmployee = await this.employeeDomainService.findEmployeeByEmployeeNumber(
+                    mmsEmp.employee_number,
+                );
+
+                if (existingEmployee) {
+                    // 기존 직원 정보 업데이트
+                    existingEmployee.employeeName = mmsEmp.name;
+                    existingEmployee.email = mmsEmp.email;
+                    existingEmployee.entryAt = mmsEmp.hire_date;
+
+                    // 부서 정보 업데이트
+                    if (mmsEmp.department?._id) {
+                        const department = await this.departmentDomainService.findDepartmentByMMSDepartmentId(
+                            mmsEmp.department._id,
+                        );
+                        if (department) {
+                            existingEmployee.department = department;
+                        }
+                    }
+
+                    await this.employeeDomainService.saveEmployee(existingEmployee);
+                    this.logger.log(`직원 정보 업데이트: ${mmsEmp.name}`);
+                } else {
+                    // 새 직원 생성
+                    const newEmployee = new EmployeeInfoEntity();
+                    newEmployee.employeeNumber = mmsEmp.employee_number;
+                    newEmployee.employeeName = mmsEmp.name;
+                    newEmployee.email = mmsEmp.email;
+                    newEmployee.entryAt = mmsEmp.hire_date;
+                    newEmployee.isExcludedFromCalculation = false;
+
+                    // 부서 정보 설정
+                    if (mmsEmp.department?._id) {
+                        const department = await this.departmentDomainService.findDepartmentByMMSDepartmentId(
+                            mmsEmp.department._id,
+                        );
+                        if (department) {
+                            newEmployee.department = department;
+                        }
+                    }
+
+                    await this.employeeDomainService.saveEmployee(newEmployee);
+                    this.logger.log(`새 직원 생성: ${mmsEmp.name}`);
+                }
             }
 
             this.logger.log('직원 업데이트 완료');
@@ -197,8 +239,8 @@ export class OrganizationContextService {
      * 퇴사데이터가 있는 직원을 제외한 부서의 직원을 조회한다
      */
     async 퇴사데이터가_있는_직원을_제외한_부서의_직원을_조회한다(departmentId: string): Promise<EmployeeInfoEntity[]> {
-        // 실제 구현에서는 findActiveEmployeesByDepartment 메서드를 Employee Domain Service에 추가해야 함
-        return [];
+        // findActiveEmployeesByDepartment 메서드 사용
+        return await this.employeeDomainService.findActiveEmployeesByDepartment(departmentId);
     }
 
     async findDepartmentById(departmentId: string): Promise<DepartmentInfoEntity> {

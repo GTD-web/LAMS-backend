@@ -3,10 +3,9 @@ import { UserContextService } from '@src/contexts/user/user-context.service';
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { SearchUserDto } from '@src/interfaces/dto/user/requests/search-user.dto';
-import { SuccessMessageHelper } from '@src/common/helpers/success-message.helper';
-import { PaginatedSuccessResponse, SuccessResponseWithData } from '@src/common/types/success-response.type';
 import { UserEntity } from '@src/domain/user/entities/user.entity';
 import { OrganizationContextService } from '@src/contexts/organization/organization-context.service';
+import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 
 /**
  * 사용자 비즈니스 서비스
@@ -25,18 +24,12 @@ export class UserBusinessService {
     /**
      * 사용자 목록 조회
      */
-    async getUserList(paginationQuery: PaginationQueryDto): Promise<PaginatedSuccessResponse<UserResponseDto>> {
+    async getUserList(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>> {
         if (!paginationQuery.page || !paginationQuery.limit) {
             throw new Error('페이지 정보가 필요합니다.');
         }
 
-        const result = await this.userContextService.페이지네이션된_사용자_목록을_조회한다(paginationQuery);
-
-        return SuccessMessageHelper.createPaginatedSuccessResponse(
-            SuccessMessageHelper.MESSAGES.USER_LIST_RETRIEVED,
-            result.data || [],
-            result.meta || { page: 1, limit: 10, total: 0, totalPages: 0 },
-        );
+        return await this.userContextService.페이지네이션된_사용자_목록을_조회한다(paginationQuery);
     }
 
     /**
@@ -45,7 +38,7 @@ export class UserBusinessService {
     async searchUsers(
         searchDto: SearchUserDto,
         paginationQuery: PaginationQueryDto,
-    ): Promise<PaginatedSuccessResponse<UserResponseDto>> {
+    ): Promise<PaginatedResponseDto<UserResponseDto>> {
         const { page = 1, limit = 10 } = paginationQuery;
         const offset = (page - 1) * limit;
 
@@ -57,41 +50,26 @@ export class UserBusinessService {
 
         const result = await this.userContextService.사용자를_검색한다(searchCriteria);
 
-        const totalPages = Math.ceil(result.total / limit);
+        // PaginatedResponseDto 형태로 변환
+        const meta = {
+            page,
+            limit,
+            total: result.total,
+            totalPages: Math.ceil(result.total / limit),
+        };
 
-        return SuccessMessageHelper.createPaginatedSuccessResponse(
-            SuccessMessageHelper.MESSAGES.USER_SEARCHED,
-            result.data || [],
-            {
-                page,
-                limit,
-                total: result.total,
-                totalPages,
-            },
-        );
+        return new PaginatedResponseDto(result.data, meta);
     }
 
     /**
      * 사용자 프로필 조회
      */
-    async getUserProfile(userId: string): Promise<SuccessResponseWithData<UserResponseDto>> {
+    async getUserProfile(userId: string): Promise<UserResponseDto> {
         if (!userId || userId.trim().length === 0) {
             throw new Error('사용자 ID가 필요합니다.');
         }
 
-        const result = await this.getProfile(userId);
-
-        return SuccessMessageHelper.createRetrievalSuccessResponse(
-            SuccessMessageHelper.MESSAGES.USER_PROFILE_RETRIEVED,
-            result,
-        );
-    }
-
-    /**
-     * 사용자 프로필 조회
-     */
-    async getProfile(userId: string): Promise<UserResponseDto> {
-        return this.userContextService.자신의_프로필을_조회한다(userId);
+        return await this.userContextService.자신의_프로필을_조회한다(userId);
     }
 
     /**
@@ -102,7 +80,7 @@ export class UserBusinessService {
         userId: string,
         type: 'access' | 'review',
         action: 'add' | 'remove',
-    ): Promise<SuccessResponseWithData<UserEntity>> {
+    ): Promise<UserEntity> {
         try {
             if (!departmentId || !userId) {
                 throw new Error('부서 ID와 사용자 ID가 필요합니다.');
@@ -110,18 +88,7 @@ export class UserBusinessService {
 
             const department = await this.organizationContextService.findDepartmentById(departmentId);
 
-            const updatedUser = await this.userContextService.사용자의_부서_권한을_변경한다(
-                userId,
-                department,
-                type,
-                action,
-            );
-
-            return SuccessMessageHelper.createUpdateSuccessResponse(
-                SuccessMessageHelper.MESSAGES.DEPARTMENT_AUTHORITY_UPDATED,
-                updatedUser,
-                [`${type}_authority`],
-            );
+            return await this.userContextService.사용자의_부서_권한을_변경한다(userId, department, type, action);
         } catch (error) {
             this.logger.error(`부서 권한 관리 실패: ${departmentId}, ${userId}, ${type}, ${action}`, error.stack);
             throw new Error('부서 권한 관리 중 오류가 발생했습니다.');
