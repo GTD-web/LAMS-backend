@@ -24,10 +24,8 @@ export class OrganizationBusinessService {
             const mmsDepartments = await this.organizationContextService.getDepartmentsFromMMS();
             const mmsEmployees = await this.organizationContextService.getEmployeesFromMMS();
 
-            for (const mmsDepartment of mmsDepartments) {
-                // 1. 부서를 업데이트하고 없는 부서는 삭제한다
-                await this.organizationContextService.부서를_업데이트하고_없는부서는_삭제한다(mmsDepartment);
-            }
+            // 1. 부서를 업데이트하고 없는 부서는 삭제한다
+            await this.organizationContextService.부서를_업데이트하고_없는부서는_삭제한다(mmsDepartments);
 
             for (const mmsEmployee of mmsEmployees) {
                 // 2. 직원을 업데이트한다

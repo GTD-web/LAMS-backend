@@ -25,9 +25,7 @@ let OrganizationBusinessService = OrganizationBusinessService_1 = class Organiza
         try {
             const mmsDepartments = await this.organizationContextService.getDepartmentsFromMMS();
             const mmsEmployees = await this.organizationContextService.getEmployeesFromMMS();
-            for (const mmsDepartment of mmsDepartments) {
-                await this.organizationContextService.부서를_업데이트하고_없는부서는_삭제한다(mmsDepartment);
-            }
+            await this.organizationContextService.부서를_업데이트하고_없는부서는_삭제한다(mmsDepartments);
             for (const mmsEmployee of mmsEmployees) {
                 const employee = await this.organizationContextService.직원을_업데이트한다(mmsEmployee);
                 if (mmsEmployee.department && mmsEmployee.status === '재직중') {
