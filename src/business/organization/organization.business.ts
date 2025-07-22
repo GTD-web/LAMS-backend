@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OrganizationContextService } from '@src/contexts/organization/organization-context.service';
 import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';
 import { EmployeeResponseDto } from '@src/interfaces/dto/organization/responses/employee-response.dto';
+import { SyncOrganizationResponseDto } from '@src/interfaces/dto/organization/responses/sync-organization-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { plainToInstance } from 'class-transformer';
 
@@ -19,7 +20,7 @@ export class OrganizationBusinessService {
     /**
      * 조직 동기화 (외부 시스템 연동이므로 try-catch 유지)
      */
-    async syncOrganization(): Promise<void> {
+    async syncOrganization(): Promise<SyncOrganizationResponseDto> {
         try {
             const mmsDepartments = await this.organizationContextService.getDepartmentsFromMMS();
             const mmsEmployees = await this.organizationContextService.getEmployeesFromMMS();
@@ -40,6 +41,7 @@ export class OrganizationBusinessService {
             }
 
             this.logger.log('조직 동기화 완료');
+            return new SyncOrganizationResponseDto();
         } catch (error) {
             this.logger.error('조직 동기화 실패', error.stack);
             throw new Error('조직 동기화 중 오류가 발생했습니다. 관리자에게 문의하세요.');

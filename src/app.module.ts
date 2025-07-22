@@ -16,6 +16,7 @@ import { AuthBusinessModule } from './business/auth/auth-business.module';
 import { UserBusinessModule } from './business/user/user-business.module';
 import { OrganizationBusinessModule } from './business/organization/organization-business.module';
 import { WorkStandardModule } from './business/work-standard/work-standard.module';
+import { OrganizationModule } from './interfaces/controllers/organization.module';
 import databaseConfig, { JWT_CONFIG } from './common/configs/env.config';
 
 @Module({
@@ -37,6 +38,7 @@ import databaseConfig, { JWT_CONFIG } from './common/configs/env.config';
         AuthBusinessModule,
         UserBusinessModule,
         OrganizationBusinessModule,
+        OrganizationModule,
         WorkStandardModule,
     ],
     controllers: [AppController],
