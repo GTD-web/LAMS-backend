@@ -17,109 +17,55 @@ exports.DepartmentEmployeeDomainService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
-const department_employee_entity_1 = require("../department/entities/department-employee.entity");
+const department_employee_entity_1 = require("./entities/department-employee.entity");
 let DepartmentEmployeeDomainService = DepartmentEmployeeDomainService_1 = class DepartmentEmployeeDomainService {
     constructor(departmentEmployeeRepository) {
         this.departmentEmployeeRepository = departmentEmployeeRepository;
         this.logger = new common_1.Logger(DepartmentEmployeeDomainService_1.name);
     }
-    async createDepartmentEmployee(department, employee) {
-        try {
-            const departmentEmployee = new department_employee_entity_1.DepartmentEmployeeEntity();
-            departmentEmployee.department = department;
-            departmentEmployee.employee = employee;
-            const savedRelation = await this.departmentEmployeeRepository.save(departmentEmployee);
-            this.logger.log(`부서-직원 관계 생성: ${department.departmentName} -> ${employee.employeeName}`);
-            return savedRelation;
-        }
-        catch (error) {
-            this.logger.error(`부서-직원 관계 생성 실패: ${department.departmentName} -> ${employee.employeeName}`, error.stack);
-            throw error;
-        }
-    }
-    async saveDepartmentEmployee(departmentEmployee) {
-        try {
-            const savedRelation = await this.departmentEmployeeRepository.save(departmentEmployee);
-            this.logger.log('부서-직원 관계 저장 완료');
-            return savedRelation;
-        }
-        catch (error) {
-            this.logger.error('부서-직원 관계 저장 실패', error.stack);
-            throw error;
-        }
+    async saveDepartmentEmployee(department, employee) {
+        const departmentEmployee = new department_employee_entity_1.DepartmentEmployeeEntity();
+        departmentEmployee.department = department;
+        departmentEmployee.employee = employee;
+        const savedRelation = await this.departmentEmployeeRepository.save(departmentEmployee);
+        this.logger.log(`부서-직원 관계 생성: ${department.departmentName} -> ${employee.employeeName}`);
+        return savedRelation;
     }
     async deleteDepartmentEmployeeByEmployeeId(employeeId) {
-        try {
-            await this.departmentEmployeeRepository.delete({ employee: { employeeId } });
-            this.logger.log(`직원 ID로 부서-직원 관계 삭제: ${employeeId}`);
-        }
-        catch (error) {
-            this.logger.error(`직원 ID로 부서-직원 관계 삭제 실패: ${employeeId}`, error.stack);
-            throw error;
-        }
+        await this.departmentEmployeeRepository.delete({ employee: { employeeId } });
+        this.logger.log(`직원 ID로 부서-직원 관계 삭제: ${employeeId}`);
     }
     async deleteDepartmentEmployeeByDepartmentId(departmentId) {
-        try {
-            await this.departmentEmployeeRepository.delete({ department: { departmentId } });
-            this.logger.log(`부서 ID로 부서-직원 관계 삭제: ${departmentId}`);
-        }
-        catch (error) {
-            this.logger.error(`부서 ID로 부서-직원 관계 삭제 실패: ${departmentId}`, error.stack);
-            throw error;
-        }
+        await this.departmentEmployeeRepository.delete({ department: { departmentId } });
+        this.logger.log(`부서 ID로 부서-직원 관계 삭제: ${departmentId}`);
     }
     async findDepartmentEmployeesByDepartmentId(departmentId) {
-        try {
-            const relations = await this.departmentEmployeeRepository.find({
-                where: { department: { departmentId } },
-                relations: ['department', 'employee'],
-            });
-            this.logger.log(`부서별 직원 관계 조회: ${departmentId} -> ${relations.length}개`);
-            return relations;
-        }
-        catch (error) {
-            this.logger.error(`부서별 직원 관계 조회 실패: ${departmentId}`, error.stack);
-            throw error;
-        }
+        const relations = await this.departmentEmployeeRepository.find({
+            where: { department: { departmentId } },
+            relations: ['department', 'employee'],
+        });
+        this.logger.log(`부서별 직원 관계 조회: ${departmentId} -> ${relations.length}개`);
+        return relations;
     }
     async findDepartmentEmployeesByEmployeeId(employeeId) {
-        try {
-            const relations = await this.departmentEmployeeRepository.find({
-                where: { employee: { employeeId } },
-                relations: ['department', 'employee'],
-            });
-            this.logger.log(`직원별 부서 관계 조회: ${employeeId} -> ${relations.length}개`);
-            return relations;
-        }
-        catch (error) {
-            this.logger.error(`직원별 부서 관계 조회 실패: ${employeeId}`, error.stack);
-            throw error;
-        }
+        const relations = await this.departmentEmployeeRepository.find({
+            where: { employee: { employeeId } },
+            relations: ['department', 'employee'],
+        });
+        this.logger.log(`직원별 부서 관계 조회: ${employeeId} -> ${relations.length}개`);
+        return relations;
     }
     async deleteAllDepartmentEmployees() {
-        try {
-            await this.departmentEmployeeRepository.clear();
-            this.logger.log('모든 부서-직원 관계 삭제 완료');
-        }
-        catch (error) {
-            this.logger.error('모든 부서-직원 관계 삭제 실패', error.stack);
-            throw error;
-        }
+        await this.departmentEmployeeRepository.clear();
     }
     async existsDepartmentEmployee(departmentId, employeeId) {
-        try {
-            const count = await this.departmentEmployeeRepository.count({
-                where: {
-                    department: { departmentId },
-                    employee: { employeeId },
-                },
-            });
-            return count > 0;
-        }
-        catch (error) {
-            this.logger.error(`부서-직원 관계 존재 여부 확인 실패: ${departmentId} -> ${employeeId}`, error.stack);
-            throw error;
-        }
+        const count = await this.departmentEmployeeRepository.count({
+            where: {
+                department: { departmentId },
+                employee: { employeeId },
+            },
+        });
+        return count > 0;
     }
 };
 exports.DepartmentEmployeeDomainService = DepartmentEmployeeDomainService;

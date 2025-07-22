@@ -22,22 +22,15 @@ export class EmployeeDomainService {
      * 직원 탈퇴 상태 토글
      */
     async toggleEmployeeExclude(employeeId: string): Promise<EmployeeInfoEntity> {
-        try {
-            const employee = await this.findEmployeeById(employeeId);
-            if (!employee) {
-                throw new NotFoundException('직원을 찾을 수 없습니다.');
-            }
-
-            employee.isExcludedFromCalculation = !employee.isExcludedFromCalculation;
-            const updatedEmployee = await this.employeeRepository.save(employee);
-            this.logger.log(
-                `직원 탈퇴 상태 토글 완료: ${updatedEmployee.employeeName} (${updatedEmployee.isExcludedFromCalculation})`,
-            );
-            return updatedEmployee;
-        } catch (error) {
-            this.logger.error(`직원 탈퇴 상태 토글 실패: ${employeeId}`, error.stack);
-            throw error;
+        const employee = await this.findEmployeeById(employeeId);
+        if (!employee) {
+            throw new NotFoundException('직원을 찾을 수 없습니다.');
         }
+
+        employee.isExcludedFromCalculation = !employee.isExcludedFromCalculation;
+        const updatedEmployee = await this.employeeRepository.save(employee);
+
+        return updatedEmployee;
     }
 
     /**

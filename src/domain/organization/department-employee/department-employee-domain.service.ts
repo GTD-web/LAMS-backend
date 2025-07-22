@@ -23,7 +23,7 @@ export class DepartmentEmployeeDomainService {
     /**
      * 부서-직원 관계 생성
      */
-    async createDepartmentEmployee(
+    async saveDepartmentEmployee(
         department: DepartmentInfoEntity,
         employee: EmployeeInfoEntity,
     ): Promise<DepartmentEmployeeEntity> {
@@ -33,15 +33,6 @@ export class DepartmentEmployeeDomainService {
 
         const savedRelation = await this.departmentEmployeeRepository.save(departmentEmployee);
         this.logger.log(`부서-직원 관계 생성: ${department.departmentName} -> ${employee.employeeName}`);
-        return savedRelation;
-    }
-
-    /**
-     * 부서-직원 관계 저장
-     */
-    async saveDepartmentEmployee(departmentEmployee: DepartmentEmployeeEntity): Promise<DepartmentEmployeeEntity> {
-        const savedRelation = await this.departmentEmployeeRepository.save(departmentEmployee);
-        this.logger.log('부서-직원 관계 저장 완료');
         return savedRelation;
     }
 
@@ -90,7 +81,6 @@ export class DepartmentEmployeeDomainService {
      */
     async deleteAllDepartmentEmployees(): Promise<void> {
         await this.departmentEmployeeRepository.clear();
-        this.logger.log('모든 부서-직원 관계 삭제 완료');
     }
 
     /**

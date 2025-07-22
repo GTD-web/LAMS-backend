@@ -24,20 +24,13 @@ let EmployeeDomainService = EmployeeDomainService_1 = class EmployeeDomainServic
         this.logger = new common_1.Logger(EmployeeDomainService_1.name);
     }
     async toggleEmployeeExclude(employeeId) {
-        try {
-            const employee = await this.findEmployeeById(employeeId);
-            if (!employee) {
-                throw new common_1.NotFoundException('직원을 찾을 수 없습니다.');
-            }
-            employee.isExcludedFromCalculation = !employee.isExcludedFromCalculation;
-            const updatedEmployee = await this.employeeRepository.save(employee);
-            this.logger.log(`직원 탈퇴 상태 토글 완료: ${updatedEmployee.employeeName} (${updatedEmployee.isExcludedFromCalculation})`);
-            return updatedEmployee;
+        const employee = await this.findEmployeeById(employeeId);
+        if (!employee) {
+            throw new common_1.NotFoundException('직원을 찾을 수 없습니다.');
         }
-        catch (error) {
-            this.logger.error(`직원 탈퇴 상태 토글 실패: ${employeeId}`, error.stack);
-            throw error;
-        }
+        employee.isExcludedFromCalculation = !employee.isExcludedFromCalculation;
+        const updatedEmployee = await this.employeeRepository.save(employee);
+        return updatedEmployee;
     }
     async findEmployeeById(employeeId) {
         return await this.employeeRepository.findOne({

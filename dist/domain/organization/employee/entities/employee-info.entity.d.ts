@@ -1,5 +1,5 @@
 import { DailyEventSummaryEntity } from '@src/domain/attendance/daily-attendance/entities/daily-event-summary.entity';
-import { DepartmentEmployeeEntity } from '../../department/entities/department-employee.entity';
+import { DepartmentEmployeeEntity } from '../../department-employee/entities/department-employee.entity';
 import { DepartmentInfoEntity } from '../../department/entities/department-info.entity';
 export declare class EmployeeInfoEntity {
     employeeId?: string;

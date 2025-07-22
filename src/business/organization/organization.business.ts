@@ -21,14 +21,25 @@ export class OrganizationBusinessService {
      */
     async syncOrganization(): Promise<void> {
         try {
-            // 1. 부서를 업데이트하고 없는 부서는 삭제한다
-            await this.organizationContextService.부서를_업데이트하고_없는부서는_삭제한다();
+            const mmsDepartments = await this.organizationContextService.getDepartmentsFromMMS();
+            const mmsEmployees = await this.organizationContextService.getEmployeesFromMMS();
 
-            // 2. 직원을 업데이트한다
-            await this.organizationContextService.직원을_업데이트한다();
+            for (const mmsDepartment of mmsDepartments) {
+                // 1. 부서를 업데이트하고 없는 부서는 삭제한다
+                await this.organizationContextService.부서를_업데이트하고_없는부서는_삭제한다(mmsDepartment);
+            }
 
-            // 3. 직원 부서 중간테이블 데이터를 삭제 갱신한다
-            await this.organizationContextService.직원_부서_중간테이블_데이터를_삭제_갱신한다();
+            for (const mmsEmployee of mmsEmployees) {
+                // 2. 직원을 업데이트한다
+                const employee = await this.organizationContextService.직원을_업데이트한다(mmsEmployee);
+                // 3. 직원 부서 중간테이블 데이터를 삭제 갱신한다
+                if (mmsEmployee.department && mmsEmployee.status === '재직중') {
+                    await this.organizationContextService.직원_부서_중간테이블_데이터를_삭제_갱신한다(
+                        employee,
+                        mmsEmployee.department._id,
+                    );
+                }
+            }
 
             this.logger.log('조직 동기화 완료');
         } catch (error) {
@@ -41,11 +52,7 @@ export class OrganizationBusinessService {
      * 부서 목록 조회
      */
     async getDepartmentList(paginationQuery: PaginationQueryDto) {
-        if (!paginationQuery.page || !paginationQuery.limit) {
-            throw new Error('페이지 정보가 필요합니다.');
-        }
-
-        const { page, limit } = paginationQuery;
+        const { page = 1, limit = 10 } = paginationQuery;
         return await this.organizationContextService.페이지네이션된_부서_목록을_조회한다(limit, page);
     }
 
@@ -53,10 +60,6 @@ export class OrganizationBusinessService {
      * 부서 제외 여부 변경
      */
     async toggleDepartmentExclusion(departmentId: string): Promise<DepartmentResponseDto> {
-        if (!departmentId || departmentId.trim().length === 0) {
-            throw new Error('부서 ID가 필요합니다.');
-        }
-
         const result = await this.organizationContextService.부서의_제외_여부를_변경한다(departmentId);
         return plainToInstance(DepartmentResponseDto, result);
     }
@@ -69,11 +72,7 @@ export class OrganizationBusinessService {
             throw new Error('부서 ID가 필요합니다.');
         }
 
-        if (!paginationQuery.page || !paginationQuery.limit) {
-            throw new Error('페이지 정보가 필요합니다.');
-        }
-
-        const { page, limit } = paginationQuery;
+        const { page = 1, limit = 10 } = paginationQuery;
 
         // 1. 부서에 해당하는 직원 페이지네이션된 목록을 조회한다
         const result = await this.organizationContextService.해당_부서_직원의_페이지네이션된_목록을_조회한다(
@@ -104,10 +103,6 @@ export class OrganizationBusinessService {
      * 활성 직원 목록 조회 (부서별)
      */
     async getActiveEmployeesByDepartment(departmentId: string): Promise<EmployeeResponseDto[]> {
-        if (!departmentId || departmentId.trim().length === 0) {
-            throw new Error('부서 ID가 필요합니다.');
-        }
-
         const result = await this.organizationContextService.퇴사데이터가_있는_직원을_제외한_부서의_직원을_조회한다(
             departmentId,
         );

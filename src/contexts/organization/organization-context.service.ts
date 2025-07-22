@@ -7,6 +7,7 @@ import { MMSDepartmentResponseDto } from '../../interfaces/dto/organization/requ
 import { MMSEmployeeResponseDto } from '../../interfaces/dto/organization/requests/mms-employee-import.dto';
 import { DepartmentInfoEntity } from '../../domain/organization/department/entities/department-info.entity';
 import { EmployeeInfoEntity } from '../../domain/organization/employee/entities/employee-info.entity';
+import { DepartmentEmployeeEntity } from '@src/domain/organization/department-employee/entities/department-employee.entity';
 
 /**
  * 조직 컨텍스트 서비스
@@ -28,7 +29,7 @@ export class OrganizationContextService {
     /**
      * MMS에서 부서 데이터 가져오기 (외부 시스템 연동이므로 try-catch 유지)
      */
-    private async getDepartmentsFromMMS(): Promise<MMSDepartmentResponseDto[]> {
+    async getDepartmentsFromMMS(): Promise<MMSDepartmentResponseDto[]> {
         try {
             const department = await axios.get(`${this.MMS_BASE_URL}/api/departments?hierarchy=true`);
             console.log('department:', department.data);
@@ -42,7 +43,7 @@ export class OrganizationContextService {
     /**
      * MMS에서 직원 데이터 가져오기 (외부 시스템 연동이므로 try-catch 유지)
      */
-    private async getEmployeesFromMMS(): Promise<MMSEmployeeResponseDto[]> {
+    async getEmployeesFromMMS(): Promise<MMSEmployeeResponseDto[]> {
         try {
             const employee = await axios.get(`${this.MMS_BASE_URL}/api/employees`);
             console.log('employee:', employee.data);
@@ -56,10 +57,8 @@ export class OrganizationContextService {
     /**
      * 부서를 업데이트하고 없는 부서는 삭제한다 (외부 시스템 연동 및 트랜잭션이므로 try-catch 유지)
      */
-    async 부서를_업데이트하고_없는부서는_삭제한다(): Promise<void> {
+    async 부서를_업데이트하고_없는부서는_삭제한다(mmsDepartments: MMSDepartmentResponseDto[]): Promise<void> {
         try {
-            const mmsDepartments = await this.getDepartmentsFromMMS();
-
             // 기존 부서 목록 조회
             const existingDepartments = await this.departmentDomainService.findAllDepartments();
 
@@ -86,59 +85,53 @@ export class OrganizationContextService {
     /**
      * 직원을 업데이트한다 (외부 시스템 연동이므로 try-catch 유지)
      */
-    async 직원을_업데이트한다(): Promise<void> {
+    async 직원을_업데이트한다(mmsEmployee: MMSEmployeeResponseDto): Promise<EmployeeInfoEntity> {
         try {
-            const mmsEmployees = await this.getEmployeesFromMMS();
+            // 기존 직원 조회 (사원번호로)
+            const existingEmployee = await this.employeeDomainService.findEmployeeByEmployeeNumber(
+                mmsEmployee.employee_number,
+            );
 
-            for (const mmsEmp of mmsEmployees) {
-                // 기존 직원 조회 (사원번호로)
-                const existingEmployee = await this.employeeDomainService.findEmployeeByEmployeeNumber(
-                    mmsEmp.employee_number,
-                );
+            if (existingEmployee) {
+                // 기존 직원 정보 업데이트
+                existingEmployee.employeeName = mmsEmployee.name;
+                existingEmployee.email = mmsEmployee.email;
+                existingEmployee.entryAt = mmsEmployee.hire_date;
 
-                if (existingEmployee) {
-                    // 기존 직원 정보 업데이트
-                    existingEmployee.employeeName = mmsEmp.name;
-                    existingEmployee.email = mmsEmp.email;
-                    existingEmployee.entryAt = mmsEmp.hire_date;
-
-                    // 부서 정보 업데이트
-                    if (mmsEmp.department?._id) {
-                        const department = await this.departmentDomainService.findDepartmentByMMSDepartmentId(
-                            mmsEmp.department._id,
-                        );
-                        if (department) {
-                            existingEmployee.department = department;
-                        }
+                // 부서 정보 업데이트
+                if (mmsEmployee.department?._id) {
+                    const department = await this.departmentDomainService.findDepartmentByMMSDepartmentId(
+                        mmsEmployee.department._id,
+                    );
+                    if (department) {
+                        existingEmployee.department = department;
                     }
-
-                    await this.employeeDomainService.saveEmployee(existingEmployee);
-                    this.logger.log(`직원 정보 업데이트: ${mmsEmp.name}`);
-                } else {
-                    // 새 직원 생성
-                    const newEmployee = new EmployeeInfoEntity();
-                    newEmployee.employeeNumber = mmsEmp.employee_number;
-                    newEmployee.employeeName = mmsEmp.name;
-                    newEmployee.email = mmsEmp.email;
-                    newEmployee.entryAt = mmsEmp.hire_date;
-                    newEmployee.isExcludedFromCalculation = false;
-
-                    // 부서 정보 설정
-                    if (mmsEmp.department?._id) {
-                        const department = await this.departmentDomainService.findDepartmentByMMSDepartmentId(
-                            mmsEmp.department._id,
-                        );
-                        if (department) {
-                            newEmployee.department = department;
-                        }
-                    }
-
-                    await this.employeeDomainService.saveEmployee(newEmployee);
-                    this.logger.log(`새 직원 생성: ${mmsEmp.name}`);
                 }
-            }
 
-            this.logger.log('직원 업데이트 완료');
+                await this.employeeDomainService.saveEmployee(existingEmployee);
+                this.logger.log(`직원 정보 업데이트: ${mmsEmployee.name}`);
+            } else {
+                // 새 직원 생성
+                const newEmployee = new EmployeeInfoEntity();
+                newEmployee.employeeNumber = mmsEmployee.employee_number;
+                newEmployee.employeeName = mmsEmployee.name;
+                newEmployee.email = mmsEmployee.email;
+                newEmployee.entryAt = mmsEmployee.hire_date;
+                newEmployee.isExcludedFromCalculation = false;
+
+                // 부서 정보 설정
+                if (mmsEmployee.department?._id) {
+                    const department = await this.departmentDomainService.findDepartmentByMMSDepartmentId(
+                        mmsEmployee.department._id,
+                    );
+                    if (department) {
+                        newEmployee.department = department;
+                    }
+                }
+
+                this.logger.log(`새 직원 생성: ${mmsEmployee.name}`);
+                return await this.employeeDomainService.saveEmployee(newEmployee);
+            }
         } catch (error) {
             this.logger.error('직원 업데이트 실패', error.stack);
             throw error;
@@ -148,24 +141,17 @@ export class OrganizationContextService {
     /**
      * 직원 부서 중간테이블 데이터를 삭제 갱신한다 (복잡한 트랜잭션이므로 try-catch 유지)
      */
-    async 직원_부서_중간테이블_데이터를_삭제_갱신한다(): Promise<void> {
-        try {
-            // 기존 중간테이블 데이터 삭제
-            await this.departmentEmployeeDomainService.deleteAllDepartmentEmployees();
-
-            // 새로운 관계 생성
-            const employees = await this.employeeDomainService.findAllEmployees();
-            for (const employee of employees) {
-                if (employee.department) {
-                    await this.departmentEmployeeDomainService.createDepartmentEmployee(employee.department, employee);
-                }
-            }
-
-            this.logger.log('직원 부서 중간테이블 갱신 완료');
-        } catch (error) {
-            this.logger.error('직원 부서 중간테이블 갱신 실패', error.stack);
-            throw error;
-        }
+    async 직원_부서_중간테이블_데이터를_삭제_갱신한다(
+        employee: EmployeeInfoEntity,
+        departmentId: string,
+    ): Promise<void> {
+        // 기존 중간테이블 데이터 삭제
+        await this.departmentEmployeeDomainService.deleteDepartmentEmployeeByEmployeeId(employee.employeeId);
+        const department = await this.departmentDomainService.findDepartmentByMMSDepartmentId(departmentId);
+        const departmentEmployee = new DepartmentEmployeeEntity();
+        departmentEmployee.department = department;
+        departmentEmployee.employee = employee;
+        await this.departmentEmployeeDomainService.saveDepartmentEmployee(employee.department, employee);
     }
 
     /**
@@ -202,7 +188,6 @@ export class OrganizationContextService {
     ): Promise<{ data: any[]; meta: any }> {
         const offset = (page - 1) * limit;
 
-        // searchEmployeesWithCriteria를 사용하여 해당 부서의 직원들을 조회
         const result = await this.employeeDomainService.searchEmployeesWithCriteria({
             departmentId,
             limit,
@@ -239,7 +224,6 @@ export class OrganizationContextService {
      * 퇴사데이터가 있는 직원을 제외한 부서의 직원을 조회한다
      */
     async 퇴사데이터가_있는_직원을_제외한_부서의_직원을_조회한다(departmentId: string): Promise<EmployeeInfoEntity[]> {
-        // findActiveEmployeesByDepartment 메서드 사용
         return await this.employeeDomainService.findActiveEmployeesByDepartment(departmentId);
     }
 

@@ -22,9 +22,11 @@ const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 const user_enum_1 = require("../../domain/user/enum/user.enum");
 const pagination_query_dto_1 = require("../../common/dtos/pagination/pagination-query.dto");
 const search_user_dto_1 = require("../dto/user/requests/search-user.dto");
+const user_response_dto_1 = require("../dto/organization/responses/user-response.dto");
 const manage_department_authority_dto_1 = require("../dto/organization/requests/manage-department-authority.dto");
-const department_authority_response_dto_1 = require("../dto/organization/responses/department-authority-response.dto");
 const error_response_dto_1 = require("../../common/dtos/common/error-response.dto");
+const user_entity_1 = require("../../domain/user/entities/user.entity");
+const pagination_response_dto_1 = require("../../common/dtos/pagination/pagination-response.dto");
 let UsersController = class UsersController {
     constructor(userBusinessService) {
         this.userBusinessService = userBusinessService;
@@ -66,27 +68,7 @@ __decorate([
     }),
     (0, swagger_1.ApiOkResponse)({
         description: '사용자 목록 조회 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                success: { type: 'boolean', example: true },
-                message: { type: 'string', example: '사용자 목록이 성공적으로 조회되었습니다.' },
-                data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/UserResponseDto' },
-                },
-                meta: {
-                    type: 'object',
-                    properties: {
-                        page: { type: 'integer', example: 1 },
-                        limit: { type: 'integer', example: 10 },
-                        total: { type: 'integer', example: 100 },
-                        totalPages: { type: 'integer', example: 10 },
-                    },
-                },
-                timestamp: { type: 'string', format: 'date-time' },
-            },
-        },
+        type: pagination_response_dto_1.PaginatedResponseDto,
     }),
     (0, swagger_1.ApiUnauthorizedResponse)({
         description: '인증 실패',
@@ -154,27 +136,7 @@ __decorate([
     }),
     (0, swagger_1.ApiOkResponse)({
         description: '사용자 검색 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                success: { type: 'boolean', example: true },
-                message: { type: 'string', example: '사용자 검색이 성공적으로 완료되었습니다.' },
-                data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/UserResponseDto' },
-                },
-                meta: {
-                    type: 'object',
-                    properties: {
-                        page: { type: 'integer', example: 1 },
-                        limit: { type: 'integer', example: 10 },
-                        total: { type: 'integer', example: 5 },
-                        totalPages: { type: 'integer', example: 1 },
-                    },
-                },
-                timestamp: { type: 'string', format: 'date-time' },
-            },
-        },
+        type: pagination_response_dto_1.PaginatedResponseDto,
     }),
     (0, swagger_1.ApiUnauthorizedResponse)({
         description: '인증 실패',
@@ -211,15 +173,7 @@ __decorate([
     }),
     (0, swagger_1.ApiOkResponse)({
         description: '사용자 상세 조회 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                success: { type: 'boolean', example: true },
-                message: { type: 'string', example: '사용자 프로필이 성공적으로 조회되었습니다.' },
-                data: { $ref: '#/components/schemas/UserResponseDto' },
-                timestamp: { type: 'string', format: 'date-time' },
-            },
-        },
+        type: user_response_dto_1.UserResponseDto,
     }),
     (0, swagger_1.ApiUnauthorizedResponse)({
         description: '인증 실패',
@@ -270,7 +224,7 @@ __decorate([
     }),
     (0, swagger_1.ApiCreatedResponse)({
         description: '부서 권한 관리 성공',
-        type: department_authority_response_dto_1.DepartmentAuthorityResponse,
+        type: user_entity_1.UserEntity,
     }),
     (0, swagger_1.ApiUnauthorizedResponse)({
         description: '인증 실패',

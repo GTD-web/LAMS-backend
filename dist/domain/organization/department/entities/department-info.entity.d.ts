@@ -1,4 +1,4 @@
-import { DepartmentEmployeeEntity } from './department-employee.entity';
+import { DepartmentEmployeeEntity } from '../../department-employee/entities/department-employee.entity';
 import { UserEntity } from '@src/domain/user/entities/user.entity';
 export declare class DepartmentInfoEntity {
     departmentId: string;

@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DepartmentInfoEntity = void 0;
 const typeorm_1 = require("typeorm");
-const department_employee_entity_1 = require("./department-employee.entity");
+const department_employee_entity_1 = require("../../department-employee/entities/department-employee.entity");
 const user_entity_1 = require("../../../user/entities/user.entity");
 let DepartmentInfoEntity = class DepartmentInfoEntity {
     toggleExclude() {

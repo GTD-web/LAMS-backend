@@ -13,8 +13,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserBusinessService = void 0;
 const common_1 = require("@nestjs/common");
 const user_context_service_1 = require("../../contexts/user/user-context.service");
-const success_message_helper_1 = require("../../common/helpers/success-message.helper");
 const organization_context_service_1 = require("../../contexts/organization/organization-context.service");
+const pagination_response_dto_1 = require("../../common/dtos/pagination/pagination-response.dto");
 let UserBusinessService = UserBusinessService_1 = class UserBusinessService {
     constructor(userContextService, organizationContextService) {
         this.userContextService = userContextService;
@@ -25,8 +25,7 @@ let UserBusinessService = UserBusinessService_1 = class UserBusinessService {
         if (!paginationQuery.page || !paginationQuery.limit) {
             throw new Error('페이지 정보가 필요합니다.');
         }
-        const result = await this.userContextService.페이지네이션된_사용자_목록을_조회한다(paginationQuery);
-        return success_message_helper_1.SuccessMessageHelper.createPaginatedSuccessResponse(success_message_helper_1.SuccessMessageHelper.MESSAGES.USER_LIST_RETRIEVED, result.data || [], result.meta || { page: 1, limit: 10, total: 0, totalPages: 0 });
+        return await this.userContextService.페이지네이션된_사용자_목록을_조회한다(paginationQuery);
     }
     async searchUsers(searchDto, paginationQuery) {
         const { page = 1, limit = 10 } = paginationQuery;
@@ -37,23 +36,19 @@ let UserBusinessService = UserBusinessService_1 = class UserBusinessService {
             offset,
         };
         const result = await this.userContextService.사용자를_검색한다(searchCriteria);
-        const totalPages = Math.ceil(result.total / limit);
-        return success_message_helper_1.SuccessMessageHelper.createPaginatedSuccessResponse(success_message_helper_1.SuccessMessageHelper.MESSAGES.USER_SEARCHED, result.data || [], {
+        const meta = {
             page,
             limit,
             total: result.total,
-            totalPages,
-        });
+            totalPages: Math.ceil(result.total / limit),
+        };
+        return new pagination_response_dto_1.PaginatedResponseDto(result.data, meta);
     }
     async getUserProfile(userId) {
         if (!userId || userId.trim().length === 0) {
             throw new Error('사용자 ID가 필요합니다.');
         }
-        const result = await this.getProfile(userId);
-        return success_message_helper_1.SuccessMessageHelper.createRetrievalSuccessResponse(success_message_helper_1.SuccessMessageHelper.MESSAGES.USER_PROFILE_RETRIEVED, result);
-    }
-    async getProfile(userId) {
-        return this.userContextService.자신의_프로필을_조회한다(userId);
+        return await this.userContextService.자신의_프로필을_조회한다(userId);
     }
     async manageDepartmentAuthority(departmentId, userId, type, action) {
         try {
@@ -61,8 +56,7 @@ let UserBusinessService = UserBusinessService_1 = class UserBusinessService {
                 throw new Error('부서 ID와 사용자 ID가 필요합니다.');
             }
             const department = await this.organizationContextService.findDepartmentById(departmentId);
-            const updatedUser = await this.userContextService.사용자의_부서_권한을_변경한다(userId, department, type, action);
-            return success_message_helper_1.SuccessMessageHelper.createUpdateSuccessResponse(success_message_helper_1.SuccessMessageHelper.MESSAGES.DEPARTMENT_AUTHORITY_UPDATED, updatedUser, [`${type}_authority`]);
+            return await this.userContextService.사용자의_부서_권한을_변경한다(userId, department, type, action);
         }
         catch (error) {
             this.logger.error(`부서 권한 관리 실패: ${departmentId}, ${userId}, ${type}, ${action}`, error.stack);
