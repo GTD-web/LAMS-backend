@@ -208,29 +208,6 @@ export class UserContextService {
         return paginatedResult;
     }
 
-    /**
-     * 사용자를 검색한다
-     */
-    async 사용자를_검색한다(searchCriteria: {
-        userId?: string;
-        email?: string;
-        name?: string;
-        loginId?: string;
-        keyword?: string;
-        limit?: number;
-        offset?: number;
-    }): Promise<{ data: UserResponseDto[]; total: number }> {
-        const result = await this.userDomainService.searchUsers(searchCriteria);
-
-        const userDtos = result.users.map((user) => plainToInstance(UserResponseDto, user));
-
-        this.logger.log(`사용자 검색 완료: ${result.users.length}명 조회 (총 ${result.total}명)`);
-        return {
-            data: userDtos,
-            total: result.total,
-        };
-    }
-
     // ==================== Domain 서비스 위임 메서드 ====================
 
     /**

@@ -25,18 +25,6 @@ export declare class UserContextService {
     자신의_프로필을_조회한다(userId: string): Promise<UserResponseDto>;
     사용자의_프로필을_조회한다(userId: string): Promise<UserResponseDto>;
     페이지네이션된_사용자_목록을_조회한다(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>>;
-    사용자를_검색한다(searchCriteria: {
-        userId?: string;
-        email?: string;
-        name?: string;
-        loginId?: string;
-        keyword?: string;
-        limit?: number;
-        offset?: number;
-    }): Promise<{
-        data: UserResponseDto[];
-        total: number;
-    }>;
     findUserById(userId: string): Promise<UserEntity | null>;
     findUserByEmail(email: string): Promise<UserEntity | null>;
     changeUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<UserEntity>;

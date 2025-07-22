@@ -14,7 +14,6 @@ exports.UserBusinessService = void 0;
 const common_1 = require("@nestjs/common");
 const user_context_service_1 = require("../../contexts/user/user-context.service");
 const organization_context_service_1 = require("../../contexts/organization/organization-context.service");
-const pagination_response_dto_1 = require("../../common/dtos/pagination/pagination-response.dto");
 let UserBusinessService = UserBusinessService_1 = class UserBusinessService {
     constructor(userContextService, organizationContextService) {
         this.userContextService = userContextService;
@@ -26,23 +25,6 @@ let UserBusinessService = UserBusinessService_1 = class UserBusinessService {
             throw new Error('페이지 정보가 필요합니다.');
         }
         return await this.userContextService.페이지네이션된_사용자_목록을_조회한다(paginationQuery);
-    }
-    async searchUsers(searchDto, paginationQuery) {
-        const { page = 1, limit = 10 } = paginationQuery;
-        const offset = (page - 1) * limit;
-        const searchCriteria = {
-            ...searchDto,
-            limit,
-            offset,
-        };
-        const result = await this.userContextService.사용자를_검색한다(searchCriteria);
-        const meta = {
-            page,
-            limit,
-            total: result.total,
-            totalPages: Math.ceil(result.total / limit),
-        };
-        return new pagination_response_dto_1.PaginatedResponseDto(result.data, meta);
     }
     async getUserProfile(userId) {
         if (!userId || userId.trim().length === 0) {

@@ -191,68 +191,6 @@ export class UserDomainService {
     }
 
     /**
-     * 사용자 검색 (복합 조건)
-     */
-    async searchUsers(searchCriteria: {
-        userId?: string;
-        email?: string;
-        name?: string;
-        loginId?: string;
-        keyword?: string;
-        limit?: number;
-        offset?: number;
-    }): Promise<{ users: UserEntity[]; total: number }> {
-        const { userId, email, name, loginId, keyword, limit = 10, offset = 0 } = searchCriteria;
-
-        // 검색 조건 구성
-        const whereConditions: FindOptionsWhere<UserEntity>[] = [];
-
-        // 키워드 통합 검색이 있는 경우
-        if (keyword) {
-            whereConditions.push({
-                username: ILike(`%${keyword}%`),
-            });
-            whereConditions.push({
-                email: ILike(`%${keyword}%`),
-            });
-        } else {
-            // 개별 필드 검색
-            const individualConditions: FindOptionsWhere<UserEntity> = {};
-
-            if (userId) {
-                individualConditions.userId = userId;
-            }
-            if (email) {
-                individualConditions.email = ILike(`%${email}%`);
-            }
-            if (name) {
-                individualConditions.username = ILike(`%${name}%`);
-            }
-            if (loginId) {
-                individualConditions.username = ILike(`%${loginId}%`);
-            }
-
-            if (Object.keys(individualConditions).length > 0) {
-                whereConditions.push(individualConditions);
-            }
-        }
-
-        // 검색 조건이 없으면 전체 조회
-        const findOptions: FindManyOptions<UserEntity> = {
-            where: whereConditions.length > 0 ? whereConditions : undefined,
-            order: { createdAt: 'DESC' },
-            skip: offset,
-            take: limit,
-        };
-
-        // 총 개수와 데이터 조회
-        const [users, total] = await this.userRepository.findAndCount(findOptions);
-
-        this.logger.log(`사용자 검색 완료: ${users.length}명 조회 (총 ${total}명)`);
-        return { users, total };
-    }
-
-    /**
      * 사용자 ID로 단일 검색
      */
     async searchUserById(userId: string): Promise<UserEntity | null> {

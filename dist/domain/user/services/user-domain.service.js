@@ -138,45 +138,6 @@ let UserDomainService = UserDomainService_1 = class UserDomainService {
         this.logger.log(`페이지네이션된 사용자 목록 조회: ${users.length}명 조회`);
         return { users, total };
     }
-    async searchUsers(searchCriteria) {
-        const { userId, email, name, loginId, keyword, limit = 10, offset = 0 } = searchCriteria;
-        const whereConditions = [];
-        if (keyword) {
-            whereConditions.push({
-                username: (0, typeorm_2.ILike)(`%${keyword}%`),
-            });
-            whereConditions.push({
-                email: (0, typeorm_2.ILike)(`%${keyword}%`),
-            });
-        }
-        else {
-            const individualConditions = {};
-            if (userId) {
-                individualConditions.userId = userId;
-            }
-            if (email) {
-                individualConditions.email = (0, typeorm_2.ILike)(`%${email}%`);
-            }
-            if (name) {
-                individualConditions.username = (0, typeorm_2.ILike)(`%${name}%`);
-            }
-            if (loginId) {
-                individualConditions.username = (0, typeorm_2.ILike)(`%${loginId}%`);
-            }
-            if (Object.keys(individualConditions).length > 0) {
-                whereConditions.push(individualConditions);
-            }
-        }
-        const findOptions = {
-            where: whereConditions.length > 0 ? whereConditions : undefined,
-            order: { createdAt: 'DESC' },
-            skip: offset,
-            take: limit,
-        };
-        const [users, total] = await this.userRepository.findAndCount(findOptions);
-        this.logger.log(`사용자 검색 완료: ${users.length}명 조회 (총 ${total}명)`);
-        return { users, total };
-    }
     async searchUserById(userId) {
         if (!userId || userId.trim().length === 0) {
             throw new common_1.BadRequestException('사용자 ID가 필요합니다.');

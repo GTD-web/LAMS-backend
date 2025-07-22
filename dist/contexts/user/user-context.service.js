@@ -142,15 +142,6 @@ let UserContextService = UserContextService_1 = class UserContextService {
         this.logger.log(`사용자 목록 조회 성공: ${result.users.length}명 조회`);
         return paginatedResult;
     }
-    async 사용자를_검색한다(searchCriteria) {
-        const result = await this.userDomainService.searchUsers(searchCriteria);
-        const userDtos = result.users.map((user) => (0, class_transformer_1.plainToInstance)(user_response_dto_1.UserResponseDto, user));
-        this.logger.log(`사용자 검색 완료: ${result.users.length}명 조회 (총 ${result.total}명)`);
-        return {
-            data: userDtos,
-            total: result.total,
-        };
-    }
     async findUserById(userId) {
         return this.userDomainService.findUserById(userId);
     }

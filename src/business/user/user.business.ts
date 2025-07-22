@@ -33,35 +33,6 @@ export class UserBusinessService {
     }
 
     /**
-     * 사용자 검색
-     */
-    async searchUsers(
-        searchDto: SearchUserDto,
-        paginationQuery: PaginationQueryDto,
-    ): Promise<PaginatedResponseDto<UserResponseDto>> {
-        const { page = 1, limit = 10 } = paginationQuery;
-        const offset = (page - 1) * limit;
-
-        const searchCriteria = {
-            ...searchDto,
-            limit,
-            offset,
-        };
-
-        const result = await this.userContextService.사용자를_검색한다(searchCriteria);
-
-        // PaginatedResponseDto 형태로 변환
-        const meta = {
-            page,
-            limit,
-            total: result.total,
-            totalPages: Math.ceil(result.total / limit),
-        };
-
-        return new PaginatedResponseDto(result.data, meta);
-    }
-
-    /**
      * 사용자 프로필 조회
      */
     async getUserProfile(userId: string): Promise<UserResponseDto> {

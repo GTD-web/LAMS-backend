@@ -17,18 +17,6 @@ export declare class UserDomainService {
         users: UserEntity[];
         total: number;
     }>;
-    searchUsers(searchCriteria: {
-        userId?: string;
-        email?: string;
-        name?: string;
-        loginId?: string;
-        keyword?: string;
-        limit?: number;
-        offset?: number;
-    }): Promise<{
-        users: UserEntity[];
-        total: number;
-    }>;
     searchUserById(userId: string): Promise<UserEntity | null>;
     searchUsersByEmail(email: string): Promise<UserEntity[]>;
     searchUsersByName(name: string): Promise<UserEntity[]>;

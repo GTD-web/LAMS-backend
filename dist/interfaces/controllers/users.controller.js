@@ -21,7 +21,6 @@ const roles_guard_1 = require("../../common/guards/roles.guard");
 const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 const user_enum_1 = require("../../domain/user/enum/user.enum");
 const pagination_query_dto_1 = require("../../common/dtos/pagination/pagination-query.dto");
-const search_user_dto_1 = require("../dto/user/requests/search-user.dto");
 const user_response_dto_1 = require("../dto/organization/responses/user-response.dto");
 const manage_department_authority_dto_1 = require("../dto/organization/requests/manage-department-authority.dto");
 const error_response_dto_1 = require("../../common/dtos/common/error-response.dto");
@@ -33,9 +32,6 @@ let UsersController = class UsersController {
     }
     async getUserList(paginationQuery) {
         return this.userBusinessService.getUserList(paginationQuery);
-    }
-    async searchUsers(searchDto, paginationQuery) {
-        return this.userBusinessService.searchUsers(searchDto, paginationQuery);
     }
     async getUserById(id) {
         return this.userBusinessService.getUserProfile(id);
@@ -83,80 +79,6 @@ __decorate([
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getUserList", null);
-__decorate([
-    (0, common_1.Get)('search'),
-    (0, roles_decorator_1.Roles)(user_enum_1.UserRole.SYSTEM_ADMIN, user_enum_1.UserRole.ATTENDANCE_ADMIN),
-    (0, swagger_1.ApiOperation)({
-        summary: '사용자 검색',
-        description: '다양한 조건으로 사용자를 검색합니다. 키워드 검색 시 이름, 이메일, 로그인 ID를 통합 검색합니다.',
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'userId',
-        description: '사용자 ID (UUID)',
-        type: 'string',
-        required: false,
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'email',
-        description: '사용자 이메일 (부분 검색)',
-        type: 'string',
-        required: false,
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'name',
-        description: '사용자 이름 (부분 검색)',
-        type: 'string',
-        required: false,
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'loginId',
-        description: '로그인 ID (부분 검색)',
-        type: 'string',
-        required: false,
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'keyword',
-        description: '검색 키워드 (이름, 이메일, 로그인 ID 통합 검색)',
-        type: 'string',
-        required: false,
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'page',
-        description: '페이지 번호 (1부터 시작)',
-        type: 'integer',
-        example: 1,
-        required: false,
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'limit',
-        description: '페이지당 항목 수',
-        type: 'integer',
-        example: 10,
-        required: false,
-    }),
-    (0, swagger_1.ApiOkResponse)({
-        description: '사용자 검색 성공',
-        type: pagination_response_dto_1.PaginatedResponseDto,
-    }),
-    (0, swagger_1.ApiUnauthorizedResponse)({
-        description: '인증 실패',
-        type: error_response_dto_1.ErrorResponseDto,
-    }),
-    (0, swagger_1.ApiForbiddenResponse)({
-        description: '접근 권한 없음 - 관리자 권한 필요',
-        type: error_response_dto_1.ErrorResponseDto,
-    }),
-    (0, swagger_1.ApiBadRequestResponse)({
-        description: '잘못된 검색 조건',
-        type: error_response_dto_1.ErrorResponseDto,
-    }),
-    __param(0, (0, common_1.Query)()),
-    __param(1, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [search_user_dto_1.SearchUserDto,
-        pagination_query_dto_1.PaginationQueryDto]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "searchUsers", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, roles_decorator_1.Roles)(user_enum_1.UserRole.SYSTEM_ADMIN, user_enum_1.UserRole.ATTENDANCE_ADMIN),
