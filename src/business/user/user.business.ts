@@ -2,9 +2,11 @@ import { UserContextService } from '@src/contexts/user/user-context.service';
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { UserEntity } from '@src/domain/user/entities/user.entity';
-import { OrganizationContextService } from '@src/contexts/organization/organization-context.service';
+
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 import { Injectable, Logger } from '@nestjs/common';
+import { AuthorityType } from '@src/domain/user-department-authority/enum/authority-type.enum';
+import { UserDepartmentAuthorityContext } from '@src/contexts/user-department-authority/user-department-authority.context';
 
 /**
  * 사용자 비즈니스 서비스
@@ -13,11 +15,9 @@ import { Injectable, Logger } from '@nestjs/common';
  */
 @Injectable()
 export class UserBusinessService {
-    private readonly logger = new Logger(UserBusinessService.name);
-
     constructor(
         private readonly userContextService: UserContextService,
-        private readonly organizationContextService: OrganizationContextService,
+        private readonly userDepartmentAuthorityContext: UserDepartmentAuthorityContext,
     ) {}
 
     /**
@@ -39,25 +39,26 @@ export class UserBusinessService {
     }
 
     /**
-     * 부서 권한 관리 (복잡한 비즈니스 로직이므로 try-catch 유지)
+     * 부서 권한 관리
      */
     async manageDepartmentAuthority(
         departmentId: string,
-        userId: string,
-        type: 'access' | 'review',
+        user: UserEntity,
+        type: AuthorityType,
         action: 'add' | 'remove',
     ): Promise<UserEntity> {
-        try {
-            if (!departmentId || !userId) {
-                throw new Error('부서 ID와 사용자 ID가 필요합니다.');
-            }
-
-            const department = await this.organizationContextService.findDepartmentById(departmentId);
-
-            return await this.userContextService.사용자의_부서_권한을_변경한다(userId, department, type, action);
-        } catch (error) {
-            this.logger.error(`부서 권한 관리 실패: ${departmentId}, ${userId}, ${type}, ${action}`, error.stack);
-            throw new Error('부서 권한 관리 중 오류가 발생했습니다.');
+        if (action === 'add') {
+            return await this.userDepartmentAuthorityContext.사용자의_부서_권한을_추가한다(
+                user.userId,
+                departmentId,
+                type,
+            );
+        } else {
+            return await this.userDepartmentAuthorityContext.사용자의_부서_권한을_삭제한다(
+                user.userId,
+                departmentId,
+                type,
+            );
         }
     }
 }

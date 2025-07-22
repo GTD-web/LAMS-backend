@@ -10,7 +10,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
-import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 import { PaginatedResponseDto, PaginationMetaDto } from '@src/common/dtos/pagination/pagination-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
@@ -127,31 +126,6 @@ export class UserDomainService {
         return savedUser;
     }
 
-    async updateUserAuthority(
-        user: UserEntity,
-        department: DepartmentInfoEntity,
-        type: 'access' | 'review',
-        action: 'add' | 'remove',
-    ): Promise<UserEntity> {
-        if (type === 'access') {
-            if (action === 'add') {
-                this.includeAccessableDepartment(user, department);
-            } else {
-                this.excludeAccessableDepartment(user, department);
-            }
-        } else {
-            if (action === 'add') {
-                this.includeReviewableDepartment(user, department);
-            } else {
-                this.excludeReviewableDepartment(user, department);
-            }
-        }
-
-        const updatedUser = await this.userRepository.save(user);
-        this.logger.log(`사용자 접근 권한 수정 완료: ${updatedUser.email}`);
-        return updatedUser;
-    }
-
     /**
      * 페이지네이션된 사용자 목록 조회
      */
@@ -173,54 +147,6 @@ export class UserDomainService {
     }
 
     // ==================== 사용자 Entity 메서드 ====================
-
-    private includeAccessableDepartment(user: UserEntity, department: DepartmentInfoEntity): UserEntity {
-        if (!user.accessableDepartments) {
-            user.accessableDepartments = [];
-        }
-
-        const isAccessableDepartment = user.accessableDepartments.some(
-            (dept) => dept.departmentId === department.departmentId,
-        );
-
-        if (isAccessableDepartment) {
-            throw new ConflictException('이미 존재하는 접근 가능 부서입니다.');
-        }
-
-        user.accessableDepartments.push(department);
-
-        return user;
-    }
-
-    private includeReviewableDepartment(user: UserEntity, department: DepartmentInfoEntity) {
-        if (!user.reviewableDepartments) {
-            user.reviewableDepartments = [];
-        }
-
-        const isReviewableDepartment = user.reviewableDepartments.some(
-            (dept) => dept.departmentId === department.departmentId,
-        );
-
-        if (isReviewableDepartment) {
-            throw new ConflictException('이미 존재하는 리뷰 가능 부서입니다.');
-        }
-
-        user.reviewableDepartments.push(department);
-
-        return user;
-    }
-
-    private excludeAccessableDepartment(user: UserEntity, department: DepartmentInfoEntity) {
-        user.accessableDepartments = user.accessableDepartments.filter(
-            (dept) => dept.departmentId !== department.departmentId,
-        );
-    }
-
-    private excludeReviewableDepartment(user: UserEntity, department: DepartmentInfoEntity) {
-        user.reviewableDepartments = user.reviewableDepartments.filter(
-            (dept) => dept.departmentId !== department.departmentId,
-        );
-    }
 
     private validatePassword(user: UserEntity, password: string) {
         return bcrypt.compareSync(password, user.password);

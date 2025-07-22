@@ -27,5 +27,5 @@ export class ManageDepartmentAuthorityDto {
     })
     @IsIn(['access', 'review'], { message: '타입은 access 또는 review여야 합니다' })
     @IsNotEmpty({ message: '타입은 필수입니다' })
-    readonly type: 'access' | 'review';
+    readonly type: AuthorityType;
 }

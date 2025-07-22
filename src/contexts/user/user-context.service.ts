@@ -1,11 +1,10 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserDomainService } from '@src/domain/user/services/user-domain.service';
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 import { plainToInstance } from 'class-transformer';
-import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 
 import { UserEntity } from '@src/domain/user/entities/user.entity';
 
@@ -69,26 +68,6 @@ export class UserContextService {
         newPassword: string,
     ): Promise<UserEntity> {
         return this.userDomainService.changeUserPassword(userId, currentPassword, newPassword);
-    }
-
-    // ==================== 권한 관리 메서드 ====================
-
-    /**
-     * 부서의 검토 권한에 사용자를 추가한다 (권한 관리는 복잡한 비즈니스 로직이므로 try-catch 유지)
-     */
-    async 사용자의_부서_권한을_변경한다(
-        userId: string,
-        department: DepartmentInfoEntity,
-        type: 'access' | 'review',
-        action: 'add' | 'remove',
-    ): Promise<UserEntity> {
-        const user = await this.userDomainService.findUserById(userId);
-        return this.userDomainService.updateUserAuthority(user, department, type, action);
-    }
-
-    async 사용자의_부서_권한을_조회한다(userId: string): Promise<UserEntity> {
-        const user = await this.userDomainService.findUserById(userId);
-        return user;
     }
 
     /**

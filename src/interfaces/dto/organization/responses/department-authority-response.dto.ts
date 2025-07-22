@@ -35,7 +35,7 @@ export class DepartmentAuthorityResponse {
         enum: ['access', 'review'],
     })
     @Expose()
-    readonly authorityType: 'access' | 'review';
+    readonly authorityType: AuthorityType;
 
     @ApiProperty({
         description: '액션',

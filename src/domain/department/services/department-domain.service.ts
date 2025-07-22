@@ -33,12 +33,18 @@ export class DepartmentDomainService {
     }
 
     /**
-     * 부서 코드로 조회
+     * 부서 ID로 조회(예외처리)
      */
-    async findDepartmentByCode(departmentCode: string): Promise<DepartmentInfoEntity | null> {
-        return await this.departmentRepository.findOne({
+    async getDepartmentById(departmentCode: string): Promise<DepartmentInfoEntity | null> {
+        const department = await this.departmentRepository.findOne({
             where: { departmentCode },
         });
+
+        if (!department) {
+            throw new NotFoundException('부서를 찾을 수 없습니다.');
+        }
+
+        return department;
     }
 
     /**

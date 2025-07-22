@@ -157,7 +157,7 @@ export class UsersController {
     })
     async manageDepartmentAuthority(
         @Param('departmentId', ParseUUIDPipe) departmentId: string,
-        @Param('type') type: 'access' | 'review',
+        @Param('type') type: AuthorityType,
         @Param('action') action: 'add' | 'remove',
         @Body() dto: ManageDepartmentAuthorityDto,
     ): Promise<UserEntity> {
