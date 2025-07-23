@@ -29,7 +29,7 @@ async function bootstrap() {
     });
     (0, swagger_util_1.settingSwagger)(app);
     const port = process.env.PORT || 5000;
-    await app.listen(port);
+    await app.listen(port, '0.0.0.0');
     console.log(`🚀 Application is running on: http://localhost:${port}`);
 }
 exports.default = bootstrap;

@@ -32,8 +32,11 @@ async function bootstrap() {
     });
 
     settingSwagger(app);
+    // Vercel에서는 동적 포트 할당
     const port = process.env.PORT || 5000;
-    await app.listen(port);
+    // 모든 인터페이스에서 수신
+    await app.listen(port, '0.0.0.0');
+
     console.log(`🚀 Application is running on: http://localhost:${port}`);
 }
 

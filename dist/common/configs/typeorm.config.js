@@ -12,7 +12,7 @@ const typeOrmConfig = (configService) => {
         database: configService.get('database.database'),
         entities: [(0, path_1.join)(__dirname, '../../domain/**/*.entity.{js,ts}'), (0, path_1.join)(__dirname, '../../**/*.entity.{js,ts}')],
         schema: 'public',
-        synchronize: true,
+        synchronize: configService.get('NODE_ENV') !== 'production',
         ssl: configService.get('NODE_ENV') === 'production'
             ? {
                 rejectUnauthorized: false,
