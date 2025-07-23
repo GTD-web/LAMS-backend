@@ -30,7 +30,7 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
         };
 
         // 사용자 정보 (JWT 토큰에서 추출)
-        const user = request.user as any;
+        const user = (request as any).user;
         const userInfo = user
             ? {
                   userId: user.sub || user.id,
@@ -153,8 +153,8 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
         return (
             (request.headers['x-forwarded-for'] as string) ||
             (request.headers['x-real-ip'] as string) ||
-            request.connection.remoteAddress ||
-            request.socket.remoteAddress ||
+            request.connection?.remoteAddress ||
+            (request as any).socket?.remoteAddress ||
             'unknown'
         );
     }
