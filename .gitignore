@@ -2,6 +2,9 @@
 /dist
 /node_modules
 database.db
+
+*.tsbuildinfo
+
 # files
 
 # Logs
