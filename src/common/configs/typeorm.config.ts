@@ -5,7 +5,7 @@ import { join } from 'path';
 export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => {
     return {
         type: 'postgres',
-        url: configService.get('database.url'),
+        // url: configService.get('database.url'),
         host: configService.get('database.host'),
         port: configService.get('database.port'),
         username: configService.get('database.username'),
@@ -16,16 +16,13 @@ export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOption
         // synchronize: configService.get('NODE_ENV') !== 'production',
         synchronize: true,
         // 환경별 SSL 설정
-        ...(configService.get('NODE_ENV') === 'production' && {
-            ssl: {
-                rejectUnauthorized: false,
-            },
-            extra: {
-                ssl: {
-                    rejectUnauthorized: false,
-                },
-            },
-        }),
+        ssl:
+            configService.get('NODE_ENV') === 'production'
+                ? {
+                      rejectUnauthorized: false,
+                  }
+                : false,
+
         logging: configService.get('NODE_ENV') === 'local',
     };
 };
