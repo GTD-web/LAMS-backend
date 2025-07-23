@@ -9,11 +9,8 @@ const response_interceptor_1 = require("./common/interceptors/response.intercept
 const swagger_util_1 = require("./common/utils/swagger/swagger.util");
 const logging_interceptor_1 = require("./common/interceptors/logging.interceptor");
 const error_logging_interceptor_1 = require("./common/interceptors/error-logging.interceptor");
-const express = require("express");
-const platform_express_1 = require("@nestjs/platform-express");
 async function bootstrap() {
-    const server = express();
-    const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(server));
+    const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
         origin: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -24,19 +21,24 @@ async function bootstrap() {
     app.useGlobalInterceptors(new error_logging_interceptor_1.ErrorLoggingInterceptor(), new response_interceptor_1.ResponseInterceptor(), new logging_interceptor_1.LoggingInterceptor());
     app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
     (0, swagger_util_1.settingSwagger)(app);
-    await app.init();
-    return server;
+    let port = 3000;
+    if (process.env.VERCEL) {
+        port = 0;
+    }
+    else if (process.env.PORT) {
+        port = parseInt(process.env.PORT, 10);
+    }
+    console.log('🚀 Starting on port:', port);
+    await app.listen(port);
+    if (port === 0) {
+        const server = app.getHttpServer();
+        const address = server.address();
+        console.log('✅ Assigned port:', address?.port);
+    }
+    return app;
 }
-exports.default = async (req, res) => {
-    const server = await bootstrap();
-    return server(req, res);
-};
-if (!process.env.VERCEL) {
-    bootstrap().then((server) => {
-        const port = process.env.PORT || 3000;
-        server.listen(port, () => {
-            console.log(`🚀 Server running on port ${port}`);
-        });
-    });
+exports.default = bootstrap;
+if (process.env.NODE_ENV !== 'production') {
+    bootstrap().catch(console.error);
 }
 //# sourceMappingURL=main.js.map

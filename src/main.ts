@@ -9,15 +9,10 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { settingSwagger } from './common/utils/swagger/swagger.util';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ErrorLoggingInterceptor } from './common/interceptors/error-logging.interceptor';
-import * as express from 'express';
-import { ExpressAdapter } from '@nestjs/platform-express';
 
 async function bootstrap() {
-    // Express 앱을 먼저 생성
-    const server = express();
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-    // NestJS를 Express 어댑터로 생성
-    const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
     app.enableCors({
         origin: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -38,23 +33,33 @@ async function bootstrap() {
 
     settingSwagger(app);
     // Vercel에서는 동적 포트 할당
-    await app.init();
+    // Vercel에서는 포트 0으로 동적 할당
+    let port = 3000;
 
-    return server;
+    if (process.env.VERCEL) {
+        port = 0; // 시스템이 자동 할당
+    } else if (process.env.PORT) {
+        port = parseInt(process.env.PORT, 10);
+    }
+
+    console.log('🚀 Starting on port:', port);
+
+    await app.listen(port);
+
+    // 실제 할당된 포트 확인 (포트 0 사용시)
+    if (port === 0) {
+        const server = app.getHttpServer();
+        const address = server.address();
+        console.log('✅ Assigned port:', address?.port);
+    }
+
+    return app;
 }
 
 // Vercel용 export
-export default async (req: any, res: any) => {
-    const server = await bootstrap();
-    return server(req, res);
-};
+export default bootstrap;
 
 // 로컬 개발용
-if (!process.env.VERCEL) {
-    bootstrap().then((server) => {
-        const port = process.env.PORT || 3000;
-        server.listen(port, () => {
-            console.log(`🚀 Server running on port ${port}`);
-        });
-    });
+if (process.env.NODE_ENV !== 'production') {
+    bootstrap().catch(console.error);
 }
