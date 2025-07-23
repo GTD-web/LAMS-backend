@@ -12,7 +12,6 @@ import {
     ApiInternalServerErrorResponse,
     ApiParam,
     ApiQuery,
-    ApiBody,
 } from '@nestjs/swagger';
 import { OrganizationBusinessService } from '@src/business/organization/organization.business';
 import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
@@ -25,8 +24,6 @@ import { SyncOrganizationResponseDto } from '@src/interfaces/dto/organization/re
 import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';
 import { EmployeeResponseDto } from '@src/interfaces/dto/organization/responses/employee-response.dto';
 import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
-import { ManageDepartmentAuthorityDto } from '@src/interfaces/dto/organization/requests/manage-department-authority.dto';
-import { AuthorityType } from '@src/domain/user-department-authority/enum/authority-type.enum';
 
 /**
  * 조직관리 컨트롤러
