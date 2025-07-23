@@ -9,6 +9,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { settingSwagger } from './common/utils/swagger/swagger.util';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ErrorLoggingInterceptor } from './common/interceptors/error-logging.interceptor';
+import { AddressInfo } from 'net';
 
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -50,7 +51,7 @@ async function bootstrap() {
     if (port === 0) {
         const server = app.getHttpServer();
         const address = server.address();
-        console.log('✅ Assigned port:', address?.port);
+        console.log('✅ Assigned port:', (address as AddressInfo).port);
     }
 
     return app;

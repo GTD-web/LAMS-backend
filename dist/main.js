@@ -33,7 +33,7 @@ async function bootstrap() {
     if (port === 0) {
         const server = app.getHttpServer();
         const address = server.address();
-        console.log('✅ Assigned port:', address?.port);
+        console.log('✅ Assigned port:', address.port);
     }
     return app;
 }
