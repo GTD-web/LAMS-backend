@@ -1,15 +1,26 @@
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import * as timezone from 'dayjs/plugin/timezone';
-import * as customParseFormat from 'dayjs/plugin/customParseFormat';
-import * as duration from 'dayjs/plugin/duration';
 
-// dayjs 플러그인 설정
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.extend(customParseFormat);
-dayjs.extend(duration);
+let isPluginsLoaded = false;
 
+async function loadPlugins() {
+    if (isPluginsLoaded) return;
+
+    try {
+        dayjs.extend(utc);
+        dayjs.extend(timezone);
+        dayjs.tz.setDefault('Asia/Seoul');
+
+        // 기본 타임존 설정
+        isPluginsLoaded = true;
+    } catch (error) {
+        console.warn('Failed to load dayjs plugins:', error);
+    }
+}
+
+// 플러그인 로드 시도
+loadPlugins();
 /**
  * 날짜 포맷 헬퍼 클래스
  * - dayjs를 사용한 일관된 날짜 처리
