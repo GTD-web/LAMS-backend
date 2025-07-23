@@ -9,10 +9,15 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { settingSwagger } from './common/utils/swagger/swagger.util';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ErrorLoggingInterceptor } from './common/interceptors/error-logging.interceptor';
+import * as express from 'express';
+import { ExpressAdapter } from '@nestjs/platform-express';
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    // Express 앱을 먼저 생성
+    const server = express();
 
+    // NestJS를 Express 어댑터로 생성
+    const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
     app.enableCors({
         origin: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -24,29 +29,32 @@ async function bootstrap() {
     app.useGlobalInterceptors(new ErrorLoggingInterceptor(), new ResponseInterceptor(), new LoggingInterceptor());
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     // 파일 업로드 설정
-    const uploadPath = join(process.cwd(), 'public');
-    app.useStaticAssets(uploadPath, {
-        prefix: '/public',
-        index: false,
-        fallthrough: false,
-    });
+    // const uploadPath = join(process.cwd(), 'public');
+    // app.useStaticAssets(uploadPath, {
+    //     prefix: '/public',
+    //     index: false,
+    //     fallthrough: false,
+    // });
 
     settingSwagger(app);
     // Vercel에서는 동적 포트 할당
-    const port =
-        process.env.PORT || // Vercel/Heroku 표준
-        process.env.APP_PORT ||
-        5000; // 커스텀 설정
-    // 모든 인터페이스에서 수신
-    await app.listen(port);
+    await app.init();
 
-    console.log(`🚀 Application is running on: http://localhost:${port}`);
+    return server;
 }
 
-// Vercel용 export 추가
-export default bootstrap;
+// Vercel용 export
+export default async (req: any, res: any) => {
+    const server = await bootstrap();
+    return server(req, res);
+};
 
-// 로컬 개발용 실행
-if (process.env.NODE_ENV !== 'production') {
-    bootstrap();
+// 로컬 개발용
+if (!process.env.VERCEL) {
+    bootstrap().then((server) => {
+        const port = process.env.PORT || 3000;
+        server.listen(port, () => {
+            console.log(`🚀 Server running on port ${port}`);
+        });
+    });
 }
