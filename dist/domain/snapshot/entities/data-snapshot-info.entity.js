@@ -13,9 +13,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DataSnapshotInfoEntity = exports.SnapshotType = void 0;
 const typeorm_1 = require("typeorm");
 const data_snapshot_child_entity_1 = require("./data-snapshot-child.entity");
-const department_info_entity_1 = require("../../organization/department/entities/department-info.entity");
 const data_snapshot_approval_request_info_entity_1 = require("./data-snapshot-approval-request-info.entity");
 const date_helper_1 = require("../../../common/utils/helpers/date.helper");
+const department_info_entity_1 = require("../../department/entities/department-info.entity");
 var SnapshotType;
 (function (SnapshotType) {
     SnapshotType["DAILY"] = "DAILY";

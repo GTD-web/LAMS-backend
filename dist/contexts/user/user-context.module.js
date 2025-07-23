@@ -9,13 +9,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserContextModule = void 0;
 const common_1 = require("@nestjs/common");
 const user_context_service_1 = require("./user-context.service");
-const user_module_1 = require("../../domain/user/user.module");
+const user_domain_module_1 = require("../../domain/user/user-domain.module");
 let UserContextModule = class UserContextModule {
 };
 exports.UserContextModule = UserContextModule;
 exports.UserContextModule = UserContextModule = __decorate([
     (0, common_1.Module)({
-        imports: [user_module_1.UserDomainModule],
+        imports: [user_domain_module_1.UserDomainModule],
         providers: [user_context_service_1.UserContextService],
         exports: [user_context_service_1.UserContextService],
     })

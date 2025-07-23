@@ -40,14 +40,6 @@ let UserContextService = class UserContextService {
     async 사용자_비밀번호를_변경한다(userId, currentPassword, newPassword) {
         return this.userDomainService.changeUserPassword(userId, currentPassword, newPassword);
     }
-    async 사용자의_부서_권한을_변경한다(userId, department, type, action) {
-        const user = await this.userDomainService.findUserById(userId);
-        return this.userDomainService.updateUserAuthority(user, department, type, action);
-    }
-    async 사용자의_부서_권한을_조회한다(userId) {
-        const user = await this.userDomainService.findUserById(userId);
-        return user;
-    }
     async findUserById(userId) {
         return await this.userDomainService.findUserById(userId);
     }

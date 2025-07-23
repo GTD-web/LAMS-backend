@@ -1,8 +1,7 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, ParseUUIDPipe, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
-    ApiBody,
     ApiParam,
     ApiQuery,
     ApiBearerAuth,
@@ -20,10 +19,9 @@ import { Roles } from '@src/common/decorators/roles.decorator';
 import { UserRole } from '@src/domain/user/enum/user.enum';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
-import { ManageDepartmentAuthorityDto } from '@src/interfaces/dto/organization/requests/manage-department-authority.dto';
 import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { AuthorityType } from '@src/domain/user-department-authority/enum/authority-type.enum';
 
 /**
  * 사용자 관리 컨트롤러
@@ -106,11 +104,20 @@ export class UsersController {
         return this.userBusinessService.getUserProfile(id);
     }
 
-    @Post('departments/:departmentId/authorities/:type/:action')
+    // ==================== 부서 권한 관리 엔드포인트 ====================
+
+    @Post(':userId/departments/:departmentId/access-authority')
     @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
     @ApiOperation({
-        summary: '부서 권한 관리',
-        description: '사용자의 부서 권한을 추가하거나 삭제합니다.',
+        summary: '부서 접근 권한 부여',
+        description: '사용자에게 특정 부서의 접근 권한을 부여합니다.',
+    })
+    @ApiParam({
+        name: 'userId',
+        description: '사용자 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
     })
     @ApiParam({
         name: 'departmentId',
@@ -119,25 +126,129 @@ export class UsersController {
         format: 'uuid',
         example: 'uuid-v4-string',
     })
-    @ApiParam({
-        name: 'type',
-        description: '권한 타입',
-        enum: ['access', 'review'],
-        example: 'access',
+    @ApiCreatedResponse({
+        description: '접근 권한 부여 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                success: { type: 'boolean', example: true },
+                message: { type: 'string', example: '접근 권한이 성공적으로 부여되었습니다.' },
+            },
+        },
+    })
+    @ApiUnauthorizedResponse({
+        description: '인증 실패',
+        type: ErrorResponseDto,
+    })
+    @ApiForbiddenResponse({
+        description: '접근 권한 없음 - 관리자 권한 필요',
+        type: ErrorResponseDto,
+    })
+    @ApiBadRequestResponse({
+        description: '잘못된 요청 데이터 또는 이미 권한이 존재함',
+        type: ErrorResponseDto,
+    })
+    @ApiNotFoundResponse({
+        description: '부서 또는 사용자를 찾을 수 없음',
+        type: ErrorResponseDto,
+    })
+    async grantAccessAuthority(
+        @Param('userId', ParseUUIDPipe) userId: string,
+        @Param('departmentId', ParseUUIDPipe) departmentId: string,
+    ): Promise<{ success: boolean; message: string }> {
+        const result = await this.userBusinessService.grantAuthority(userId, departmentId, AuthorityType.ACCESS);
+        return {
+            success: result,
+            message: '접근 권한이 성공적으로 부여되었습니다.',
+        };
+    }
+
+    @Post(':userId/departments/:departmentId/review-authority')
+    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @ApiOperation({
+        summary: '부서 검토 권한 부여',
+        description: '사용자에게 특정 부서의 검토 권한을 부여합니다.',
     })
     @ApiParam({
-        name: 'action',
-        description: '작업 타입',
-        enum: ['add', 'delete'],
-        example: 'add',
+        name: 'userId',
+        description: '사용자 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
     })
-    @ApiBody({
-        type: ManageDepartmentAuthorityDto,
-        description: '권한 관리 데이터',
+    @ApiParam({
+        name: 'departmentId',
+        description: '부서 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
     })
     @ApiCreatedResponse({
-        description: '부서 권한 관리 성공',
-        type: UserEntity,
+        description: '검토 권한 부여 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                success: { type: 'boolean', example: true },
+                message: { type: 'string', example: '검토 권한이 성공적으로 부여되었습니다.' },
+            },
+        },
+    })
+    @ApiUnauthorizedResponse({
+        description: '인증 실패',
+        type: ErrorResponseDto,
+    })
+    @ApiForbiddenResponse({
+        description: '접근 권한 없음 - 관리자 권한 필요',
+        type: ErrorResponseDto,
+    })
+    @ApiBadRequestResponse({
+        description: '잘못된 요청 데이터 또는 이미 권한이 존재함',
+        type: ErrorResponseDto,
+    })
+    @ApiNotFoundResponse({
+        description: '부서 또는 사용자를 찾을 수 없음',
+        type: ErrorResponseDto,
+    })
+    async grantReviewAuthority(
+        @Param('userId', ParseUUIDPipe) userId: string,
+        @Param('departmentId', ParseUUIDPipe) departmentId: string,
+    ): Promise<{ success: boolean; message: string }> {
+        const result = await this.userBusinessService.grantAuthority(userId, departmentId, AuthorityType.REVIEW);
+        return {
+            success: result,
+            message: '검토 권한이 성공적으로 부여되었습니다.',
+        };
+    }
+
+    @Delete(':userId/departments/:departmentId/access-authority')
+    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @ApiOperation({
+        summary: '부서 접근 권한 삭제',
+        description: '사용자의 특정 부서 접근 권한을 삭제합니다.',
+    })
+    @ApiParam({
+        name: 'userId',
+        description: '사용자 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
+    })
+    @ApiParam({
+        name: 'departmentId',
+        description: '부서 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
+    })
+    @ApiOkResponse({
+        description: '접근 권한 삭제 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                success: { type: 'boolean', example: true },
+                message: { type: 'string', example: '접근 권한이 성공적으로 삭제되었습니다.' },
+            },
+        },
     })
     @ApiUnauthorizedResponse({
         description: '인증 실패',
@@ -152,15 +263,74 @@ export class UsersController {
         type: ErrorResponseDto,
     })
     @ApiNotFoundResponse({
-        description: '부서 또는 사용자를 찾을 수 없음',
+        description: '부서, 사용자 또는 권한을 찾을 수 없음',
         type: ErrorResponseDto,
     })
-    async manageDepartmentAuthority(
+    async removeAccessAuthority(
+        @Param('userId', ParseUUIDPipe) userId: string,
         @Param('departmentId', ParseUUIDPipe) departmentId: string,
-        @Param('type') type: AuthorityType,
-        @Param('action') action: 'add' | 'remove',
-        @Body() dto: ManageDepartmentAuthorityDto,
-    ): Promise<UserEntity> {
-        return this.userBusinessService.manageDepartmentAuthority(departmentId, dto.userId, type, action);
+    ): Promise<{ success: boolean; message: string }> {
+        const result = await this.userBusinessService.removeAuthority(userId, departmentId, AuthorityType.ACCESS);
+        return {
+            success: result,
+            message: '접근 권한이 성공적으로 삭제되었습니다.',
+        };
+    }
+
+    @Delete(':userId/departments/:departmentId/review-authority')
+    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @ApiOperation({
+        summary: '부서 검토 권한 삭제',
+        description: '사용자의 특정 부서 검토 권한을 삭제합니다.',
+    })
+    @ApiParam({
+        name: 'userId',
+        description: '사용자 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
+    })
+    @ApiParam({
+        name: 'departmentId',
+        description: '부서 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
+    })
+    @ApiOkResponse({
+        description: '검토 권한 삭제 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                success: { type: 'boolean', example: true },
+                message: { type: 'string', example: '검토 권한이 성공적으로 삭제되었습니다.' },
+            },
+        },
+    })
+    @ApiUnauthorizedResponse({
+        description: '인증 실패',
+        type: ErrorResponseDto,
+    })
+    @ApiForbiddenResponse({
+        description: '접근 권한 없음 - 관리자 권한 필요',
+        type: ErrorResponseDto,
+    })
+    @ApiBadRequestResponse({
+        description: '잘못된 요청 데이터',
+        type: ErrorResponseDto,
+    })
+    @ApiNotFoundResponse({
+        description: '부서, 사용자 또는 권한을 찾을 수 없음',
+        type: ErrorResponseDto,
+    })
+    async removeReviewAuthority(
+        @Param('userId', ParseUUIDPipe) userId: string,
+        @Param('departmentId', ParseUUIDPipe) departmentId: string,
+    ): Promise<{ success: boolean; message: string }> {
+        const result = await this.userBusinessService.removeAuthority(userId, departmentId, AuthorityType.REVIEW);
+        return {
+            success: result,
+            message: '검토 권한이 성공적으로 삭제되었습니다.',
+        };
     }
 }

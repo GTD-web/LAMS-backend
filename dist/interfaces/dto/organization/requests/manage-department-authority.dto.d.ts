@@ -1,3 +1,3 @@
 export declare class ManageDepartmentAuthorityDto {
-    readonly userId: string;
+    readonly departmentId: string;
 }

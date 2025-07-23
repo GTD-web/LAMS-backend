@@ -4,7 +4,7 @@ import { Repository, Like, Not, IsNull, FindOptionsWhere, FindManyOptions, ILike
 import { EmployeeInfoEntity } from '../entities/employee-info.entity';
 import { PaginatedResponseDto, PaginationMetaDto } from '@src/common/dtos/pagination/pagination-response.dto';
 import { EmployeeResponseDto } from '@src/interfaces/dto/organization/responses/employee-response.dto';
-import { plainToInstance } from 'class-transformer/types';
+import { plainToInstance } from 'class-transformer';
 
 /**
  * 직원 도메인 서비스

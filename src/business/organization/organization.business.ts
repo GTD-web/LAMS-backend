@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { OrganizationContextService } from '@src/contexts/organization/organization-context.service';
 import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';
 import { EmployeeResponseDto } from '@src/interfaces/dto/organization/responses/employee-response.dto';
 import { SyncOrganizationResponseDto } from '@src/interfaces/dto/organization/responses/sync-organization-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { plainToInstance } from 'class-transformer';
-import { UserContextService } from '@src/contexts/user/user-context.service';
+import { UserDepartmentAuthorityContext } from '@src/contexts/user-department-authority/user-department-authority-context';
 
 /**
  * 조직관리 비즈니스 서비스
@@ -16,7 +16,7 @@ import { UserContextService } from '@src/contexts/user/user-context.service';
 export class OrganizationBusinessService {
     constructor(
         private readonly organizationContextService: OrganizationContextService,
-        private readonly userContextService: UserContextService,
+        private readonly userDepartmentAuthorityContext: UserDepartmentAuthorityContext,
     ) {}
 
     /**
@@ -48,15 +48,23 @@ export class OrganizationBusinessService {
      * 부서 목록 조회
      */
     async getDepartmentList(paginationQuery: PaginationQueryDto) {
-        const { page = 1, limit = 10 } = paginationQuery;
-        return await this.organizationContextService.페이지네이션된_부서_목록을_조회한다(limit, page);
+        return await this.organizationContextService.페이지네이션된_부서_목록을_조회한다(paginationQuery);
     }
 
     /**
      * 권한이 있는 부서 조회
      */
-    async getDepartmentListByUser(userId: string) {
-        return await this.organizationContextService.권한이_있는_부서_조회(userId);
+    async getAccessibleAuthorizedDepartments(userId: string): Promise<DepartmentResponseDto[]> {
+        const departments = await this.userDepartmentAuthorityContext.사용자의_접근_가능한_부서_목록을_조회한다(userId);
+        return departments.map((department) => plainToInstance(DepartmentResponseDto, department));
+    }
+
+    /**
+     * 검토 가능한 부서 조회
+     */
+    async getReviewableAuthorizedDepartments(userId: string): Promise<DepartmentResponseDto[]> {
+        const departments = await this.userDepartmentAuthorityContext.사용자의_검토_가능한_부서_목록을_조회한다(userId);
+        return departments.map((department) => plainToInstance(DepartmentResponseDto, department));
     }
 
     /**

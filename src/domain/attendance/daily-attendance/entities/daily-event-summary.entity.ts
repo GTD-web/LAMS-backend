@@ -1,4 +1,4 @@
-import { EmployeeInfoEntity } from '@src/domain/organization/employee/entities/employee-info.entity';
+import { EmployeeInfoEntity } from '@src/domain/employee/entities/employee-info.entity';
 import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { DateHelper } from '@src/common/utils/helpers/date.helper';
 

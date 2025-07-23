@@ -22,10 +22,9 @@ const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 const user_enum_1 = require("../../domain/user/enum/user.enum");
 const pagination_query_dto_1 = require("../../common/dtos/pagination/pagination-query.dto");
 const user_response_dto_1 = require("../dto/organization/responses/user-response.dto");
-const manage_department_authority_dto_1 = require("../dto/organization/requests/manage-department-authority.dto");
 const error_response_dto_1 = require("../../common/dtos/common/error-response.dto");
-const user_entity_1 = require("../../domain/user/entities/user.entity");
 const pagination_response_dto_1 = require("../../common/dtos/pagination/pagination-response.dto");
+const authority_type_enum_1 = require("../../domain/user-department-authority/enum/authority-type.enum");
 let UsersController = class UsersController {
     constructor(userBusinessService) {
         this.userBusinessService = userBusinessService;
@@ -36,8 +35,33 @@ let UsersController = class UsersController {
     async getUserById(id) {
         return this.userBusinessService.getUserProfile(id);
     }
-    async manageDepartmentAuthority(departmentId, type, action, dto) {
-        return this.userBusinessService.manageDepartmentAuthority(departmentId, dto.userId, type, action);
+    async grantAccessAuthority(userId, departmentId) {
+        const result = await this.userBusinessService.grantAuthority(userId, departmentId, authority_type_enum_1.AuthorityType.ACCESS);
+        return {
+            success: result,
+            message: '접근 권한이 성공적으로 부여되었습니다.',
+        };
+    }
+    async grantReviewAuthority(userId, departmentId) {
+        const result = await this.userBusinessService.grantAuthority(userId, departmentId, authority_type_enum_1.AuthorityType.REVIEW);
+        return {
+            success: result,
+            message: '검토 권한이 성공적으로 부여되었습니다.',
+        };
+    }
+    async removeAccessAuthority(userId, departmentId) {
+        const result = await this.userBusinessService.removeAuthority(userId, departmentId, authority_type_enum_1.AuthorityType.ACCESS);
+        return {
+            success: result,
+            message: '접근 권한이 성공적으로 삭제되었습니다.',
+        };
+    }
+    async removeReviewAuthority(userId, departmentId) {
+        const result = await this.userBusinessService.removeAuthority(userId, departmentId, authority_type_enum_1.AuthorityType.REVIEW);
+        return {
+            success: result,
+            message: '검토 권한이 성공적으로 삭제되었습니다.',
+        };
     }
 };
 exports.UsersController = UsersController;
@@ -115,11 +139,18 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getUserById", null);
 __decorate([
-    (0, common_1.Post)('departments/:departmentId/authorities/:type/:action'),
+    (0, common_1.Post)(':userId/departments/:departmentId/access-authority'),
     (0, roles_decorator_1.Roles)(user_enum_1.UserRole.SYSTEM_ADMIN, user_enum_1.UserRole.ATTENDANCE_ADMIN),
     (0, swagger_1.ApiOperation)({
-        summary: '부서 권한 관리',
-        description: '사용자의 부서 권한을 추가하거나 삭제합니다.',
+        summary: '부서 접근 권한 부여',
+        description: '사용자에게 특정 부서의 접근 권한을 부여합니다.',
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'userId',
+        description: '사용자 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
     }),
     (0, swagger_1.ApiParam)({
         name: 'departmentId',
@@ -128,25 +159,121 @@ __decorate([
         format: 'uuid',
         example: 'uuid-v4-string',
     }),
-    (0, swagger_1.ApiParam)({
-        name: 'type',
-        description: '권한 타입',
-        enum: ['access', 'review'],
-        example: 'access',
+    (0, swagger_1.ApiCreatedResponse)({
+        description: '접근 권한 부여 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                success: { type: 'boolean', example: true },
+                message: { type: 'string', example: '접근 권한이 성공적으로 부여되었습니다.' },
+            },
+        },
+    }),
+    (0, swagger_1.ApiUnauthorizedResponse)({
+        description: '인증 실패',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    (0, swagger_1.ApiForbiddenResponse)({
+        description: '접근 권한 없음 - 관리자 권한 필요',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    (0, swagger_1.ApiBadRequestResponse)({
+        description: '잘못된 요청 데이터 또는 이미 권한이 존재함',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    (0, swagger_1.ApiNotFoundResponse)({
+        description: '부서 또는 사용자를 찾을 수 없음',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)('departmentId', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "grantAccessAuthority", null);
+__decorate([
+    (0, common_1.Post)(':userId/departments/:departmentId/review-authority'),
+    (0, roles_decorator_1.Roles)(user_enum_1.UserRole.SYSTEM_ADMIN, user_enum_1.UserRole.ATTENDANCE_ADMIN),
+    (0, swagger_1.ApiOperation)({
+        summary: '부서 검토 권한 부여',
+        description: '사용자에게 특정 부서의 검토 권한을 부여합니다.',
     }),
     (0, swagger_1.ApiParam)({
-        name: 'action',
-        description: '작업 타입',
-        enum: ['add', 'delete'],
-        example: 'add',
+        name: 'userId',
+        description: '사용자 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
     }),
-    (0, swagger_1.ApiBody)({
-        type: manage_department_authority_dto_1.ManageDepartmentAuthorityDto,
-        description: '권한 관리 데이터',
+    (0, swagger_1.ApiParam)({
+        name: 'departmentId',
+        description: '부서 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
     }),
     (0, swagger_1.ApiCreatedResponse)({
-        description: '부서 권한 관리 성공',
-        type: user_entity_1.UserEntity,
+        description: '검토 권한 부여 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                success: { type: 'boolean', example: true },
+                message: { type: 'string', example: '검토 권한이 성공적으로 부여되었습니다.' },
+            },
+        },
+    }),
+    (0, swagger_1.ApiUnauthorizedResponse)({
+        description: '인증 실패',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    (0, swagger_1.ApiForbiddenResponse)({
+        description: '접근 권한 없음 - 관리자 권한 필요',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    (0, swagger_1.ApiBadRequestResponse)({
+        description: '잘못된 요청 데이터 또는 이미 권한이 존재함',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    (0, swagger_1.ApiNotFoundResponse)({
+        description: '부서 또는 사용자를 찾을 수 없음',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)('departmentId', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "grantReviewAuthority", null);
+__decorate([
+    (0, common_1.Delete)(':userId/departments/:departmentId/access-authority'),
+    (0, roles_decorator_1.Roles)(user_enum_1.UserRole.SYSTEM_ADMIN, user_enum_1.UserRole.ATTENDANCE_ADMIN),
+    (0, swagger_1.ApiOperation)({
+        summary: '부서 접근 권한 삭제',
+        description: '사용자의 특정 부서 접근 권한을 삭제합니다.',
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'userId',
+        description: '사용자 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'departmentId',
+        description: '부서 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '접근 권한 삭제 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                success: { type: 'boolean', example: true },
+                message: { type: 'string', example: '접근 권한이 성공적으로 삭제되었습니다.' },
+            },
+        },
     }),
     (0, swagger_1.ApiUnauthorizedResponse)({
         description: '인증 실패',
@@ -161,17 +288,68 @@ __decorate([
         type: error_response_dto_1.ErrorResponseDto,
     }),
     (0, swagger_1.ApiNotFoundResponse)({
-        description: '부서 또는 사용자를 찾을 수 없음',
+        description: '부서, 사용자 또는 권한을 찾을 수 없음',
         type: error_response_dto_1.ErrorResponseDto,
     }),
-    __param(0, (0, common_1.Param)('departmentId', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Param)('type')),
-    __param(2, (0, common_1.Param)('action')),
-    __param(3, (0, common_1.Body)()),
+    __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)('departmentId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, manage_department_authority_dto_1.ManageDepartmentAuthorityDto]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
-], UsersController.prototype, "manageDepartmentAuthority", null);
+], UsersController.prototype, "removeAccessAuthority", null);
+__decorate([
+    (0, common_1.Delete)(':userId/departments/:departmentId/review-authority'),
+    (0, roles_decorator_1.Roles)(user_enum_1.UserRole.SYSTEM_ADMIN, user_enum_1.UserRole.ATTENDANCE_ADMIN),
+    (0, swagger_1.ApiOperation)({
+        summary: '부서 검토 권한 삭제',
+        description: '사용자의 특정 부서 검토 권한을 삭제합니다.',
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'userId',
+        description: '사용자 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'departmentId',
+        description: '부서 ID',
+        type: 'string',
+        format: 'uuid',
+        example: 'uuid-v4-string',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '검토 권한 삭제 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                success: { type: 'boolean', example: true },
+                message: { type: 'string', example: '검토 권한이 성공적으로 삭제되었습니다.' },
+            },
+        },
+    }),
+    (0, swagger_1.ApiUnauthorizedResponse)({
+        description: '인증 실패',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    (0, swagger_1.ApiForbiddenResponse)({
+        description: '접근 권한 없음 - 관리자 권한 필요',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    (0, swagger_1.ApiBadRequestResponse)({
+        description: '잘못된 요청 데이터',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    (0, swagger_1.ApiNotFoundResponse)({
+        description: '부서, 사용자 또는 권한을 찾을 수 없음',
+        type: error_response_dto_1.ErrorResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Param)('departmentId', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "removeReviewAuthority", null);
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('사용자 관리 (Users)'),
     (0, common_1.Controller)('users'),

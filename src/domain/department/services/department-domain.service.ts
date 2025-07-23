@@ -5,7 +5,7 @@ import { DepartmentInfoEntity } from '../entities/department-info.entity';
 import { MMSDepartmentResponseDto } from '@src/interfaces/dto/organization/requests/mms-department-import.dto';
 import { PaginationMetaDto, PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';
-import { plainToInstance } from 'class-transformer/types';
+import { plainToInstance } from 'class-transformer';
 
 /**
  * 부서 도메인 서비스
@@ -84,29 +84,6 @@ export class DepartmentDomainService {
 
         this.logger.log(`페이지네이션된 부서 목록 조회: ${departments.length}개 조회`);
         return paginatedResult;
-    }
-
-    /**
-     * 부서 정보 수정
-     */
-    async updateDepartment(
-        departmentId: string,
-        updateData: Partial<DepartmentInfoEntity>,
-    ): Promise<DepartmentInfoEntity> {
-        if (!departmentId || departmentId.trim().length === 0) {
-            throw new BadRequestException('부서 ID가 필요합니다.');
-        }
-
-        const department = await this.findDepartmentById(departmentId);
-        if (!department) {
-            throw new NotFoundException('부서를 찾을 수 없습니다.');
-        }
-
-        Object.assign(department, updateData);
-        const updatedDepartment = await this.departmentRepository.save(department);
-
-        this.logger.log(`부서 정보 수정 완료: ${updatedDepartment.departmentName}`);
-        return updatedDepartment;
     }
 
     /**

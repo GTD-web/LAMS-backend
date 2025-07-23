@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { UserBusinessService } from './user.business';
 import { UserContextModule } from '@src/contexts/user/user-context.module';
-import { OrganizationContextModule } from '@src/contexts/organization/organization-context.module';
+import { UserDepartmentAuthorityContextModule } from '@src/contexts/user-department-authority/user-department-authority-context.module';
 
 /**
  * 사용자 비즈니스 모듈
@@ -9,7 +9,7 @@ import { OrganizationContextModule } from '@src/contexts/organization/organizati
  * - 사용자 컨텍스트 서비스를 통해 실제 작업 수행
  */
 @Module({
-    imports: [UserContextModule, OrganizationContextModule],
+    imports: [UserContextModule, UserDepartmentAuthorityContextModule],
     providers: [UserBusinessService],
     exports: [UserBusinessService],
 })

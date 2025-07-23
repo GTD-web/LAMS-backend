@@ -1,4 +1,4 @@
-import { EmployeeInfoEntity } from '@src/domain/organization/employee/entities/employee-info.entity';
+import { EmployeeInfoEntity } from '@src/domain/employee/entities/employee-info.entity';
 export declare enum BirthDayLeaveStatus {
     CAN_NOT_INPUT = "???? ??? ? ??",
     CAN_NOT_USED = "?? ?? ??? ? ??",

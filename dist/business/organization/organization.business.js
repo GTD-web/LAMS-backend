@@ -16,11 +16,11 @@ const department_response_dto_1 = require("../../interfaces/dto/organization/res
 const employee_response_dto_1 = require("../../interfaces/dto/organization/responses/employee-response.dto");
 const sync_organization_response_dto_1 = require("../../interfaces/dto/organization/responses/sync-organization-response.dto");
 const class_transformer_1 = require("class-transformer");
-const user_context_service_1 = require("../../contexts/user/user-context.service");
+const user_department_authority_context_1 = require("../../contexts/user-department-authority/user-department-authority-context");
 let OrganizationBusinessService = class OrganizationBusinessService {
-    constructor(organizationContextService, userContextService) {
+    constructor(organizationContextService, userDepartmentAuthorityContext) {
         this.organizationContextService = organizationContextService;
-        this.userContextService = userContextService;
+        this.userDepartmentAuthorityContext = userDepartmentAuthorityContext;
     }
     async syncOrganization() {
         const mmsDepartments = await this.organizationContextService.getDepartmentsFromMMS();
@@ -35,11 +35,15 @@ let OrganizationBusinessService = class OrganizationBusinessService {
         return new sync_organization_response_dto_1.SyncOrganizationResponseDto();
     }
     async getDepartmentList(paginationQuery) {
-        const { page = 1, limit = 10 } = paginationQuery;
-        return await this.organizationContextService.페이지네이션된_부서_목록을_조회한다(limit, page);
+        return await this.organizationContextService.페이지네이션된_부서_목록을_조회한다(paginationQuery);
     }
-    async getDepartmentListByUser(userId) {
-        return await this.organizationContextService.권한이_있는_부서_조회(userId);
+    async getAccessibleAuthorizedDepartments(userId) {
+        const departments = await this.userDepartmentAuthorityContext.사용자의_접근_가능한_부서_목록을_조회한다(userId);
+        return departments.map((department) => (0, class_transformer_1.plainToInstance)(department_response_dto_1.DepartmentResponseDto, department));
+    }
+    async getReviewableAuthorizedDepartments(userId) {
+        const departments = await this.userDepartmentAuthorityContext.사용자의_검토_가능한_부서_목록을_조회한다(userId);
+        return departments.map((department) => (0, class_transformer_1.plainToInstance)(department_response_dto_1.DepartmentResponseDto, department));
     }
     async toggleDepartmentExclusion(departmentId) {
         const result = await this.organizationContextService.부서의_제외_여부를_변경한다(departmentId);
@@ -66,6 +70,6 @@ exports.OrganizationBusinessService = OrganizationBusinessService;
 exports.OrganizationBusinessService = OrganizationBusinessService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [organization_context_service_1.OrganizationContextService,
-        user_context_service_1.UserContextService])
+        user_department_authority_context_1.UserDepartmentAuthorityContext])
 ], OrganizationBusinessService);
 //# sourceMappingURL=organization.business.js.map

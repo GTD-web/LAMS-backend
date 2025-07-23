@@ -1,6 +1,6 @@
 import { DataSnapshotChildInfoEntity } from './data-snapshot-child.entity';
-import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 import { DataSnapshotApprovalRequestInfoEntity } from './data-snapshot-approval-request-info.entity';
+import { DepartmentInfoEntity } from '@src/domain/department/entities/department-info.entity';
 export declare enum SnapshotType {
     DAILY = "DAILY",
     WEEKLY = "WEEKLY",

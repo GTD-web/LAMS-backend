@@ -17,12 +17,12 @@ class ManageDepartmentAuthorityDto {
 exports.ManageDepartmentAuthorityDto = ManageDepartmentAuthorityDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: '사용자ID (UUID)',
+        description: '부서ID (UUID)',
         example: 'uuid-v4-string',
         format: 'uuid',
     }),
-    (0, class_validator_1.IsNotEmpty)({ message: '사용자ID는 필수입니다.' }),
-    (0, class_validator_1.IsUUID)(4, { message: '사용자ID는 UUID 형식이어야 합니다.' }),
+    (0, class_validator_1.IsNotEmpty)({ message: '부서ID는 필수입니다.' }),
+    (0, class_validator_1.IsUUID)(4, { message: '부서ID는 UUID 형식이어야 합니다.' }),
     __metadata("design:type", String)
-], ManageDepartmentAuthorityDto.prototype, "userId", void 0);
+], ManageDepartmentAuthorityDto.prototype, "departmentId", void 0);
 //# sourceMappingURL=manage-department-authority.dto.js.map

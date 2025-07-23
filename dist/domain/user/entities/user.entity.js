@@ -11,9 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserEntity = exports.LamsUserRole = void 0;
 const typeorm_1 = require("typeorm");
-const department_info_entity_1 = require("../../organization/department/entities/department-info.entity");
 const approval_request_info_entity_1 = require("../../approval/entities/approval-request-info.entity");
 const approval_step_info_entity_1 = require("../../approval/entities/approval-step-info.entity");
+const department_info_entity_1 = require("../../department/entities/department-info.entity");
 var LamsUserRole;
 (function (LamsUserRole) {
     LamsUserRole["ATTENDANCE_ADMIN"] = "ATTENDANCE_ADMIN";

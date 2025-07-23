@@ -89,27 +89,6 @@ let UserDomainService = UserDomainService_1 = class UserDomainService {
         this.logger.log(`사용자 생성 완료: ${savedUser.email}`);
         return savedUser;
     }
-    async updateUserAuthority(user, department, type, action) {
-        if (type === 'access') {
-            if (action === 'add') {
-                this.includeAccessableDepartment(user, department);
-            }
-            else {
-                this.excludeAccessableDepartment(user, department);
-            }
-        }
-        else {
-            if (action === 'add') {
-                this.includeReviewableDepartment(user, department);
-            }
-            else {
-                this.excludeReviewableDepartment(user, department);
-            }
-        }
-        const updatedUser = await this.userRepository.save(user);
-        this.logger.log(`사용자 접근 권한 수정 완료: ${updatedUser.email}`);
-        return updatedUser;
-    }
     async findPaginatedUsers(paginationQuery) {
         const { page, limit } = paginationQuery;
         const skip = (page - 1) * limit;
@@ -122,34 +101,6 @@ let UserDomainService = UserDomainService_1 = class UserDomainService {
         const userDtos = users.map((user) => (0, class_transformer_1.plainToInstance)(user_response_dto_1.UserResponseDto, user));
         const paginatedResult = new pagination_response_dto_1.PaginatedResponseDto(userDtos, meta);
         return paginatedResult;
-    }
-    includeAccessableDepartment(user, department) {
-        if (!user.accessableDepartments) {
-            user.accessableDepartments = [];
-        }
-        const isAccessableDepartment = user.accessableDepartments.some((dept) => dept.departmentId === department.departmentId);
-        if (isAccessableDepartment) {
-            throw new common_1.ConflictException('이미 존재하는 접근 가능 부서입니다.');
-        }
-        user.accessableDepartments.push(department);
-        return user;
-    }
-    includeReviewableDepartment(user, department) {
-        if (!user.reviewableDepartments) {
-            user.reviewableDepartments = [];
-        }
-        const isReviewableDepartment = user.reviewableDepartments.some((dept) => dept.departmentId === department.departmentId);
-        if (isReviewableDepartment) {
-            throw new common_1.ConflictException('이미 존재하는 리뷰 가능 부서입니다.');
-        }
-        user.reviewableDepartments.push(department);
-        return user;
-    }
-    excludeAccessableDepartment(user, department) {
-        user.accessableDepartments = user.accessableDepartments.filter((dept) => dept.departmentId !== department.departmentId);
-    }
-    excludeReviewableDepartment(user, department) {
-        user.reviewableDepartments = user.reviewableDepartments.filter((dept) => dept.departmentId !== department.departmentId);
     }
     validatePassword(user, password) {
         return bcrypt.compareSync(password, user.password);

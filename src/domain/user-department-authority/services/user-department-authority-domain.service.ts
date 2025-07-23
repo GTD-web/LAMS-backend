@@ -19,53 +19,13 @@ export class UserDepartmentAuthorityDomainService {
     ) {}
 
     /**
-     * 부서 권한 관리 (권한 추가/삭제)
-     */
-    async manageDepartmentAuthority(
-        user: UserEntity,
-        department: DepartmentInfoEntity,
-        authorityType: AuthorityType,
-        action: AuthorityAction,
-    ): Promise<{ success: boolean }> {
-        this.logger.log(
-            `권한 관리 시작: 사용자=${user.username}, 부서=${department.departmentName}, 타입=${authorityType}, 액션=${action}`,
-        );
-
-        try {
-            if (action === AuthorityAction.ADD) {
-                await this.grantAuthority(user, department, authorityType);
-                this.logger.log(
-                    `권한 부여 성공: 사용자=${user.username}, 부서=${department.departmentName}, 타입=${authorityType}`,
-                );
-            } else if (action === AuthorityAction.REMOVE) {
-                await this.removeAuthority(user.userId, department.departmentId, authorityType);
-                this.logger.log(
-                    `권한 삭제 성공: 사용자=${user.username}, 부서=${department.departmentName}, 타입=${authorityType}`,
-                );
-            }
-
-            return { success: true };
-        } catch (error) {
-            this.logger.error(
-                `권한 관리 실패: 사용자=${user.username}, 부서=${department.departmentName}, 타입=${authorityType}, 액션=${action}`,
-                error.stack,
-            );
-            throw error;
-        }
-    }
-
-    /**
      * 권한 부여
      */
     async grantAuthority(
         user: UserEntity,
         department: DepartmentInfoEntity,
         authorityType: AuthorityType,
-    ): Promise<UserDepartmentAuthorityEntity> {
-        this.logger.debug(
-            `권한 부여 시도: 사용자=${user.username}, 부서=${department.departmentName}, 타입=${authorityType}`,
-        );
-
+    ): Promise<boolean> {
         // 기존 권한이 있는지 확인
         const existingAuthority = await this.userDepartmentAuthorityRepository.findOne({
             where: {
@@ -76,9 +36,6 @@ export class UserDepartmentAuthorityDomainService {
         });
 
         if (existingAuthority) {
-            this.logger.warn(
-                `이미 존재하는 권한: 사용자=${user.username}, 부서=${department.departmentName}, 타입=${authorityType}`,
-            );
             throw new BadRequestException('이미 권한이 있습니다.');
         }
 
@@ -91,15 +48,13 @@ export class UserDepartmentAuthorityDomainService {
         const savedAuthority = await this.userDepartmentAuthorityRepository.save(newAuthority);
         this.logger.debug(`권한 부여 완료: ID=${savedAuthority.authorityId}`);
 
-        return savedAuthority;
+        return true;
     }
 
     /**
      * 권한 완전 삭제
      */
     async removeAuthority(userId: string, departmentId: string, authorityType: AuthorityType): Promise<boolean> {
-        this.logger.debug(`권한 삭제 시도: 사용자ID=${userId}, 부서ID=${departmentId}, 타입=${authorityType}`);
-
         const result = await this.userDepartmentAuthorityRepository.delete({
             userId,
             departmentId,
@@ -138,37 +93,33 @@ export class UserDepartmentAuthorityDomainService {
     }
 
     /**
-     * 사용자의 접근 가능한 부서 ID 목록 조회
+     * 사용자의 접근 가능한 부서 목록 조회
      */
-    async getUserAccessibleDepartmentIds(userId: string): Promise<string[]> {
-        this.logger.debug(`접근 가능한 부서 조회: 사용자ID=${userId}`);
-
+    async getUserAccessibleDepartment(userId: string): Promise<DepartmentInfoEntity[]> {
         const authorities = await this.userDepartmentAuthorityRepository.find({
             where: { userId, authorityType: AuthorityType.ACCESS },
             select: ['departmentId'],
         });
 
-        const departmentIds = authorities.map((auth) => auth.departmentId);
-        this.logger.debug(`접근 가능한 부서 수: ${departmentIds.length}개`);
+        const departments = authorities.map((auth) => auth.department);
+        this.logger.debug(`접근 가능한 부서 수: ${departments.length}개`);
 
-        return departmentIds;
+        return departments;
     }
 
     /**
-     * 사용자의 검토 가능한 부서 ID 목록 조회
+     * 사용자의 검토 가능한 부서 목록 조회
      */
-    async getUserReviewableDepartmentIds(userId: string): Promise<string[]> {
-        this.logger.debug(`검토 가능한 부서 조회: 사용자ID=${userId}`);
-
+    async getUserReviewableDepartment(userId: string): Promise<DepartmentInfoEntity[]> {
         const authorities = await this.userDepartmentAuthorityRepository.find({
             where: { userId, authorityType: AuthorityType.REVIEW },
             select: ['departmentId'],
         });
 
-        const departmentIds = authorities.map((auth) => auth.departmentId);
-        this.logger.debug(`검토 가능한 부서 수: ${departmentIds.length}개`);
+        const departments = authorities.map((auth) => auth.department);
+        this.logger.debug(`검토 가능한 부서 수: ${departments.length}개`);
 
-        return departmentIds;
+        return departments;
     }
 
     /**
@@ -195,8 +146,6 @@ export class UserDepartmentAuthorityDomainService {
      * 부서의 검토 권한을 가진 사용자가 있는지 return
      */
     async hasReviewableUserInDepartment(departmentId: string): Promise<boolean> {
-        this.logger.debug(`부서 검토 권한자 확인: 부서ID=${departmentId}`);
-
         const count = await this.userDepartmentAuthorityRepository.count({
             where: { departmentId, authorityType: AuthorityType.REVIEW },
         });

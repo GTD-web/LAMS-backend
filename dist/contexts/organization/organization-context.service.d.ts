@@ -1,10 +1,10 @@
-import { DepartmentDomainService } from '../../domain/organization/department/services/department-domain.service';
-import { EmployeeDomainService } from '../../domain/organization/employee/services/employee-domain.service';
-import { DepartmentEmployeeDomainService } from '../../domain/organization/department-employee/department-employee-domain.service';
+import { DepartmentDomainService } from '../../domain/department/services/department-domain.service';
+import { EmployeeDomainService } from '../../domain/employee/services/employee-domain.service';
+import { DepartmentEmployeeDomainService } from '../../domain/department-employee/department-employee-domain.service';
 import { MMSDepartmentResponseDto } from '../../interfaces/dto/organization/requests/mms-department-import.dto';
 import { MMSEmployeeResponseDto } from '../../interfaces/dto/organization/requests/mms-employee-import.dto';
-import { DepartmentInfoEntity } from '../../domain/organization/department/entities/department-info.entity';
-import { EmployeeInfoEntity } from '../../domain/organization/employee/entities/employee-info.entity';
+import { DepartmentInfoEntity } from '../../domain/department/entities/department-info.entity';
+import { EmployeeInfoEntity } from '../../domain/employee/entities/employee-info.entity';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';

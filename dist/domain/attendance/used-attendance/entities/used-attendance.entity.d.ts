@@ -1,4 +1,4 @@
-import { EmployeeInfoEntity } from '@src/domain/organization/employee/entities/employee-info.entity';
+import { EmployeeInfoEntity } from '@src/domain/employee/entities/employee-info.entity';
 import { AttendanceTypeEntity } from '../../../attendance-type/entities/attendance-type.entity';
 export declare class UsedAttendanceEntity {
     usedAttendanceId: string;

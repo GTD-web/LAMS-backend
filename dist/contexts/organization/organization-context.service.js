@@ -13,11 +13,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrganizationContextService = void 0;
 const common_1 = require("@nestjs/common");
 const axios_1 = require("axios");
-const department_domain_service_1 = require("../../domain/organization/department/services/department-domain.service");
-const employee_domain_service_1 = require("../../domain/organization/employee/services/employee-domain.service");
-const department_employee_domain_service_1 = require("../../domain/organization/department-employee/department-employee-domain.service");
-const employee_info_entity_1 = require("../../domain/organization/employee/entities/employee-info.entity");
-const department_employee_entity_1 = require("../../domain/organization/department-employee/entities/department-employee.entity");
+const department_domain_service_1 = require("../../domain/department/services/department-domain.service");
+const employee_domain_service_1 = require("../../domain/employee/services/employee-domain.service");
+const department_employee_domain_service_1 = require("../../domain/department-employee/department-employee-domain.service");
+const employee_info_entity_1 = require("../../domain/employee/entities/employee-info.entity");
+const department_employee_entity_1 = require("../../domain/department-employee/entities/department-employee.entity");
 let OrganizationContextService = OrganizationContextService_1 = class OrganizationContextService {
     constructor(departmentDomainService, employeeDomainService, departmentEmployeeDomainService) {
         this.departmentDomainService = departmentDomainService;
@@ -125,7 +125,7 @@ let OrganizationContextService = OrganizationContextService_1 = class Organizati
     async 해당_부서_직원의_페이지네이션된_목록을_조회한다(departmentId, paginationQuery) {
         return await this.employeeDomainService.searchEmployeesWithCriteria({
             departmentId,
-            paginationQuery,
+            ...paginationQuery,
         });
     }
     async 직원들의_연차_정보를_갱신해서_보여준다() {

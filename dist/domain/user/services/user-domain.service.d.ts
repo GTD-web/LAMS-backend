@@ -1,6 +1,5 @@
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
-import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
@@ -14,12 +13,7 @@ export declare class UserDomainService {
     getUserById(userId: string): Promise<UserEntity>;
     findUserAuthority(userId: string): Promise<UserEntity>;
     createUser(userData: Partial<UserEntity>): Promise<UserEntity>;
-    updateUserAuthority(user: UserEntity, department: DepartmentInfoEntity, type: 'access' | 'review', action: 'add' | 'remove'): Promise<UserEntity>;
     findPaginatedUsers(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>>;
-    private includeAccessableDepartment;
-    private includeReviewableDepartment;
-    private excludeAccessableDepartment;
-    private excludeReviewableDepartment;
     private validatePassword;
     private updateHashedPassword;
 }

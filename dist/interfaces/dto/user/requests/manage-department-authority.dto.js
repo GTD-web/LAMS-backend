@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ManageDepartmentAuthorityDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
+const authority_type_enum_1 = require("../../../../domain/user-department-authority/enum/authority-type.enum");
 const class_validator_1 = require("class-validator");
 class ManageDepartmentAuthorityDto {
 }

@@ -3,7 +3,6 @@ import { UserDomainService } from '@src/domain/user/services/user-domain.service
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 import { UserEntity } from '@src/domain/user/entities/user.entity';
 export declare class UserContextService {
     private readonly userDomainService;
@@ -14,7 +13,5 @@ export declare class UserContextService {
     자신의_프로필을_조회한다(userId: string): Promise<UserResponseDto>;
     페이지네이션된_사용자_목록을_조회한다(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>>;
     사용자_비밀번호를_변경한다(userId: string, currentPassword: string, newPassword: string): Promise<UserEntity>;
-    사용자의_부서_권한을_변경한다(userId: string, department: DepartmentInfoEntity, type: 'access' | 'review', action: 'add' | 'remove'): Promise<UserEntity>;
-    사용자의_부서_권한을_조회한다(userId: string): Promise<UserEntity>;
     findUserById(userId: string): Promise<UserEntity>;
 }

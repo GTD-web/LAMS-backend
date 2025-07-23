@@ -11,9 +11,9 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { DataSnapshotChildInfoEntity } from './data-snapshot-child.entity';
-import { DepartmentInfoEntity } from '@src/domain/organization/department/entities/department-info.entity';
 import { DataSnapshotApprovalRequestInfoEntity } from './data-snapshot-approval-request-info.entity';
 import { DateHelper } from '@src/common/utils/helpers/date.helper';
+import { DepartmentInfoEntity } from '@src/domain/department/entities/department-info.entity';
 
 export enum SnapshotType {
     DAILY = 'DAILY',

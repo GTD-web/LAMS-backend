@@ -10,13 +10,13 @@ exports.UserBusinessModule = void 0;
 const common_1 = require("@nestjs/common");
 const user_business_1 = require("./user.business");
 const user_context_module_1 = require("../../contexts/user/user-context.module");
-const organization_context_module_1 = require("../../contexts/organization/organization-context.module");
+const user_department_authority_context_module_1 = require("../../contexts/user-department-authority/user-department-authority-context.module");
 let UserBusinessModule = class UserBusinessModule {
 };
 exports.UserBusinessModule = UserBusinessModule;
 exports.UserBusinessModule = UserBusinessModule = __decorate([
     (0, common_1.Module)({
-        imports: [user_context_module_1.UserContextModule, organization_context_module_1.OrganizationContextModule],
+        imports: [user_context_module_1.UserContextModule, user_department_authority_context_module_1.UserDepartmentAuthorityContextModule],
         providers: [user_business_1.UserBusinessService],
         exports: [user_business_1.UserBusinessService],
     })

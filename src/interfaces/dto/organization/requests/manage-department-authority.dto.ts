@@ -6,11 +6,11 @@ import { IsNotEmpty, IsUUID } from 'class-validator';
  */
 export class ManageDepartmentAuthorityDto {
     @ApiProperty({
-        description: '사용자ID (UUID)',
+        description: '부서ID (UUID)',
         example: 'uuid-v4-string',
         format: 'uuid',
     })
-    @IsNotEmpty({ message: '사용자ID는 필수입니다.' })
-    @IsUUID(4, { message: '사용자ID는 UUID 형식이어야 합니다.' })
-    readonly userId: string;
+    @IsNotEmpty({ message: '부서ID는 필수입니다.' })
+    @IsUUID(4, { message: '부서ID는 UUID 형식이어야 합니다.' })
+    readonly departmentId: string;
 }

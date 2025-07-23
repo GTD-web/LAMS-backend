@@ -2,11 +2,10 @@ import { UserContextService } from '@src/contexts/user/user-context.service';
 import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
 import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
 import { UserEntity } from '@src/domain/user/entities/user.entity';
-
 import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AuthorityType } from '@src/domain/user-department-authority/enum/authority-type.enum';
-import { UserDepartmentAuthorityContext } from '@src/contexts/user-department-authority/user-department-authority.context';
+import { UserDepartmentAuthorityContext } from '@src/contexts/user-department-authority/user-department-authority-context';
 
 /**
  * 사용자 비즈니스 서비스
@@ -39,26 +38,24 @@ export class UserBusinessService {
     }
 
     /**
-     * 부서 권한 관리
+     * 사용자에게 부서 권한 부여
      */
-    async manageDepartmentAuthority(
-        departmentId: string,
-        user: UserEntity,
-        type: AuthorityType,
-        action: 'add' | 'remove',
-    ): Promise<UserEntity> {
-        if (action === 'add') {
-            return await this.userDepartmentAuthorityContext.사용자의_부서_권한을_추가한다(
-                user.userId,
-                departmentId,
-                type,
-            );
-        } else {
-            return await this.userDepartmentAuthorityContext.사용자의_부서_권한을_삭제한다(
-                user.userId,
-                departmentId,
-                type,
-            );
-        }
+    async grantAuthority(userId: string, departmentId: string, authorityType: AuthorityType): Promise<boolean> {
+        return await this.userDepartmentAuthorityContext.사용자의_부서_권한을_추가한다(
+            userId,
+            departmentId,
+            authorityType,
+        );
+    }
+
+    /**
+     * 사용자의 부서 권한 삭제
+     */
+    async removeAuthority(userId: string, departmentId: string, authorityType: AuthorityType): Promise<boolean> {
+        return await this.userDepartmentAuthorityContext.사용자의_부서_권한을_삭제한다(
+            userId,
+            departmentId,
+            authorityType,
+        );
     }
 }

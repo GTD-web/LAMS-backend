@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const organization_business_1 = require("./organization.business");
 const organization_context_module_1 = require("../../contexts/organization/organization-context.module");
 const organization_controller_1 = require("../../interfaces/controllers/organization.controller");
+const user_department_authority_context_module_1 = require("../../contexts/user-department-authority/user-department-authority-context.module");
 let OrganizationBusinessModule = class OrganizationBusinessModule {
 };
 exports.OrganizationBusinessModule = OrganizationBusinessModule;
 exports.OrganizationBusinessModule = OrganizationBusinessModule = __decorate([
     (0, common_1.Module)({
-        imports: [organization_context_module_1.OrganizationContextModule],
+        imports: [organization_context_module_1.OrganizationContextModule, user_department_authority_context_module_1.UserDepartmentAuthorityContextModule],
         providers: [organization_business_1.OrganizationBusinessService],
         controllers: [organization_controller_1.OrganizationController],
         exports: [organization_business_1.OrganizationBusinessService],

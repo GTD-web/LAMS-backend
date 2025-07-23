@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UserContextService } from './user-context.service';
-import { UserDomainModule } from '@src/domain/user/user.module';
+import { UserDomainModule } from '@src/domain/user/user-domain.module';
 
 /**
  * ?? ??? ???? ??

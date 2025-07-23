@@ -8,17 +8,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var UserBusinessService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserBusinessService = void 0;
 const user_context_service_1 = require("../../contexts/user/user-context.service");
-const organization_context_service_1 = require("../../contexts/organization/organization-context.service");
 const common_1 = require("@nestjs/common");
-let UserBusinessService = UserBusinessService_1 = class UserBusinessService {
-    constructor(userContextService, organizationContextService) {
+const user_department_authority_context_1 = require("../../contexts/user-department-authority/user-department-authority-context");
+let UserBusinessService = class UserBusinessService {
+    constructor(userContextService, userDepartmentAuthorityContext) {
         this.userContextService = userContextService;
-        this.organizationContextService = organizationContextService;
-        this.logger = new common_1.Logger(UserBusinessService_1.name);
+        this.userDepartmentAuthorityContext = userDepartmentAuthorityContext;
     }
     async getUserList(paginationQuery) {
         return await this.userContextService.페이지네이션된_사용자_목록을_조회한다(paginationQuery);
@@ -29,24 +27,17 @@ let UserBusinessService = UserBusinessService_1 = class UserBusinessService {
         }
         return await this.userContextService.자신의_프로필을_조회한다(userId);
     }
-    async manageDepartmentAuthority(departmentId, userId, type, action) {
-        try {
-            if (!departmentId || !userId) {
-                throw new Error('부서 ID와 사용자 ID가 필요합니다.');
-            }
-            const department = await this.organizationContextService.findDepartmentById(departmentId);
-            return await this.userContextService.사용자의_부서_권한을_변경한다(userId, department, type, action);
-        }
-        catch (error) {
-            this.logger.error(`부서 권한 관리 실패: ${departmentId}, ${userId}, ${type}, ${action}`, error.stack);
-            throw new Error('부서 권한 관리 중 오류가 발생했습니다.');
-        }
+    async grantAuthority(userId, departmentId, authorityType) {
+        return await this.userDepartmentAuthorityContext.사용자의_부서_권한을_추가한다(userId, departmentId, authorityType);
+    }
+    async removeAuthority(userId, departmentId, authorityType) {
+        return await this.userDepartmentAuthorityContext.사용자의_부서_권한을_삭제한다(userId, departmentId, authorityType);
     }
 };
 exports.UserBusinessService = UserBusinessService;
-exports.UserBusinessService = UserBusinessService = UserBusinessService_1 = __decorate([
+exports.UserBusinessService = UserBusinessService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [user_context_service_1.UserContextService,
-        organization_context_service_1.OrganizationContextService])
+        user_department_authority_context_1.UserDepartmentAuthorityContext])
 ], UserBusinessService);
 //# sourceMappingURL=user.business.js.map

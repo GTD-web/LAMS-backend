@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmployeeAnnualLeaveEntity = exports.BirthDayLeaveStatus = void 0;
-const employee_info_entity_1 = require("../../organization/employee/entities/employee-info.entity");
+const employee_info_entity_1 = require("../../employee/entities/employee-info.entity");
 const typeorm_1 = require("typeorm");
 var BirthDayLeaveStatus;
 (function (BirthDayLeaveStatus) {

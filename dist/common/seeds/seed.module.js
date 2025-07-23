@@ -14,7 +14,7 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const user_seed_1 = require("./user.seed");
 const user_entity_1 = require("../../domain/user/entities/user.entity");
-const user_module_1 = require("../../domain/user/user.module");
+const user_domain_module_1 = require("../../domain/user/user-domain.module");
 let SeedModule = class SeedModule {
     constructor(userSeedService) {
         this.userSeedService = userSeedService;
@@ -26,7 +26,7 @@ let SeedModule = class SeedModule {
 exports.SeedModule = SeedModule;
 exports.SeedModule = SeedModule = __decorate([
     (0, common_1.Module)({
-        imports: [user_module_1.UserDomainModule, typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, user_entity_1.UserEntity])],
+        imports: [user_domain_module_1.UserDomainModule, typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, user_entity_1.UserEntity])],
         providers: [user_seed_1.UserSeedService],
         exports: [user_seed_1.UserSeedService],
     }),
