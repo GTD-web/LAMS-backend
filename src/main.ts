@@ -9,7 +9,6 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { settingSwagger } from './common/utils/swagger/swagger.util';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ErrorLoggingInterceptor } from './common/interceptors/error-logging.interceptor';
-import { AddressInfo } from 'net';
 
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -25,42 +24,16 @@ async function bootstrap() {
     app.useGlobalInterceptors(new ErrorLoggingInterceptor(), new ResponseInterceptor(), new LoggingInterceptor());
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     // 파일 업로드 설정
-    // const uploadPath = join(process.cwd(), 'public');
-    // app.useStaticAssets(uploadPath, {
-    //     prefix: '/public',
-    //     index: false,
-    //     fallthrough: false,
-    // });
+    const uploadPath = join(process.cwd(), 'public');
+    app.useStaticAssets(uploadPath, {
+        prefix: '/public',
+        index: false,
+        fallthrough: false,
+    });
 
     settingSwagger(app);
-    // Vercel에서는 동적 포트 할당
-    // Vercel에서는 포트 0으로 동적 할당
-    let port = 3000;
-
-    if (process.env.VERCEL) {
-        port = 0; // 시스템이 자동 할당
-    } else if (process.env.PORT) {
-        port = parseInt(process.env.PORT, 10);
-    }
-
-    console.log('🚀 Starting on port:', port);
-
+    const port = process.env.PORT || 5000;
     await app.listen(port);
-
-    // 실제 할당된 포트 확인 (포트 0 사용시)
-    if (port === 0) {
-        const server = app.getHttpServer();
-        const address = server.address();
-        console.log('✅ Assigned port:', (address as AddressInfo).port);
-    }
-
-    return app;
+    console.log(`🚀 Application is running on: http://localhost:${port}`);
 }
-
-// Vercel용 export
-export default bootstrap;
-
-// 로컬 개발용
-if (process.env.NODE_ENV !== 'production') {
-    bootstrap().catch(console.error);
-}
+bootstrap();
