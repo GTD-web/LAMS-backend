@@ -17,6 +17,9 @@
         "forceConsistentCasingInFileNames": false,
         "noFallthroughCasesInSwitch": false,
         "incremental": true,
+        "paths": {
+            "src/*": ["src/*"]
+        }
     },
     "include": ["./**/*", "../src/**/*", "../api/**/*"]
 }
