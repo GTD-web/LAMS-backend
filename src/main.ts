@@ -36,4 +36,11 @@ async function bootstrap() {
     await app.listen(port);
     console.log(`🚀 Application is running on: http://localhost:${port}`);
 }
-bootstrap();
+
+// Vercel용 export 추가
+export default bootstrap;
+
+// 로컬 개발용 실행
+if (process.env.NODE_ENV !== 'production') {
+    bootstrap();
+}
