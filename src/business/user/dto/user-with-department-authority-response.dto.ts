@@ -1,4 +1,4 @@
-import { DepartmentInfoEntity } from 'src/domain/department/entities/department-info.entity';
+import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
 import { UserResponseDto } from './user-response.dto';
 
 export class UserWithDepartmentAuthorityResponseDto extends UserResponseDto {

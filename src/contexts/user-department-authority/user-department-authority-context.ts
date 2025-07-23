@@ -4,7 +4,7 @@ import { DepartmentDomainService } from '../../domain/department/services/depart
 import { AuthorityType } from '../../domain/user-department-authority/enum/authority-type.enum';
 import { UserDepartmentAuthorityDomainService } from '../../domain/user-department-authority/services/user-department-authority-domain.service';
 import { UserDomainService } from '../../domain/user/services/user-domain.service';
-import { UserDepartmentAuthorityDto } from 'src/domain/user-department-authority/dto/user-department-authority.dto';
+import { UserDepartmentAuthorityDto } from '../../domain/user-department-authority/dto/user-department-authority.dto';
 
 @Injectable()
 export class UserDepartmentAuthorityContext {

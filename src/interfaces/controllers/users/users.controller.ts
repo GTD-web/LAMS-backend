@@ -22,9 +22,9 @@ import { UserResponseDto } from '../../../business/user/dto/user-response.dto';
 import { ErrorResponseDto } from '../../../common/dtos/common/error-response.dto';
 import { PaginatedResponseDto } from '../../../common/dtos/pagination/pagination-response.dto';
 import { AuthorityType } from '../../../domain/user-department-authority/enum/authority-type.enum';
-import { GetUser } from 'src/common/decorators/get-user.decorator';
-import { UserEntity } from 'src/domain/user/entities/user.entity';
-import { UserWithDepartmentAuthorityResponseDto } from 'src/business/user/dto/user-with-department-authority-response.dto';
+import { GetUser } from '../../../common/decorators/get-user.decorator';
+import { UserEntity } from '../../../domain/user/entities/user.entity';
+import { UserWithDepartmentAuthorityResponseDto } from '../../../business/user/dto/user-with-department-authority-response.dto';
 
 /**
  * 사용자 관리 컨트롤러

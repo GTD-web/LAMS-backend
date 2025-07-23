@@ -7,7 +7,7 @@ import { Injectable } from '@nestjs/common';
 import { AuthorityType } from '../../domain/user-department-authority/enum/authority-type.enum';
 import { UserDepartmentAuthorityContext } from '../../contexts/user-department-authority/user-department-authority-context';
 import { UserWithDepartmentAuthorityResponseDto } from './dto/user-with-department-authority-response.dto';
-import { UserRole } from 'src/domain/user/enum/user.enum';
+import { UserRole } from '../../domain/user/enum/user.enum';
 
 /**
  * 사용자 비즈니스 서비스

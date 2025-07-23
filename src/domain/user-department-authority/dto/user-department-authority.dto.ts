@@ -1,4 +1,4 @@
-import { DepartmentInfoEntity } from 'src/domain/department/entities/department-info.entity';
+import { DepartmentInfoEntity } from '../../department/entities/department-info.entity';
 
 export class ReviewableDepartmentDto {
     reviewableDepartments: DepartmentInfoEntity[];
