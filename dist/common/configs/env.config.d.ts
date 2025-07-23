@@ -4,12 +4,14 @@ declare const _default: (() => {
     username: string;
     password: string;
     database: string;
+    url: string;
 }) & import("@nestjs/config").ConfigFactoryKeyHost<{
     host: string;
     port: number;
     username: string;
     password: string;
     database: string;
+    url: string;
 }>;
 export default _default;
 export declare const JWT_CONFIG: (() => {

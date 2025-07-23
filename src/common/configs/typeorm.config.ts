@@ -5,6 +5,7 @@ import { join } from 'path';
 export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => {
     return {
         type: 'postgres',
+        url: configService.get('database.url'),
         host: configService.get('database.host'),
         port: configService.get('database.port'),
         username: configService.get('database.username'),
@@ -12,7 +13,19 @@ export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOption
         database: configService.get('database.database'),
         entities: [join(__dirname, '../../domain/**/*.entity.{js,ts}'), join(__dirname, '../../**/*.entity.{js,ts}')],
         schema: 'public',
-        synchronize: configService.get('NODE_ENV') !== 'production',
-        // logging: configService.get('NODE_ENV') === 'local',
+        // synchronize: configService.get('NODE_ENV') !== 'production',
+        synchronize: true,
+        // 환경별 SSL 설정
+        ...(configService.get('NODE_ENV') === 'production' && {
+            ssl: {
+                rejectUnauthorized: false,
+            },
+            extra: {
+                ssl: {
+                    rejectUnauthorized: false,
+                },
+            },
+        }),
+        logging: configService.get('NODE_ENV') === 'local',
     };
 };

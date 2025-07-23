@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.jwtConfig = void 0;
 const jwtConfig = (configService) => ({
-    secret: configService.get('GLOBAL_SECRET'),
+    secret: configService.get('jwt.secret'),
     signOptions: {
-        expiresIn: configService.get('JWT_EXPIRES_IN'),
+        expiresIn: configService.get('jwt.expiresIn'),
     },
 });
 exports.jwtConfig = jwtConfig;
