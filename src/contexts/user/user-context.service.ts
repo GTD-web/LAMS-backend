@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserDomainService } from '../../domain/user/services/user-domain.service';
-import { UserResponseDto } from '../../interfaces/dto/organization/responses/user-response.dto';
+import { UserResponseDto } from '../../business/user/dto/user-response.dto';
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
 import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 import { plainToInstance } from 'class-transformer';
@@ -40,15 +40,6 @@ export class UserContextService {
     }
 
     // ==================== 사용자 관리 메서드 ====================
-
-    /**
-     * 자신의 프로필을 조회한다
-     */
-    async 자신의_프로필을_조회한다(userId: string): Promise<UserResponseDto> {
-        const user = await this.userDomainService.getUserById(userId);
-
-        return plainToInstance(UserResponseDto, user);
-    }
 
     /**
      * 페이지네이션된 사용자 목록을 조회한다

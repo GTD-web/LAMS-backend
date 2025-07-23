@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { OrganizationBusinessService } from './organization.business';
 import { OrganizationContextModule } from '../../contexts/organization/organization-context.module';
-import { OrganizationController } from '../../interfaces/controllers/organization.controller';
+import { OrganizationController } from '../../interfaces/controllers/organization/organization.controller';
 import { UserDepartmentAuthorityContextModule } from '../../contexts/user-department-authority/user-department-authority-context.module';
 
 /**
@@ -11,7 +11,6 @@ import { UserDepartmentAuthorityContextModule } from '../../contexts/user-depart
 @Module({
     imports: [OrganizationContextModule, UserDepartmentAuthorityContextModule],
     providers: [OrganizationBusinessService],
-    controllers: [OrganizationController],
     exports: [OrganizationBusinessService],
 })
 export class OrganizationBusinessModule {}

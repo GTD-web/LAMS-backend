@@ -4,20 +4,14 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './common/configs/typeorm.config';
-import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConfig } from './common/configs/jwt.config';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { SeedModule } from './common/seeds/seed.module';
-import { AuthBusinessModule } from './business/auth/auth-business.module';
-import { UserBusinessModule } from './business/user/user-business.module';
-import { OrganizationBusinessModule } from './business/organization/organization-business.module';
-import { WorkStandardModule } from './business/work-standard/work-standard.module';
-import { OrganizationModule } from './interfaces/controllers/organization.module';
+import { OrganizationInterfaceModule } from './interfaces/controllers/organization/organization-interface.module';
 import databaseConfig, { JWT_CONFIG } from './common/configs/env.config';
+import { WorkStandardInterfaceModule } from './interfaces/controllers/work-standard/work-standard-interface.module';
+import { UsersInterfaceModule } from './interfaces/controllers/users/users-interface.module';
+import { AuthInterfaceModule } from './interfaces/controllers/auth/auth-interface.module';
 
 @Module({
     imports: [
@@ -35,11 +29,10 @@ import databaseConfig, { JWT_CONFIG } from './common/configs/env.config';
             inject: [ConfigService],
         }),
         SeedModule,
-        AuthBusinessModule,
-        UserBusinessModule,
-        OrganizationBusinessModule,
-        OrganizationModule,
-        WorkStandardModule,
+        AuthInterfaceModule,
+        UsersInterfaceModule,
+        OrganizationInterfaceModule,
+        WorkStandardInterfaceModule,
     ],
     controllers: [AppController],
     providers: [AppService],

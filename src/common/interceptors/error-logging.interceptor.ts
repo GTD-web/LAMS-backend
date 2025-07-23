@@ -1,7 +1,6 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { Request, Response } from 'express';
 import { DateHelper } from '../utils/helpers/date.helper';
 
 /**
@@ -16,21 +15,21 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         const httpContext = context.switchToHttp();
-        const request = httpContext.getRequest<Request>();
-        const response = httpContext.getResponse<Response>();
+        const request = httpContext.getRequest();
+        const response = httpContext.getResponse();
         const startTime = Date.now();
 
         // 요청 기본 정보
         const requestInfo = {
             method: request.method,
             url: request.url,
-            userAgent: request.get('User-Agent'),
+            userAgent: request.get ? request.get('User-Agent') : request.headers?.['user-agent'],
             ip: this.getClientIp(request),
             timestamp: DateHelper.now(),
         };
 
         // 사용자 정보 (JWT 토큰에서 추출)
-        const user = (request as any).user;
+        const user = request.user;
         const userInfo = user
             ? {
                   userId: user.sub || user.id,
@@ -43,7 +42,8 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
             tap(() => {
                 // 성공 응답 로깅 (간단히)
                 const responseTime = Date.now() - startTime;
-                this.logger.log(`✅ ${request.method} ${request.url} - ${response.statusCode} (${responseTime}ms)`);
+                const statusCode = response.statusCode || 200;
+                this.logger.log(`✅ ${request.method} ${request.url} - ${statusCode} (${responseTime}ms)`);
             }),
             catchError((error) => {
                 // 에러 상세 로깅
@@ -149,12 +149,12 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
     /**
      * 클라이언트 IP 주소 추출
      */
-    private getClientIp(request: Request): string {
+    private getClientIp(request: any): string {
         return (
-            (request.headers['x-forwarded-for'] as string) ||
-            (request.headers['x-real-ip'] as string) ||
+            request.headers?.['x-forwarded-for'] ||
+            request.headers?.['x-real-ip'] ||
             request.connection?.remoteAddress ||
-            (request as any).socket?.remoteAddress ||
+            request.socket?.remoteAddress ||
             'unknown'
         );
     }

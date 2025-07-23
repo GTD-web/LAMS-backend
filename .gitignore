@@ -47,3 +47,4 @@ lerna-debug.log*
 
 # 임시 파일
 /files
+*.tsbuildinfo

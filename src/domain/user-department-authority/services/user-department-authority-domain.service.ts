@@ -5,6 +5,7 @@ import { UserDepartmentAuthorityEntity } from '../entities/user-department-autho
 import { AuthorityType } from '../enum/authority-type.enum';
 import { UserEntity } from '../../../domain/user/entities/user.entity';
 import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
+import { UserDepartmentAuthorityDto } from '../dto/user-department-authority.dto';
 
 /**
  * 사용자-부서 권한 도메인 서비스
@@ -73,12 +74,22 @@ export class UserDepartmentAuthorityDomainService {
     /**
      * 사용자의 모든 부서 권한 조회 (활성/비활성 포함)
      */
-    async findAllUserDepartmentAuthorities(userId: string): Promise<UserDepartmentAuthorityEntity[]> {
-        return await this.userDepartmentAuthorityRepository.find({
+    async findAllUserDepartmentAuthorities(userId: string): Promise<UserDepartmentAuthorityDto> {
+        const authorities = await this.userDepartmentAuthorityRepository.find({
             where: { userId },
-            relations: ['department', 'user', 'grantedBy'],
+            relations: ['department'],
             order: { createdAt: 'DESC' },
         });
+
+        const accessableDepartments = authorities
+            .filter((authority) => authority.authorityType === AuthorityType.ACCESS)
+            .map((authority) => authority.department);
+
+        const reviewableDepartments = authorities
+            .filter((authority) => authority.authorityType === AuthorityType.REVIEW)
+            .map((authority) => authority.department);
+
+        return new UserDepartmentAuthorityDto(accessableDepartments, reviewableDepartments);
     }
 
     /**

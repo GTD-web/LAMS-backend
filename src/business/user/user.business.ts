@@ -1,11 +1,13 @@
 import { UserContextService } from '../../contexts/user/user-context.service';
-import { UserResponseDto } from '../../interfaces/dto/organization/responses/user-response.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
 import { UserEntity } from '../../domain/user/entities/user.entity';
 import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 import { Injectable } from '@nestjs/common';
 import { AuthorityType } from '../../domain/user-department-authority/enum/authority-type.enum';
 import { UserDepartmentAuthorityContext } from '../../contexts/user-department-authority/user-department-authority-context';
+import { UserWithDepartmentAuthorityResponseDto } from './dto/user-with-department-authority-response.dto';
+import { UserRole } from 'src/domain/user/enum/user.enum';
 
 /**
  * 사용자 비즈니스 서비스
@@ -27,14 +29,29 @@ export class UserBusinessService {
     }
 
     /**
-     * 사용자 프로필 조회
+     * 사용자 상세 조회 권한 포함
      */
-    async getUserProfile(userId: string): Promise<UserResponseDto> {
-        if (!userId || userId.trim().length === 0) {
-            throw new Error('사용자 ID가 필요합니다.');
+    async getUserByIdWithDepartmentAuthority(userId: string): Promise<UserWithDepartmentAuthorityResponseDto> {
+        const user = await this.userContextService.findUserById(userId);
+
+        if (!user) {
+            return null;
         }
 
-        return await this.userContextService.자신의_프로필을_조회한다(userId);
+        const userDepartmentAuthority =
+            await this.userDepartmentAuthorityContext.사용자의_부서_권한을_조회_부서목록을_반환한다(userId);
+
+        return new UserWithDepartmentAuthorityResponseDto({
+            userId: user.userId,
+            username: user.username,
+            email: user.email,
+            roles: user.roles as UserRole[],
+            isActive: user.isActive,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            accessableDepartments: userDepartmentAuthority.accessableDepartments,
+            reviewableDepartments: userDepartmentAuthority.reviewableDepartments,
+        });
     }
 
     /**

@@ -4,6 +4,7 @@ import { DepartmentDomainService } from '../../domain/department/services/depart
 import { AuthorityType } from '../../domain/user-department-authority/enum/authority-type.enum';
 import { UserDepartmentAuthorityDomainService } from '../../domain/user-department-authority/services/user-department-authority-domain.service';
 import { UserDomainService } from '../../domain/user/services/user-domain.service';
+import { UserDepartmentAuthorityDto } from 'src/domain/user-department-authority/dto/user-department-authority.dto';
 
 @Injectable()
 export class UserDepartmentAuthorityContext {
@@ -30,5 +31,9 @@ export class UserDepartmentAuthorityContext {
 
     async 사용자의_검토_가능한_부서_목록을_조회한다(userId: string): Promise<DepartmentInfoEntity[]> {
         return await this.userDepartmentAuthorityDomainService.getUserReviewableDepartment(userId);
+    }
+
+    async 사용자의_부서_권한을_조회_부서목록을_반환한다(userId: string): Promise<UserDepartmentAuthorityDto> {
+        return await this.userDepartmentAuthorityDomainService.findAllUserDepartmentAuthorities(userId);
     }
 }

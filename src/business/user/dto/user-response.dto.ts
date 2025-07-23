@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { UserRole } from '../../../../domain/user/enum/user.enum';
+import { UserRole } from '../../../domain/user/enum/user.enum';
 
 /**
  * 사용자 응답 DTO
@@ -47,20 +47,6 @@ export class UserResponseDto {
     readonly isActive: boolean;
 
     @ApiProperty({
-        description: '통합 계정 여부',
-        example: true,
-    })
-    @Expose()
-    readonly isIntegrated: boolean;
-
-    @ApiProperty({
-        description: '사용자 유형',
-        example: 'UserEntity',
-    })
-    @Expose()
-    readonly type: string;
-
-    @ApiProperty({
         description: '계정 생성 시간',
         example: '2025-07-11T08:05:22.339Z',
         format: 'date-time',
@@ -77,20 +63,6 @@ export class UserResponseDto {
     @Expose()
     @Type(() => Date)
     readonly updatedAt: Date;
-
-    @ApiProperty({
-        description: '권한 접근 여부',
-        example: true,
-    })
-    @Expose()
-    readonly hasAccessAuthority: boolean;
-
-    @ApiProperty({
-        description: '권한 검토 여부',
-        example: true,
-    })
-    @Expose()
-    readonly hasReviewAuthority: boolean;
 
     constructor(partial: Partial<UserResponseDto>) {
         Object.assign(this, partial);

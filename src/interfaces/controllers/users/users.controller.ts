@@ -12,16 +12,19 @@ import {
     ApiForbiddenResponse,
     ApiNotFoundResponse,
 } from '@nestjs/swagger';
-import { UserBusinessService } from '../../business/user/user.business';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '../../domain/user/enum/user.enum';
-import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
-import { UserResponseDto } from '../../interfaces/dto/organization/responses/user-response.dto';
-import { ErrorResponseDto } from '../../common/dtos/common/error-response.dto';
-import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
-import { AuthorityType } from '../../domain/user-department-authority/enum/authority-type.enum';
+import { UserBusinessService } from '../../../business/user/user.business';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { UserRole } from '../../../domain/user/enum/user.enum';
+import { PaginationQueryDto } from '../../../common/dtos/pagination/pagination-query.dto';
+import { UserResponseDto } from '../../../business/user/dto/user-response.dto';
+import { ErrorResponseDto } from '../../../common/dtos/common/error-response.dto';
+import { PaginatedResponseDto } from '../../../common/dtos/pagination/pagination-response.dto';
+import { AuthorityType } from '../../../domain/user-department-authority/enum/authority-type.enum';
+import { GetUser } from 'src/common/decorators/get-user.decorator';
+import { UserEntity } from 'src/domain/user/entities/user.entity';
+import { UserWithDepartmentAuthorityResponseDto } from 'src/business/user/dto/user-with-department-authority-response.dto';
 
 /**
  * 사용자 관리 컨트롤러
@@ -71,6 +74,28 @@ export class UsersController {
         return this.userBusinessService.getUserList(paginationQuery);
     }
 
+    @Get('profile')
+    @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
+    @ApiOperation({
+        summary: '사용자 프로필 조회',
+        description: '사용자 ID로 특정 사용자의 프로필 정보를 조회합니다.',
+    })
+    @ApiOkResponse({
+        description: '사용자 프로필 조회 성공',
+        type: UserResponseDto,
+    })
+    @ApiUnauthorizedResponse({
+        description: '인증 실패',
+        type: ErrorResponseDto,
+    })
+    @ApiNotFoundResponse({
+        description: '사용자를 찾을 수 없음',
+        type: ErrorResponseDto,
+    })
+    async getUserProfile(@GetUser() user: UserEntity): Promise<UserWithDepartmentAuthorityResponseDto> {
+        return this.userBusinessService.getUserByIdWithDepartmentAuthority(user.userId);
+    }
+
     @Get(':id')
     @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)
     @ApiOperation({
@@ -100,8 +125,8 @@ export class UsersController {
         description: '사용자를 찾을 수 없음',
         type: ErrorResponseDto,
     })
-    async getUserById(@Param('id', ParseUUIDPipe) id: string): Promise<UserResponseDto> {
-        return this.userBusinessService.getUserProfile(id);
+    async getUserById(@Param('id', ParseUUIDPipe) id: string): Promise<UserWithDepartmentAuthorityResponseDto> {
+        return this.userBusinessService.getUserByIdWithDepartmentAuthority(id);
     }
 
     // ==================== 부서 권한 관리 엔드포인트 ====================

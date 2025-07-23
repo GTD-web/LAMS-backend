@@ -5,7 +5,7 @@ import { UserRole } from '../../domain/user/enum/user.enum';
 import { LoginResponseDto } from '../../interfaces/dto/auth/responses/login-response.dto';
 import { UserEntity } from '../../domain/user/entities/user.entity';
 import { plainToInstance } from 'class-transformer';
-import { UserResponseDto } from '../../interfaces/dto/organization/responses/user-response.dto';
+import { UserResponseDto } from '../user/dto/user-response.dto';
 import { UserContextService } from '../../contexts/user/user-context.service';
 
 /**
@@ -37,13 +37,6 @@ export class AuthBusinessService {
             token,
             user: plainToInstance(UserResponseDto, user),
         };
-    }
-
-    /**
-     * 프로필 조회
-     */
-    async getProfile(token: string, userId: string): Promise<UserResponseDto> {
-        return this.userContextService.자신의_프로필을_조회한다(userId);
     }
 
     /**

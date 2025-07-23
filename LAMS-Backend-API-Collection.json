@@ -1,0 +1,781 @@
+{
+    "info": {
+        "name": "LAMS Backend API",
+        "description": "LAMS(근태관리시스템) Backend API 테스트 컬렉션",
+        "version": "1.0.0",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{access_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000/api",
+            "type": "string"
+        },
+        {
+            "key": "vercel_url",
+            "value": "https://your-vercel-app.vercel.app/api",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "user_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "department_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "attendance_type_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "holiday_id",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "🔐 Authentication",
+            "item": [
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const responseJson = pm.response.json();",
+                                    "    pm.collectionVariables.set('access_token', responseJson.accessToken);",
+                                    "    pm.collectionVariables.set('user_id', responseJson.user.userId);",
+                                    "    pm.test('Login successful', function () {",
+                                    "        pm.expect(pm.response.code).to.eql(201);",
+                                    "        pm.expect(responseJson.accessToken).to.not.be.empty;",
+                                    "    });",
+                                    "} else {",
+                                    "    pm.test('Login failed', function () {",
+                                    "        pm.expect(pm.response.code).to.be.oneOf([400, 401]);",
+                                    "    });",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/admin/auth/login",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "auth", "login"]
+                        },
+                        "description": "사용자 로그인 - JWT 토큰 발급"
+                    }
+                },
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/admin/auth/profile",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "auth", "profile"]
+                        },
+                        "description": "현재 사용자 프로필 조회"
+                    }
+                },
+                {
+                    "name": "Change Password",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newPassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/admin/auth/change-password",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "auth", "change-password"]
+                        },
+                        "description": "비밀번호 변경"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "👥 Users Management",
+            "item": [
+                {
+                    "name": "Get User List",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const responseJson = pm.response.json();",
+                                    "    if (responseJson.data && responseJson.data.length > 0) {",
+                                    "        pm.collectionVariables.set('user_id', responseJson.data[0].userId);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users?page=1&limit=10",
+                            "host": ["{{base_url}}"],
+                            "path": ["users"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "description": "사용자 목록 조회 (페이지네이션)"
+                    }
+                },
+                {
+                    "name": "Get User by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users/{{user_id}}",
+                            "host": ["{{base_url}}"],
+                            "path": ["users", "{{user_id}}"]
+                        },
+                        "description": "특정 사용자 상세 조회"
+                    }
+                },
+                {
+                    "name": "Grant Department Access Authority",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users/{{user_id}}/departments/{{department_id}}/access-authority",
+                            "host": ["{{base_url}}"],
+                            "path": ["users", "{{user_id}}", "departments", "{{department_id}}", "access-authority"]
+                        },
+                        "description": "사용자에게 부서 접근 권한 부여"
+                    }
+                },
+                {
+                    "name": "Grant Department Review Authority",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users/{{user_id}}/departments/{{department_id}}/review-authority",
+                            "host": ["{{base_url}}"],
+                            "path": ["users", "{{user_id}}", "departments", "{{department_id}}", "review-authority"]
+                        },
+                        "description": "사용자에게 부서 검토 권한 부여"
+                    }
+                },
+                {
+                    "name": "Revoke Department Authority",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users/{{user_id}}/departments/{{department_id}}/authority",
+                            "host": ["{{base_url}}"],
+                            "path": ["users", "{{user_id}}", "departments", "{{department_id}}", "authority"]
+                        },
+                        "description": "사용자의 부서 권한 취소"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "🏢 Organization",
+            "item": [
+                {
+                    "name": "Sync Organization",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/v1/organization/sync",
+                            "host": ["{{base_url}}"],
+                            "path": ["v1", "organization", "sync"]
+                        },
+                        "description": "MMS 시스템과 조직 정보 동기화"
+                    }
+                },
+                {
+                    "name": "Get Department List",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const responseJson = pm.response.json();",
+                                    "    if (responseJson.data && responseJson.data.length > 0) {",
+                                    "        pm.collectionVariables.set('department_id', responseJson.data[0].departmentId);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/v1/organization/departments?page=1&limit=10",
+                            "host": ["{{base_url}}"],
+                            "path": ["v1", "organization", "departments"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "description": "부서 목록 조회 (페이지네이션)"
+                    }
+                },
+                {
+                    "name": "Get Department by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/v1/organization/departments/{{department_id}}",
+                            "host": ["{{base_url}}"],
+                            "path": ["v1", "organization", "departments", "{{department_id}}"]
+                        },
+                        "description": "특정 부서 상세 조회"
+                    }
+                },
+                {
+                    "name": "Get Employees by Department",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/v1/organization/departments/{{department_id}}/employees?page=1&limit=10",
+                            "host": ["{{base_url}}"],
+                            "path": ["v1", "organization", "departments", "{{department_id}}", "employees"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "description": "부서별 직원 목록 조회"
+                    }
+                },
+                {
+                    "name": "Get Active Employees by Department",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/v1/organization/departments/{{department_id}}/active-employees",
+                            "host": ["{{base_url}}"],
+                            "path": ["v1", "organization", "departments", "{{department_id}}", "active-employees"]
+                        },
+                        "description": "부서별 활성 직원 목록 조회"
+                    }
+                },
+                {
+                    "name": "Get Employee List",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/v1/organization/employees?page=1&limit=10",
+                            "host": ["{{base_url}}"],
+                            "path": ["v1", "organization", "employees"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "description": "전체 직원 목록 조회"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "⏰ Work Standard",
+            "item": [
+                {
+                    "name": "Attendance Types",
+                    "item": [
+                        {
+                            "name": "Get Attendance Types",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "if (pm.response.code === 200) {",
+                                            "    const responseJson = pm.response.json();",
+                                            "    if (responseJson.data && responseJson.data.length > 0) {",
+                                            "        pm.collectionVariables.set('attendance_type_id', responseJson.data[0].attendanceTypeId);",
+                                            "    }",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/v1/work-standard/attendance-types?page=1&limit=10",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["v1", "work-standard", "attendance-types"],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "limit",
+                                            "value": "10"
+                                        }
+                                    ]
+                                },
+                                "description": "근무 유형 목록 조회 (페이지네이션)"
+                            }
+                        },
+                        {
+                            "name": "Get All Attendance Types",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/v1/work-standard/attendance-types/all",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["v1", "work-standard", "attendance-types", "all"]
+                                },
+                                "description": "모든 근무 유형 조회"
+                            }
+                        },
+                        {
+                            "name": "Get Attendance Type by ID",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/v1/work-standard/attendance-types/{{attendance_type_id}}",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["v1", "work-standard", "attendance-types", "{{attendance_type_id}}"]
+                                },
+                                "description": "특정 근무 유형 조회"
+                            }
+                        },
+                        {
+                            "name": "Create Attendance Type",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "if (pm.response.code === 201) {",
+                                            "    const responseJson = pm.response.json();",
+                                            "    pm.collectionVariables.set('attendance_type_id', responseJson.attendanceTypeId);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"title\": \"정규근무\",\n  \"workTime\": 480,\n  \"isRecognizedWorkTime\": true,\n  \"startWorkTime\": \"09:00\",\n  \"endWorkTime\": \"18:00\",\n  \"deductedAnnualLeave\": 0\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/v1/work-standard/attendance-types",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["v1", "work-standard", "attendance-types"]
+                                },
+                                "description": "새로운 근무 유형 생성"
+                            }
+                        },
+                        {
+                            "name": "Update Attendance Type",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"title\": \"정규근무 (수정)\",\n  \"workTime\": 480,\n  \"isRecognizedWorkTime\": true,\n  \"startWorkTime\": \"09:00\",\n  \"endWorkTime\": \"18:00\",\n  \"deductedAnnualLeave\": 0\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/v1/work-standard/attendance-types/{{attendance_type_id}}",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["v1", "work-standard", "attendance-types", "{{attendance_type_id}}"]
+                                },
+                                "description": "근무 유형 수정"
+                            }
+                        },
+                        {
+                            "name": "Delete Attendance Type",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/v1/work-standard/attendance-types/{{attendance_type_id}}",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["v1", "work-standard", "attendance-types", "{{attendance_type_id}}"]
+                                },
+                                "description": "근무 유형 삭제"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Holidays",
+                    "item": [
+                        {
+                            "name": "Get Holidays",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "if (pm.response.code === 200) {",
+                                            "    const responseJson = pm.response.json();",
+                                            "    if (responseJson.data && responseJson.data.length > 0) {",
+                                            "        pm.collectionVariables.set('holiday_id', responseJson.data[0].holidayId);",
+                                            "    }",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/v1/work-standard/holidays?year=2024&page=1&limit=10",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["v1", "work-standard", "holidays"],
+                                    "query": [
+                                        {
+                                            "key": "year",
+                                            "value": "2024"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "limit",
+                                            "value": "10"
+                                        }
+                                    ]
+                                },
+                                "description": "연도별 공휴일 목록 조회"
+                            }
+                        },
+                        {
+                            "name": "Get Holiday by ID",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/v1/work-standard/holidays/{{holiday_id}}",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["v1", "work-standard", "holidays", "{{holiday_id}}"]
+                                },
+                                "description": "특정 공휴일 조회"
+                            }
+                        },
+                        {
+                            "name": "Create Holiday",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "if (pm.response.code === 201) {",
+                                            "    const responseJson = pm.response.json();",
+                                            "    pm.collectionVariables.set('holiday_id', responseJson.holidayId);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"holidayName\": \"신정\",\n  \"holidayDate\": \"2024-01-01\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/v1/work-standard/holidays",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["v1", "work-standard", "holidays"]
+                                },
+                                "description": "새로운 공휴일 생성"
+                            }
+                        },
+                        {
+                            "name": "Update Holiday",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"holidayName\": \"신정 (수정)\",\n  \"holidayDate\": \"2024-01-01\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/v1/work-standard/holidays/{{holiday_id}}",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["v1", "work-standard", "holidays", "{{holiday_id}}"]
+                                },
+                                "description": "공휴일 수정"
+                            }
+                        },
+                        {
+                            "name": "Delete Holiday",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/v1/work-standard/holidays/{{holiday_id}}",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["v1", "work-standard", "holidays", "{{holiday_id}}"]
+                                },
+                                "description": "공휴일 삭제"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Initialize Seed Data",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/v1/work-standard/seed-data",
+                            "host": ["{{base_url}}"],
+                            "path": ["v1", "work-standard", "seed-data"]
+                        },
+                        "description": "시스템 초기 데이터 설정"
+                    }
+                }
+            ]
+        }
+    ]
+}

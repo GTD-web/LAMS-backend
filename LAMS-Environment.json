@@ -1,0 +1,48 @@
+{
+    "id": "lams-environment",
+    "name": "LAMS Environment",
+    "values": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000/api",
+            "enabled": true,
+            "type": "default"
+        },
+        {
+            "key": "vercel_url",
+            "value": "https://your-vercel-app.vercel.app/api",
+            "enabled": true,
+            "type": "default"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "enabled": true,
+            "type": "secret"
+        },
+        {
+            "key": "user_id",
+            "value": "",
+            "enabled": true,
+            "type": "default"
+        },
+        {
+            "key": "department_id",
+            "value": "",
+            "enabled": true,
+            "type": "default"
+        },
+        {
+            "key": "attendance_type_id",
+            "value": "",
+            "enabled": true,
+            "type": "default"
+        },
+        {
+            "key": "holiday_id",
+            "value": "",
+            "enabled": true,
+            "type": "default"
+        }
+    ]
+}

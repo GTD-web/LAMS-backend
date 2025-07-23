@@ -10,17 +10,17 @@ import {
     ApiOkResponse,
     ApiCreatedResponse,
 } from '@nestjs/swagger';
-import { AuthBusinessService } from '../../business/auth/auth.business';
-import { Public } from '../../common/decorators/public.decorator';
-import { GetUser } from '../../common/decorators/get-user.decorator';
-import { LoginResponseDto } from '../../interfaces/dto/auth/responses/login-response.dto';
-import { LoginDto } from '../../interfaces/dto/auth/request/login.dto';
-import { ChangePasswordDto } from '../../interfaces/dto/auth/request/change-password.dto';
-import { UserResponseDto } from '../../interfaces/dto/organization/responses/user-response.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { ErrorResponseDto } from '../../common/dtos/common/error-response.dto';
-import { UserEntity } from '../../domain/user/entities/user.entity';
+import { AuthBusinessService } from '../../../business/auth/auth.business';
+import { Public } from '../../../common/decorators/public.decorator';
+import { GetUser } from '../../../common/decorators/get-user.decorator';
+import { LoginResponseDto } from '../../dto/auth/responses/login-response.dto';
+import { LoginDto } from './dto/login.dto';
+import { UserResponseDto } from '../../../business/user/dto/user-response.dto';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { ErrorResponseDto } from '../../../common/dtos/common/error-response.dto';
+import { UserEntity } from '../../../domain/user/entities/user.entity';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 /**
  * 인증 컨트롤러

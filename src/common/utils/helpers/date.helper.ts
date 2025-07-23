@@ -1,21 +1,30 @@
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as timezone from 'dayjs/plugin/timezone';
 
 let isPluginsLoaded = false;
 
-async function loadPlugins() {
+function loadPlugins() {
     if (isPluginsLoaded) return;
 
     try {
-        dayjs.extend(utc);
-        dayjs.extend(timezone);
-        dayjs.tz.setDefault('Asia/Seoul');
+        // DayJS 인스턴스가 존재하는지 확인
+        if (dayjs && typeof dayjs.extend === 'function') {
+            dayjs.extend(utc);
+            dayjs.extend(timezone);
 
-        // 기본 타임존 설정
-        isPluginsLoaded = true;
+            // 기본 타임존 설정 (tz가 존재하는 경우에만)
+            if (dayjs.tz && typeof dayjs.tz.setDefault === 'function') {
+                dayjs.tz.setDefault('Asia/Seoul');
+            }
+
+            isPluginsLoaded = true;
+        } else {
+            console.warn('DayJS instance or extend method not available');
+        }
     } catch (error) {
         console.warn('Failed to load dayjs plugins:', error);
+        // 플러그인 로딩 실패 시에도 계속 진행
     }
 }
 

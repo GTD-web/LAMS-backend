@@ -3,7 +3,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { join } from 'path';
-import express, { Request, Response } from 'express';
+import express from 'express';
 import { AppModule } from '../src/app.module';
 import { JwtAuthGuard } from '../src/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../src/common/guards/roles.guard';
@@ -54,8 +54,8 @@ async function createNestApp(): Promise<NestExpressApplication> {
     return app;
 }
 
-export default async (req: Request, res: Response) => {
+export default async (req: any, res: any) => {
     const app = await createNestApp();
-    const expressApp = app.getHttpAdapter().getInstance() as express.Application;
-    return expressApp(req, res);
+    const handler = app.getHttpAdapter().getInstance();
+    handler(req, res);
 };

@@ -20,7 +20,6 @@ async function bootstrap() {
     });
     app.setGlobalPrefix('api');
     app.useGlobalGuards(new JwtAuthGuard(app.get(Reflector)), new RolesGuard(app.get(Reflector)));
-    // 전역 인터셉터 등록 (ErrorLoggingInterceptor 추가)
     app.useGlobalInterceptors(new ErrorLoggingInterceptor(), new ResponseInterceptor(), new LoggingInterceptor());
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     // 파일 업로드 설정

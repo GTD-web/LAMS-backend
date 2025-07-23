@@ -12,7 +12,7 @@ import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { PaginatedResponseDto, PaginationMetaDto } from '../../../common/dtos/pagination/pagination-response.dto';
 import { PaginationQueryDto } from '../../../common/dtos/pagination/pagination-query.dto';
-import { UserResponseDto } from '../../../interfaces/dto/organization/responses/user-response.dto';
+import { UserResponseDto } from '../../../business/user/dto/user-response.dto';
 import { plainToInstance } from 'class-transformer';
 
 /**
@@ -96,14 +96,6 @@ export class UserDomainService {
             throw new NotFoundException('ID에 해당하는 사용자를 찾을 수 없습니다.');
         }
 
-        return user;
-    }
-
-    async findUserAuthority(userId: string): Promise<UserEntity> {
-        const user = await this.userRepository.findOne({
-            where: { userId },
-            relations: ['accessableDepartments', 'reviewableDepartments'],
-        });
         return user;
     }
 
