@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { UserBusinessService } from './user.business';
-import { UserContextModule } from '@src/contexts/user/user-context.module';
-import { UserDepartmentAuthorityContextModule } from '@src/contexts/user-department-authority/user-department-authority-context.module';
+import { UserContextModule } from '../../contexts/user/user-context.module';
+import { UserDepartmentAuthorityContextModule } from '../../contexts/user-department-authority/user-department-authority-context.module';
 
 /**
  * 사용자 비즈니스 모듈

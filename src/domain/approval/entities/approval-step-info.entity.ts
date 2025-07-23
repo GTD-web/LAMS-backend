@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ApprovalRequestBaseInfoEntity } from './approval-request-info.entity';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
+import { UserEntity } from '../../../domain/user/entities/user.entity';
 
 export enum ApprovalStepStatus {
     PENDING = '대기중',

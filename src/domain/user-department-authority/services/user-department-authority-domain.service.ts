@@ -2,9 +2,9 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserDepartmentAuthorityEntity } from '../entities/user-department-authority.entity';
-import { AuthorityType, AuthorityAction } from '../enum/authority-type.enum';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
-import { DepartmentInfoEntity } from '@src/domain/department/entities/department-info.entity';
+import { AuthorityType } from '../enum/authority-type.enum';
+import { UserEntity } from '../../../domain/user/entities/user.entity';
+import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
 
 /**
  * 사용자-부서 권한 도메인 서비스

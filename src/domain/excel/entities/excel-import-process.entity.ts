@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
+import { UserEntity } from '../../../domain/user/entities/user.entity';
 
 @Entity()
 export class ExcelImportProcessEntity {

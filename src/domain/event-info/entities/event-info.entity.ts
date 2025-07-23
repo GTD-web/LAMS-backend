@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ExtractEventInfoType } from '@src/common/types/excel.type';
+import { ExtractEventInfoType } from '../../../common/types/excel.type';
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 

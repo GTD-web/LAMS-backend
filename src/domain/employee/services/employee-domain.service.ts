@@ -2,8 +2,8 @@ import { Injectable, Logger, BadRequestException, NotFoundException } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Not, IsNull, FindOptionsWhere, FindManyOptions, ILike } from 'typeorm';
 import { EmployeeInfoEntity } from '../entities/employee-info.entity';
-import { PaginatedResponseDto, PaginationMetaDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { EmployeeResponseDto } from '@src/interfaces/dto/organization/responses/employee-response.dto';
+import { PaginatedResponseDto, PaginationMetaDto } from '../../../common/dtos/pagination/pagination-response.dto';
+import { EmployeeResponseDto } from '../../../interfaces/dto/organization/responses/employee-response.dto';
 import { plainToInstance } from 'class-transformer';
 
 /**

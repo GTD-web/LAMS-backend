@@ -1,8 +1,8 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserSeedService } from './user.seed';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
-import { UserDomainModule } from '@src/domain/user/user-domain.module';
+import { UserEntity } from '../../domain/user/entities/user.entity';
+import { UserDomainModule } from '../../domain/user/user-domain.module';
 
 /**
  * 시드 모듈

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuthBusinessService } from './auth.business';
-import { UserContextModule } from '@src/contexts/user/user-context.module';
-import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
-import { AuthController } from '@src/interfaces/controllers/auth.controller';
+import { UserContextModule } from '../../contexts/user/user-context.module';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { AuthController } from '../../interfaces/controllers/auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 /**

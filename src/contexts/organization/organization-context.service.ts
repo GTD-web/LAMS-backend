@@ -7,10 +7,10 @@ import { MMSDepartmentResponseDto } from '../../interfaces/dto/organization/requ
 import { MMSEmployeeResponseDto } from '../../interfaces/dto/organization/requests/mms-employee-import.dto';
 import { DepartmentInfoEntity } from '../../domain/department/entities/department-info.entity';
 import { EmployeeInfoEntity } from '../../domain/employee/entities/employee-info.entity';
-import { DepartmentEmployeeEntity } from '@src/domain/department-employee/entities/department-employee.entity';
-import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';
+import { DepartmentEmployeeEntity } from '../../domain/department-employee/entities/department-employee.entity';
+import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
+import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
+import { DepartmentResponseDto } from '../../interfaces/dto/organization/responses/department-response.dto';
 
 /**
  * 조직 컨텍스트 서비스

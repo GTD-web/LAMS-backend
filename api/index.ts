@@ -1,5 +1,3 @@
-import 'tsconfig-paths/register';
-
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';

@@ -10,9 +10,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
-import { PaginatedResponseDto, PaginationMetaDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
+import { PaginatedResponseDto, PaginationMetaDto } from '../../../common/dtos/pagination/pagination-response.dto';
+import { PaginationQueryDto } from '../../../common/dtos/pagination/pagination-query.dto';
+import { UserResponseDto } from '../../../interfaces/dto/organization/responses/user-response.dto';
 import { plainToInstance } from 'class-transformer';
 
 /**

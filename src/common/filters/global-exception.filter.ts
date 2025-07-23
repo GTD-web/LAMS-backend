@@ -1,7 +1,7 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
-import { DateHelper } from '@src/common/utils/helpers/date.helper';
+import { DateHelper } from '../utils/helpers/date.helper';
 
 /**
  * 글로벌 예외 필터

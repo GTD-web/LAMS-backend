@@ -1,12 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserDomainService } from '@src/domain/user/services/user-domain.service';
-import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
-import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { UserDomainService } from '../../domain/user/services/user-domain.service';
+import { UserResponseDto } from '../../interfaces/dto/organization/responses/user-response.dto';
+import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
+import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 import { plainToInstance } from 'class-transformer';
 
-import { UserEntity } from '@src/domain/user/entities/user.entity';
+import { UserEntity } from '../../domain/user/entities/user.entity';
 
 /**
  * 통합 사용자 컨텍스트 서비스

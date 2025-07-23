@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { ApprovalHistoryInfoEntity } from './approval-history-info.entity';
 import { ApprovalStepInfoEntity } from './approval-step-info.entity';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
+import { UserEntity } from '../../../domain/user/entities/user.entity';
 
 @Entity()
 @TableInheritance({ column: { type: 'varchar', name: 'type' } })

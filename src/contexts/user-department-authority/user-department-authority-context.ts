@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { DepartmentInfoEntity } from '@src/domain/department/entities/department-info.entity';
-import { DepartmentDomainService } from '@src/domain/department/services/department-domain.service';
-import { AuthorityType } from '@src/domain/user-department-authority/enum/authority-type.enum';
-import { UserDepartmentAuthorityDomainService } from '@src/domain/user-department-authority/services/user-department-authority-domain.service';
-import { UserDomainService } from '@src/domain/user/services/user-domain.service';
+import { DepartmentInfoEntity } from '../../domain/department/entities/department-info.entity';
+import { DepartmentDomainService } from '../../domain/department/services/department-domain.service';
+import { AuthorityType } from '../../domain/user-department-authority/enum/authority-type.enum';
+import { UserDepartmentAuthorityDomainService } from '../../domain/user-department-authority/services/user-department-authority-domain.service';
+import { UserDomainService } from '../../domain/user/services/user-domain.service';
 
 @Injectable()
 export class UserDepartmentAuthorityContext {

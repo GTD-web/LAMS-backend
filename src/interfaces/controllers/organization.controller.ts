@@ -13,17 +13,17 @@ import {
     ApiParam,
     ApiQuery,
 } from '@nestjs/swagger';
-import { OrganizationBusinessService } from '@src/business/organization/organization.business';
-import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
-import { RolesGuard } from '@src/common/guards/roles.guard';
-import { Roles } from '@src/common/decorators/roles.decorator';
-import { UserRole } from '@src/domain/user/enum/user.enum';
-import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { SyncOrganizationResponseDto } from '@src/interfaces/dto/organization/responses/sync-organization-response.dto';
-import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';
-import { EmployeeResponseDto } from '@src/interfaces/dto/organization/responses/employee-response.dto';
-import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
+import { OrganizationBusinessService } from '../../business/organization/organization.business';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../../domain/user/enum/user.enum';
+import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
+import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
+import { SyncOrganizationResponseDto } from '../../interfaces/dto/organization/responses/sync-organization-response.dto';
+import { DepartmentResponseDto } from '../../interfaces/dto/organization/responses/department-response.dto';
+import { EmployeeResponseDto } from '../../interfaces/dto/organization/responses/employee-response.dto';
+import { ErrorResponseDto } from '../../common/dtos/common/error-response.dto';
 
 /**
  * 조직관리 컨트롤러

@@ -1,4 +1,4 @@
-import { EmployeeInfoEntity } from '@src/domain/employee/entities/employee-info.entity';
+import { EmployeeInfoEntity } from '../../../domain/employee/entities/employee-info.entity';
 import {
     Column,
     CreateDateColumn,
@@ -10,9 +10,9 @@ import {
 } from 'typeorm';
 
 export enum BirthDayLeaveStatus {
-    CAN_NOT_INPUT = '???? ??? ? ??',
-    CAN_NOT_USED = '?? ?? ??? ? ??',
-    USED = '?? ?? ???',
+    CAN_NOT_INPUT = '생일이 입력되지 않음',
+    CAN_NOT_USED = '생일 휴가 사용되지 않음',
+    USED = '생일 휴가 사용됨',
 }
 
 @Entity()

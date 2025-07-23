@@ -1,12 +1,12 @@
 import { Injectable, UnauthorizedException, Logger, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthPayloadDto } from '../../interfaces/dto/auth/responses/auth-payload.dto';
-import { UserRole } from '@src/domain/user/enum/user.enum';
-import { LoginResponseDto } from '@src/interfaces/dto/auth/responses/login-response.dto';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
+import { UserRole } from '../../domain/user/enum/user.enum';
+import { LoginResponseDto } from '../../interfaces/dto/auth/responses/login-response.dto';
+import { UserEntity } from '../../domain/user/entities/user.entity';
 import { plainToInstance } from 'class-transformer';
-import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
-import { UserContextService } from '@src/contexts/user/user-context.service';
+import { UserResponseDto } from '../../interfaces/dto/organization/responses/user-response.dto';
+import { UserContextService } from '../../contexts/user/user-context.service';
 
 /**
  * 인증 비즈니스 서비스

@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { DailyEventSummaryEntity } from '@src/domain/attendance/daily-attendance/entities/daily-event-summary.entity';
-import { DepartmentEmployeeEntity } from '../../department-employee/entities/department-employee.entity';
-import { DepartmentInfoEntity } from '../../department/entities/department-info.entity';
-import { DateHelper } from '@src/common/utils/helpers/date.helper';
+import { DailyEventSummaryEntity } from '../../../domain/attendance/daily-attendance/entities/daily-event-summary.entity';
+import { DepartmentEmployeeEntity } from '../../../domain/department-employee/entities/department-employee.entity';
+import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
+import { DateHelper } from '../../../common/utils/helpers/date.helper';
 
 @Entity()
 export class EmployeeInfoEntity {

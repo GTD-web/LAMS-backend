@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserRole } from '@src/domain/user/enum/user.enum';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
+import { UserRole } from '../../domain/user/enum/user.enum';
+import { UserEntity } from '../../domain/user/entities/user.entity';
 
 @Injectable()
 export class UserSeedService {

@@ -1,7 +1,7 @@
 import { AfterLoad, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ApprovalRequestBaseInfoEntity } from './approval-request-info.entity';
-import { DateHelper } from '@src/common/utils/helpers/date.helper';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
+import { DateHelper } from '../../../common/utils/helpers/date.helper';
+import { UserEntity } from '../../../domain/user/entities/user.entity';
 
 export enum ApprovalHistoryAction {
     APPROVE = '승인',

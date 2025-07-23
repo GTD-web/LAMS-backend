@@ -8,8 +8,8 @@ import {
     UpdateDateColumn,
     Unique,
 } from 'typeorm';
-import { DepartmentInfoEntity } from '@src/domain/department/entities/department-info.entity';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
+import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
+import { UserEntity } from '../../../domain/user/entities/user.entity';
 import { AuthorityType } from '../enum/authority-type.enum';
 
 /**

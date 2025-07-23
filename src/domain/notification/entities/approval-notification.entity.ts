@@ -1,6 +1,6 @@
 import { ChildEntity, Column, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseNotificationEntity } from './base-notification.entity';
-import { DataSnapshotApprovalRequestInfoEntity } from '@src/domain/snapshot/entities/data-snapshot-approval-request-info.entity';
+import { DataSnapshotApprovalRequestInfoEntity } from '../../../domain/snapshot/entities/data-snapshot-approval-request-info.entity';
 
 @ChildEntity()
 export class SnapshotApprovalNotificationEntity extends BaseNotificationEntity {

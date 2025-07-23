@@ -1,4 +1,4 @@
-import { EmployeeInfoEntity } from '@src/domain/employee/entities/employee-info.entity';
+import { EmployeeInfoEntity } from '../../../../domain/employee/entities/employee-info.entity';
 import {
     Column,
     CreateDateColumn,

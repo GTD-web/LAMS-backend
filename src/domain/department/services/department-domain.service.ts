@@ -2,9 +2,9 @@ import { Injectable, Logger, NotFoundException, BadRequestException } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, FindManyOptions, ILike } from 'typeorm';
 import { DepartmentInfoEntity } from '../entities/department-info.entity';
-import { MMSDepartmentResponseDto } from '@src/interfaces/dto/organization/requests/mms-department-import.dto';
-import { PaginationMetaDto, PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';
+import { MMSDepartmentResponseDto } from '../../../interfaces/dto/organization/requests/mms-department-import.dto';
+import { PaginationMetaDto, PaginatedResponseDto } from '../../../common/dtos/pagination/pagination-response.dto';
+import { DepartmentResponseDto } from '../../../interfaces/dto/organization/responses/department-response.dto';
 import { plainToInstance } from 'class-transformer';
 
 /**

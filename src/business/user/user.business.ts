@@ -1,11 +1,11 @@
-import { UserContextService } from '@src/contexts/user/user-context.service';
-import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
-import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { UserEntity } from '@src/domain/user/entities/user.entity';
-import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
+import { UserContextService } from '../../contexts/user/user-context.service';
+import { UserResponseDto } from '../../interfaces/dto/organization/responses/user-response.dto';
+import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
+import { UserEntity } from '../../domain/user/entities/user.entity';
+import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 import { Injectable } from '@nestjs/common';
-import { AuthorityType } from '@src/domain/user-department-authority/enum/authority-type.enum';
-import { UserDepartmentAuthorityContext } from '@src/contexts/user-department-authority/user-department-authority-context';
+import { AuthorityType } from '../../domain/user-department-authority/enum/authority-type.enum';
+import { UserDepartmentAuthorityContext } from '../../contexts/user-department-authority/user-department-authority-context';
 
 /**
  * 사용자 비즈니스 서비스

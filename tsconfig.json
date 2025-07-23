@@ -17,12 +17,6 @@
         "forceConsistentCasingInFileNames": false,
         "noFallthroughCasesInSwitch": false,
         "incremental": true,
-        "paths": {
-            "*": ["./node_modules/*"],
-            "@src/*": ["./src/*"],
-            "@libs/*": ["./libs/*"],
-            "@files/*": ["./files/*"]
-        }
     },
     "include": ["./**/*", "../src/**/*", "../api/**/*"]
 }

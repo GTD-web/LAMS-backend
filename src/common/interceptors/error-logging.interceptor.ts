@@ -2,7 +2,7 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } fr
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
-import { DateHelper } from '@src/common/utils/helpers/date.helper';
+import { DateHelper } from '../utils/helpers/date.helper';
 
 /**
  * 에러 로깅 인터셉터

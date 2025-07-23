@@ -12,8 +12,8 @@ import {
 } from 'typeorm';
 import { DataSnapshotChildInfoEntity } from './data-snapshot-child.entity';
 import { DataSnapshotApprovalRequestInfoEntity } from './data-snapshot-approval-request-info.entity';
-import { DateHelper } from '@src/common/utils/helpers/date.helper';
-import { DepartmentInfoEntity } from '@src/domain/department/entities/department-info.entity';
+import { DateHelper } from '../../../common/utils/helpers/date.helper';
+import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
 
 export enum SnapshotType {
     DAILY = 'DAILY',

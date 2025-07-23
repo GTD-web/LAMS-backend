@@ -12,16 +12,16 @@ import {
     ApiForbiddenResponse,
     ApiNotFoundResponse,
 } from '@nestjs/swagger';
-import { UserBusinessService } from '@src/business/user/user.business';
-import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
-import { RolesGuard } from '@src/common/guards/roles.guard';
-import { Roles } from '@src/common/decorators/roles.decorator';
-import { UserRole } from '@src/domain/user/enum/user.enum';
-import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
-import { UserResponseDto } from '@src/interfaces/dto/organization/responses/user-response.dto';
-import { ErrorResponseDto } from '@src/common/dtos/common/error-response.dto';
-import { PaginatedResponseDto } from '@src/common/dtos/pagination/pagination-response.dto';
-import { AuthorityType } from '@src/domain/user-department-authority/enum/authority-type.enum';
+import { UserBusinessService } from '../../business/user/user.business';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../../domain/user/enum/user.enum';
+import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
+import { UserResponseDto } from '../../interfaces/dto/organization/responses/user-response.dto';
+import { ErrorResponseDto } from '../../common/dtos/common/error-response.dto';
+import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
+import { AuthorityType } from '../../domain/user-department-authority/enum/authority-type.enum';
 
 /**
  * 사용자 관리 컨트롤러

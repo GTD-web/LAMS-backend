@@ -12,9 +12,9 @@ import {
     TableInheritance,
     UpdateDateColumn,
 } from 'typeorm';
-import { ApprovalRequestBaseInfoEntity } from '@src/domain/approval/entities/approval-request-info.entity';
-import { ApprovalStepInfoEntity } from '@src/domain/approval/entities/approval-step-info.entity';
-import { DepartmentInfoEntity } from '@src/domain/department/entities/department-info.entity';
+import { ApprovalRequestBaseInfoEntity } from '../../../domain/approval/entities/approval-request-info.entity';
+import { ApprovalStepInfoEntity } from '../../../domain/approval/entities/approval-step-info.entity';
+import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
 
 export enum LamsUserRole {
     ATTENDANCE_ADMIN = 'ATTENDANCE_ADMIN',

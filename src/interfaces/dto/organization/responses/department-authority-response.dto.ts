@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AuthorityType } from '@src/domain/user-department-authority/enum/authority-type.enum';
+import { AuthorityType } from '../../../../domain/user-department-authority/enum/authority-type.enum';
 import { Exclude, Expose } from 'class-transformer';
 
 /**

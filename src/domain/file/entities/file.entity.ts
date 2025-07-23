@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { DateHelper } from '@src/common/utils/helpers/date.helper';
+import { DateHelper } from '../../../common/utils/helpers/date.helper';
 
 export enum FileStatus {
     UNREAD = 'unread',

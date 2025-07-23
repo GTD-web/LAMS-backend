@@ -1,4 +1,4 @@
-import { UserRole } from '@src/domain/user/enum/user.enum';
+import { UserRole } from '../../../../domain/user/enum/user.enum';
 
 export class AuthPayloadDto {
     constructor(sub: string, roles: UserRole[], exp?: number) {

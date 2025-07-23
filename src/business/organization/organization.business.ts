@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { OrganizationContextService } from '@src/contexts/organization/organization-context.service';
-import { DepartmentResponseDto } from '@src/interfaces/dto/organization/responses/department-response.dto';
-import { EmployeeResponseDto } from '@src/interfaces/dto/organization/responses/employee-response.dto';
-import { SyncOrganizationResponseDto } from '@src/interfaces/dto/organization/responses/sync-organization-response.dto';
-import { PaginationQueryDto } from '@src/common/dtos/pagination/pagination-query.dto';
+import { OrganizationContextService } from '../../contexts/organization/organization-context.service';
+import { DepartmentResponseDto } from '../../interfaces/dto/organization/responses/department-response.dto';
+import { EmployeeResponseDto } from '../../interfaces/dto/organization/responses/employee-response.dto';
+import { SyncOrganizationResponseDto } from '../../interfaces/dto/organization/responses/sync-organization-response.dto';
+import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
 import { plainToInstance } from 'class-transformer';
-import { UserDepartmentAuthorityContext } from '@src/contexts/user-department-authority/user-department-authority-context';
+import { UserDepartmentAuthorityContext } from '../../contexts/user-department-authority/user-department-authority-context';
 
 /**
  * 조직관리 비즈니스 서비스
