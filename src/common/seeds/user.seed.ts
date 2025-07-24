@@ -24,7 +24,6 @@ export class UserSeedService {
                 return;
             }
 
-            // 관리자 계정 ?�성
             const adminUser = new UserEntity();
             adminUser.username = 'admin';
             adminUser.password = 'fnalfmdjemals';

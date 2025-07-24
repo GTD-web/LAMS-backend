@@ -19,6 +19,9 @@
         "incremental": true,
         "esModuleInterop": true,
         "moduleResolution": "node",
+        "noImplicitReturns": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
         "paths": {
             "src/*": ["src/*"]
         }

@@ -1,7 +1,6 @@
 import { UserContextService } from '../../contexts/user/user-context.service';
 import { UserResponseDto } from './dto/user-response.dto';
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
-import { UserEntity } from '../../domain/user/entities/user.entity';
 import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 import { Injectable } from '@nestjs/common';
 import { AuthorityType } from '../../domain/user-department-authority/enum/authority-type.enum';
