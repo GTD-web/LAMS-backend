@@ -58,9 +58,9 @@ export class UserDomainService {
     /**
      * 사용자 인증 검증
      */
-    async validateUserCredentials(email: string, password: string): Promise<UserEntity | null> {
+    async validateUserCredentials(email: string, password: string): Promise<UserEntity> {
         const user = await this.userRepository.findOne({
-            where: { email: email.toLowerCase().trim() },
+            where: { email: email },
         });
 
         if (!user) {

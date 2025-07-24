@@ -171,14 +171,7 @@ export class OrganizationContextService {
         departmentId: string,
         queryRunner?: QueryRunner,
     ): Promise<boolean> {
-        const department = await this.departmentDomainService.findDepartmentByMMSDepartmentId(
-            departmentId,
-            queryRunner,
-        );
-
-        if (!department) {
-            return false;
-        }
+        const department = await this.departmentDomainService.getDepartmentByMMSDepartmentId(departmentId, queryRunner);
 
         // 도메인 서비스에서 효율적 업데이트 수행
         return await this.departmentEmployeeDomainService.updateEmployeeDepartmentRelation(
@@ -266,8 +259,7 @@ export class OrganizationContextService {
         // 도메인에서 페이지네이션까지 처리
         const paginationResult = await this.departmentEmployeeDomainService.findPaginatedEmployeesByDepartmentIds(
             departmentIds,
-            paginationQuery.page,
-            paginationQuery.limit,
+            paginationQuery,
             employeeFilterQuery,
         );
 

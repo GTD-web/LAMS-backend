@@ -1,12 +1,9 @@
 import * as bcrypt from 'bcrypt';
 import {
-    AfterLoad,
     BeforeInsert,
-    BeforeUpdate,
     Column,
     CreateDateColumn,
     Entity,
-    ManyToMany,
     OneToMany,
     PrimaryGeneratedColumn,
     TableInheritance,
@@ -15,7 +12,6 @@ import {
 import { ApprovalRequestBaseInfoEntity } from '../../../domain/approval/entities/approval-request-info.entity';
 import { UserDepartmentAuthorityEntity } from '../../user-department-authority/entities/user-department-authority.entity';
 import { ApprovalStepInfoEntity } from '../../../domain/approval/entities/approval-step-info.entity';
-import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
 
 export enum LamsUserRole {
     ATTENDANCE_ADMIN = 'ATTENDANCE_ADMIN',
@@ -27,6 +23,7 @@ export enum LamsUserRole {
 export class UserEntity {
     @PrimaryGeneratedColumn('uuid')
     userId: string;
+    w;
 
     @Column()
     username: string;

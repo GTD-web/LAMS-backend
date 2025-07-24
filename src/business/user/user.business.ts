@@ -33,6 +33,7 @@ export class UserBusinessService {
     async getUserByIdWithDepartmentAuthority(userId: string): Promise<UserWithDepartmentAuthorityResponseDto> {
         const user = await this.userContextService.findUserById(userId);
 
+        // 사용자가 없으면 빈 값 반환
         if (!user) {
             return null;
         }

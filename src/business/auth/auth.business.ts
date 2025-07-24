@@ -69,7 +69,6 @@ export class AuthBusinessService {
             newPassword,
         );
 
-        this.logger.log(`비밀번호 변경 성공: ${updatedUser.email}`);
         return plainToInstance(UserResponseDto, updatedUser);
     }
 }

@@ -8,6 +8,7 @@ import { EmployeeResponseDto } from 'src/interfaces/dto/organization/responses/e
 import { plainToInstance } from 'class-transformer';
 import { PaginatedResponseDto, PaginationMetaDto } from 'src/common/dtos/pagination/pagination-response.dto';
 import { EmployeeSearchOptions } from './interfaces/employee-search-options.interface';
+import { PaginationQueryDto } from 'src/common/dtos/pagination/pagination-query.dto';
 
 /**
  * 부서-직원 관계 도메인 서비스
@@ -165,10 +166,11 @@ export class DepartmentEmployeeDomainService {
      */
     async findPaginatedEmployeesByDepartmentIds(
         departmentIds: string[],
-        page: number = 1,
-        limit: number = 10,
+        paginationQuery: PaginationQueryDto,
+
         options?: EmployeeSearchOptions,
     ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
+        const { page = 1, limit = 10 } = paginationQuery;
         // 모든 고유 직원 조회 (필터링 포함)
         const allEmployees = await this.findAllEmployeesByDepartmentIds(departmentIds, options);
 

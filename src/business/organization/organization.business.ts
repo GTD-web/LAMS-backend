@@ -110,18 +110,7 @@ export class OrganizationBusinessService {
         } catch (error) {
             // 트랜잭션 롤백
             await queryRunner.rollbackTransaction();
-
-            // 구체적인 에러 정보 로깅
-            if (error.name === 'EntityPropertyNotFoundError') {
-                this.logger.error(`Entity 관계 설정 오류: ${error.message}`, error.stack);
-                throw new Error(`데이터베이스 스키마 오류: ${error.message}`);
-            } else if (error.message?.includes('employee_number')) {
-                this.logger.error(`직원 정보 처리 오류: ${error.message}`, error.stack);
-                throw new Error(`직원 데이터 처리 중 오류가 발생했습니다: ${error.message}`);
-            } else {
-                this.logger.error('조직 동기화 실패 - 모든 변경사항이 롤백되었습니다.', error.stack);
-                throw new Error(`조직 동기화 중 오류가 발생했습니다: ${error.message}`);
-            }
+            this.logger.error(`Entity 관계 설정 오류: ${error.message}`, error.stack);
         } finally {
             // QueryRunner 해제
             await queryRunner.release();

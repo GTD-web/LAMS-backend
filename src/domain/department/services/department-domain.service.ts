@@ -228,6 +228,26 @@ export class DepartmentDomainService {
     }
 
     /**
+     * MMS 부서 ID로 조회
+     */
+    async getDepartmentByMMSDepartmentId(
+        mmsDepartmentId: string,
+        queryRunner?: QueryRunner,
+    ): Promise<DepartmentInfoEntity | null> {
+        const repository = queryRunner
+            ? queryRunner.manager.getRepository(DepartmentInfoEntity)
+            : this.departmentRepository;
+        const department = await repository.findOne({
+            where: { mmsDepartmentId },
+        });
+
+        if (!department) {
+            throw new NotFoundException(`Department with MMS ID ${mmsDepartmentId} not found`);
+        }
+        return department;
+    }
+
+    /**
      * MMS 부서 정보로 부서 생성 또는 수정
      */
     async createOrUpdateDepartment(
