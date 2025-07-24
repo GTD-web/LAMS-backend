@@ -1,9 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { DailyEventSummaryEntity } from '../../../domain/attendance/daily-attendance/entities/daily-event-summary.entity';
 import { DepartmentEmployeeEntity } from '../../../domain/department-employee/entities/department-employee.entity';
-import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
-import { DateHelper } from '../../../common/utils/helpers/date.helper';
 
 @Entity()
 export class EmployeeInfoEntity {
@@ -49,15 +47,6 @@ export class EmployeeInfoEntity {
     })
     entryAt: string;
 
-    /* TODO: 추후 제거 예정 - 2025-01-07*/
-    @ManyToOne(() => DepartmentInfoEntity)
-    @JoinColumn({ name: 'departmentId' })
-    @ApiProperty({
-        description: '부서',
-        example: 'exDepartment',
-    })
-    department: DepartmentInfoEntity;
-
     @Column({ type: 'date', nullable: true })
     @ApiProperty({
         description: '생일',
@@ -91,54 +80,54 @@ export class EmployeeInfoEntity {
     @OneToMany(() => DepartmentEmployeeEntity, (employee) => employee.employee)
     departments: DepartmentEmployeeEntity[];
 
-    /**
-     * 직원이 현재 재직 중인지 확인
-     */
-    isActive(): boolean {
-        if (!this.quitedAt) return true;
-        const today = DateHelper.today();
-        return this.quitedAt > today;
-    }
+    // /**
+    //  * 직원이 현재 재직 중인지 확인
+    //  */
+    // isActive(): boolean {
+    //     if (!this.quitedAt) return true;
+    //     const today = DateHelper.today();
+    //     return this.quitedAt > today;
+    // }
 
-    /**
-     * 직원이 특정 날짜에 재직 중이었는지 확인
-     */
-    isActiveAt(date: string): boolean {
-        if (this.entryAt && date < this.entryAt) return false;
-        if (this.quitedAt && date >= this.quitedAt) return false;
-        return true;
-    }
+    // /**
+    //  * 직원이 특정 날짜에 재직 중이었는지 확인
+    //  */
+    // isActiveAt(date: string): boolean {
+    //     if (this.entryAt && date < this.entryAt) return false;
+    //     if (this.quitedAt && date >= this.quitedAt) return false;
+    //     return true;
+    // }
 
-    /**
-     * 직원의 근속 연수 계산
-     */
-    getYearsOfService(baseDate?: string): number {
-        if (!this.entryAt) return 0;
+    // /**
+    //  * 직원의 근속 연수 계산
+    //  */
+    // getYearsOfService(baseDate?: string): number {
+    //     if (!this.entryAt) return 0;
 
-        const endDate = baseDate || this.quitedAt || DateHelper.today();
-        return DateHelper.calculateWorkPeriod(this.entryAt, endDate) / 12; // 월 단위를 연 단위로 변환
-    }
+    //     const endDate = baseDate || this.quitedAt || DateHelper.today();
+    //     return DateHelper.calculateWorkPeriod(this.entryAt, endDate) / 12; // 월 단위를 연 단위로 변환
+    // }
 
-    /**
-     * 직원의 나이 계산
-     */
-    getAge(): number | null {
-        if (!this.birthDate) return null;
+    // /**
+    //  * 직원의 나이 계산
+    //  */
+    // getAge(): number | null {
+    //     if (!this.birthDate) return null;
 
-        return DateHelper.calculateAge(this.birthDate);
-    }
+    //     return DateHelper.calculateAge(this.birthDate);
+    // }
 
-    /**
-     * 직원 정보 업데이트
-     */
-    updateInfo(updates: Partial<EmployeeInfoEntity>): void {
-        Object.assign(this, updates);
-    }
+    // /**
+    //  * 직원 정보 업데이트
+    //  */
+    // updateInfo(updates: Partial<EmployeeInfoEntity>): void {
+    //     Object.assign(this, updates);
+    // }
 
-    /**
-     * 제외 상태 토글
-     */
-    toggleExcludeFromCalculation(): void {
-        this.isExcludedFromCalculation = !this.isExcludedFromCalculation;
-    }
+    // /**
+    //  * 제외 상태 토글
+    //  */
+    // toggleExcludeFromCalculation(): void {
+    //     this.isExcludedFromCalculation = !this.isExcludedFromCalculation;
+    // }
 }

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { QueryRunner } from 'typeorm';
 import { DepartmentInfoEntity } from '../../domain/department/entities/department-info.entity';
 import { DepartmentDomainService } from '../../domain/department/services/department-domain.service';
 import { AuthorityType } from '../../domain/user-department-authority/enum/authority-type.enum';
@@ -35,5 +36,17 @@ export class UserDepartmentAuthorityContext {
 
     async 사용자의_부서_권한을_조회_부서목록을_반환한다(userId: string): Promise<UserDepartmentAuthorityDto> {
         return await this.userDepartmentAuthorityDomainService.findAllUserDepartmentAuthorities(userId);
+    }
+
+    async 해당_부서의_권한을_가진_데이터를_삭제한다(
+        departments: DepartmentInfoEntity[],
+        queryRunner?: QueryRunner,
+    ): Promise<void> {
+        for (const department of departments) {
+            await this.userDepartmentAuthorityDomainService.removeUserDepartmentAuthorities(
+                department.departmentId,
+                queryRunner,
+            );
+        }
     }
 }

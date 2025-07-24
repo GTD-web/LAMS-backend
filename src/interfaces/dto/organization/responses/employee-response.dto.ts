@@ -28,12 +28,33 @@ export class EmployeeResponseDto {
     @Expose()
     readonly employeeNumber: string;
 
-    @ApiPropertyOptional({
-        description: 'MMS 직원 ID',
-        example: 'mms_emp_001',
+    @ApiProperty({
+        description: '직원 이메일',
+        example: 'exEmployeeEmail',
     })
     @Expose()
-    readonly mmsEmployeeId?: string;
+    readonly email: string;
+
+    @ApiProperty({
+        description: '입사일',
+        example: '2021-01-01',
+    })
+    @Expose()
+    readonly entryAt: string;
+
+    @ApiProperty({
+        description: '생일',
+        example: '1990-01-01',
+    })
+    @Expose()
+    readonly birthDate: string;
+
+    @ApiProperty({
+        description: '퇴사일',
+        example: '2023-12-31',
+    })
+    @Expose()
+    readonly quitedAt: string;
 
     @ApiProperty({
         description: '계산 제외 여부',

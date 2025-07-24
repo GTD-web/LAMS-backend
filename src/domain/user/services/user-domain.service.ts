@@ -71,7 +71,6 @@ export class UserDomainService {
             throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
         }
 
-        this.logger.log(`로그인 성공: ${user.email}`);
         return user;
     }
 
@@ -114,7 +113,6 @@ export class UserDomainService {
         const user = this.userRepository.create(userData);
         const savedUser = await this.userRepository.save(user);
 
-        this.logger.log(`사용자 생성 완료: ${savedUser.email}`);
         return savedUser;
     }
 
