@@ -53,7 +53,7 @@ export class DepartmentDomainService {
     /**
      * 부서 목록 조회
      */
-    async findAllDepartments(queryRunner?: QueryRunner, isExclude?: boolean): Promise<DepartmentInfoEntity[]> {
+    async findAllDepartments(isExclude?: boolean, queryRunner?: QueryRunner): Promise<DepartmentInfoEntity[]> {
         const whereCondition = isExclude !== undefined ? { isExclude } : {};
 
         const repository = queryRunner
@@ -196,10 +196,6 @@ export class DepartmentDomainService {
      * 부서 제외 여부 토글
      */
     async toggleDepartmentExclusion(departmentId: string): Promise<DepartmentInfoEntity> {
-        if (!departmentId || departmentId.trim().length === 0) {
-            throw new BadRequestException('부서 ID가 필요합니다.');
-        }
-
         const department = await this.findDepartmentById(departmentId);
         if (!department) {
             throw new NotFoundException('부서를 찾을 수 없습니다.');

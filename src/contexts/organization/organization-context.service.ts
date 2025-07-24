@@ -63,7 +63,7 @@ export class OrganizationContextService {
         mmsDepartments: MMSDepartmentResponseDto[],
         queryRunner?: QueryRunner,
     ): Promise<DepartmentInfoEntity[]> {
-        const existingDepartments = await this.departmentDomainService.findAllDepartments(queryRunner, undefined);
+        const existingDepartments = await this.departmentDomainService.findAllDepartments(undefined, queryRunner);
 
         // MMS 부서 데이터를 평면화 (domain 서비스 활용)
         const flattenedMMSDepartments = this.departmentDomainService.flattenMMSDepartments(mmsDepartments);

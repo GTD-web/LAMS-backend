@@ -219,28 +219,4 @@ export class DepartmentEmployeeDomainService {
         await this.saveDepartmentEmployee(newDepartment, employee, queryRunner);
         return true;
     }
-
-    /**
-     * 여러 직원의 부서 관계를 배치로 효율적으로 업데이트
-     */
-    async batchUpdateEmployeeDepartmentRelations(
-        updates: Array<{
-            employee: EmployeeInfoEntity;
-            department: DepartmentInfoEntity;
-        }>,
-    ): Promise<{ updated: number; skipped: number }> {
-        let updatedCount = 0;
-        let skippedCount = 0;
-
-        for (const { employee, department } of updates) {
-            const wasUpdated = await this.updateEmployeeDepartmentRelation(employee, department);
-            if (wasUpdated) {
-                updatedCount++;
-            } else {
-                skippedCount++;
-            }
-        }
-
-        return { updated: updatedCount, skipped: skippedCount };
-    }
 }
