@@ -254,7 +254,6 @@ export class WorkStandardContextService {
      */
     async 일간_이벤트_요약에_공휴일이_변경된다(date: string): Promise<void> {
         // TODO: 일간 이벤트 요약 업데이트 로직 구현
-        this.logger.log(`일간 이벤트 요약 업데이트 예정: ${date}`);
     }
 
     /**

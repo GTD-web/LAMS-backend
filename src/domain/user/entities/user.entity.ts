@@ -13,6 +13,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { ApprovalRequestBaseInfoEntity } from '../../../domain/approval/entities/approval-request-info.entity';
+import { UserDepartmentAuthorityEntity } from '../../user-department-authority/entities/user-department-authority.entity';
 import { ApprovalStepInfoEntity } from '../../../domain/approval/entities/approval-step-info.entity';
 import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
 
@@ -67,11 +68,14 @@ export class UserEntity {
     // @Column({ default: false })
     // hasReviewAuthority: boolean;
 
-    @ManyToMany(() => DepartmentInfoEntity, (department) => department.accessAuthorities)
-    accessableDepartments: DepartmentInfoEntity[];
+    // @ManyToMany(() => DepartmentInfoEntity, (department) => department.accessAuthorities)
+    // accessableDepartments: DepartmentInfoEntity[];
 
-    @ManyToMany(() => DepartmentInfoEntity, (department) => department.reviewAuthorities)
-    reviewableDepartments: DepartmentInfoEntity[];
+    // @ManyToMany(() => DepartmentInfoEntity, (department) => department.reviewAuthorities)
+    // reviewableDepartments: DepartmentInfoEntity[];
+
+    @OneToMany(() => UserDepartmentAuthorityEntity, (auth) => auth.user)
+    departmentAuthorities: UserDepartmentAuthorityEntity[];
 
     @OneToMany(() => ApprovalRequestBaseInfoEntity, (request) => request.requester)
     requests: ApprovalRequestBaseInfoEntity[];

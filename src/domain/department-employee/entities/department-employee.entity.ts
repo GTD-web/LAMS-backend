@@ -10,6 +10,6 @@ export class DepartmentEmployeeEntity {
     @ManyToOne(() => DepartmentInfoEntity, (department) => department.employees)
     department: DepartmentInfoEntity;
 
-    @ManyToOne(() => EmployeeInfoEntity, (employee) => employee.department)
+    @ManyToOne(() => EmployeeInfoEntity, (employee) => employee.departments)
     employee: EmployeeInfoEntity;
 }

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
  * 조직 동기화 성공 응답 DTO
@@ -23,9 +23,32 @@ export class SyncOrganizationResponseDto {
     })
     readonly success: boolean;
 
-    constructor(message: string = '조직 동기화가 성공적으로 완료되었습니다.') {
+    @ApiPropertyOptional({
+        description: '동기화 통계 정보',
+        type: 'object',
+        properties: {
+            totalEmployees: { type: 'integer', example: 25 },
+            updatedRelations: { type: 'integer', example: 5 },
+            skippedRelations: { type: 'integer', example: 20 },
+        },
+    })
+    readonly statistics?: {
+        totalEmployees: number;
+        updatedRelations: number;
+        skippedRelations: number;
+    };
+
+    constructor(
+        message: string = '조직 동기화가 성공적으로 완료되었습니다.',
+        statistics?: {
+            totalEmployees: number;
+            updatedRelations: number;
+            skippedRelations: number;
+        },
+    ) {
         this.message = message;
         this.completedAt = new Date().toISOString();
         this.success = true;
+        this.statistics = statistics;
     }
 }

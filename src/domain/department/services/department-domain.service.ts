@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere, FindManyOptions, ILike } from 'typeorm';
+import { Repository, FindOptionsWhere, FindManyOptions, ILike, QueryRunner } from 'typeorm';
 import { DepartmentInfoEntity } from '../entities/department-info.entity';
 import { MMSDepartmentResponseDto } from '../../../interfaces/controllers/organization/dto/mms-department-import.dto';
 import { PaginationMetaDto, PaginatedResponseDto } from '../../../common/dtos/pagination/pagination-response.dto';
@@ -25,10 +25,13 @@ export class DepartmentDomainService {
     /**
      * 부서 ID로 조회
      */
-    async findDepartmentById(departmentId: string): Promise<DepartmentInfoEntity | null> {
-        return await this.departmentRepository.findOne({
+    async findDepartmentById(departmentId: string, queryRunner?: QueryRunner): Promise<DepartmentInfoEntity | null> {
+        const repository = queryRunner
+            ? queryRunner.manager.getRepository(DepartmentInfoEntity)
+            : this.departmentRepository;
+        return await repository.findOne({
             where: { departmentId },
-            relations: ['employees', 'employees.employee', 'accessAuthorities', 'reviewAuthorities'],
+            relations: ['employees', 'employees.employee', 'children'],
         });
     }
 
@@ -50,13 +53,116 @@ export class DepartmentDomainService {
     /**
      * 부서 목록 조회
      */
-    async findAllDepartments(isExclude?: boolean): Promise<DepartmentInfoEntity[]> {
+    async findAllDepartments(queryRunner?: QueryRunner, isExclude?: boolean): Promise<DepartmentInfoEntity[]> {
         const whereCondition = isExclude !== undefined ? { isExclude } : {};
 
-        return await this.departmentRepository.find({
+        const repository = queryRunner
+            ? queryRunner.manager.getRepository(DepartmentInfoEntity)
+            : this.departmentRepository;
+
+        return await repository.find({
             where: whereCondition,
             order: { createdAt: 'DESC' },
-            relations: ['employees', 'employees.employee'],
+        });
+    }
+    async findAllChildrenDepartments(departmentId: string): Promise<DepartmentInfoEntity[]> {
+        // 모든 부서를 한 번에 조회하여 메모리에서 계층구조 구성 (성능 최적화)
+        const allDepartments = await this.departmentRepository.find();
+        this.logger.debug(`전체 부서 수: ${allDepartments.length}`);
+
+        // 시작 부서 찾기
+        const targetDepartment = allDepartments.find((dept) => dept.departmentId === departmentId);
+        if (!targetDepartment) {
+            throw new Error(`Department with ID ${departmentId} not found`);
+        }
+        this.logger.debug(`시작 부서: ${targetDepartment.departmentName} (ID: ${departmentId})`);
+
+        // 부서 ID별 맵 생성
+        const departmentMap = new Map<string, DepartmentInfoEntity>();
+        allDepartments.forEach((dept) => departmentMap.set(dept.departmentId, dept));
+
+        // 부서 계층구조 로깅
+        allDepartments.forEach((dept) => {
+            this.logger.debug(
+                `부서: ${dept.departmentName} (ID: ${dept.departmentId}, Parent: ${dept.parentDepartmentId})`,
+            );
+        });
+
+        // 재귀적으로 모든 하위 부서 수집
+        const allChildrenDepartments: DepartmentInfoEntity[] = [];
+        this.collectAllChildrenFromMemory(departmentId, departmentMap, allChildrenDepartments);
+
+        this.logger.debug(`수집된 하위 부서 수: ${allChildrenDepartments.length}`);
+        allChildrenDepartments.forEach((dept) => {
+            this.logger.debug(`수집된 부서: ${dept.departmentName} (ID: ${dept.departmentId})`);
+        });
+
+        return allChildrenDepartments;
+    }
+
+    /**
+     * 메모리에서 재귀적으로 모든 하위 부서를 수집하는 헬퍼 함수 (성능 최적화)
+     */
+    private collectAllChildrenFromMemory(
+        parentDepartmentId: string,
+        departmentMap: Map<string, DepartmentInfoEntity>,
+        collectedDepartments: DepartmentInfoEntity[],
+    ): void {
+        // 현재 부서 추가
+        const currentDepartment = departmentMap.get(parentDepartmentId);
+        if (currentDepartment) {
+            // 이미 수집된 부서인지 확인 (중복 방지)
+            const alreadyExists = collectedDepartments.some(
+                (dept) => dept.departmentId === currentDepartment.departmentId,
+            );
+
+            if (!alreadyExists) {
+                collectedDepartments.push(currentDepartment);
+            }
+        }
+
+        // 모든 부서에서 현재 부서를 부모로 하는 하위 부서들 찾기
+        for (const [departmentId, department] of departmentMap) {
+            if (department.parentDepartmentId === parentDepartmentId) {
+                // 재귀적으로 하위 부서들 수집
+                this.collectAllChildrenFromMemory(departmentId, departmentMap, collectedDepartments);
+            }
+        }
+    }
+
+    /**
+     * 범용 계층구조 평면화 함수
+     */
+    private flattenHierarchy<T>(items: T[], getChildren: (item: T) => T[] | undefined): T[] {
+        const flattened: T[] = [];
+
+        const flatten = (item: T) => {
+            flattened.push(item);
+            const children = getChildren(item);
+            if (children && children.length > 0) {
+                children.forEach((child) => flatten(child));
+            }
+        };
+
+        items.forEach((item) => flatten(item));
+        return flattened;
+    }
+
+    /**
+     * MMS 부서 데이터를 평면화하는 함수 (재사용 가능한 유틸리티)
+     */
+    flattenMMSDepartments(departments: MMSDepartmentResponseDto[]): MMSDepartmentResponseDto[] {
+        return this.flattenHierarchy(departments, (dept) => dept.child_departments);
+    }
+
+    /**
+     * 평면화된 MMS 부서 데이터를 부모 부서부터 생성하기 위해 정렬
+     */
+    sortDepartmentsByHierarchy(departments: MMSDepartmentResponseDto[]): MMSDepartmentResponseDto[] {
+        return departments.sort((a, b) => {
+            if (!a.parent_department_id && b.parent_department_id) return -1;
+            if (a.parent_department_id && !b.parent_department_id) return 1;
+            return 0;
         });
     }
 
@@ -109,8 +215,14 @@ export class DepartmentDomainService {
     /**
      * MMS 부서 ID로 조회
      */
-    async findDepartmentByMMSDepartmentId(mmsDepartmentId: string): Promise<DepartmentInfoEntity | null> {
-        return await this.departmentRepository.findOne({
+    async findDepartmentByMMSDepartmentId(
+        mmsDepartmentId: string,
+        queryRunner?: QueryRunner,
+    ): Promise<DepartmentInfoEntity | null> {
+        const repository = queryRunner
+            ? queryRunner.manager.getRepository(DepartmentInfoEntity)
+            : this.departmentRepository;
+        return await repository.findOne({
             where: { mmsDepartmentId },
         });
     }
@@ -119,55 +231,70 @@ export class DepartmentDomainService {
      * MMS 부서 정보로 부서 생성 또는 수정
      */
     async createOrUpdateDepartment(
-        departmentData: MMSDepartmentResponseDto,
+        mmsDepartments: MMSDepartmentResponseDto,
         parentDepartment?: DepartmentInfoEntity,
+        queryRunner?: QueryRunner,
     ): Promise<DepartmentInfoEntity> {
-        let department = await this.findDepartmentByMMSDepartmentId(departmentData.id);
+        // _id와 id 모두 확인
+        const mmsId = mmsDepartments._id || mmsDepartments.id;
+        let department = await this.findDepartmentByMMSDepartmentId(mmsId, queryRunner);
+
+        const repository = queryRunner
+            ? queryRunner.manager.getRepository(DepartmentInfoEntity)
+            : this.departmentRepository;
 
         if (department) {
             // 기존 부서 업데이트
-            department.departmentName = departmentData.department_name;
-            department.departmentCode = departmentData.department_code;
+            department.departmentName = mmsDepartments.department_name;
+            department.departmentCode = mmsDepartments.department_code;
         } else {
-            // 새 부서 생성
-            department = this.departmentRepository.create({
-                departmentId: departmentData.id,
-                departmentName: departmentData.department_name,
-                departmentCode: departmentData.department_code,
+            // 새 부서 생성 (departmentId는 UUID로 자동 생성)
+            department = repository.create({
+                departmentName: mmsDepartments.department_name,
+                departmentCode: mmsDepartments.department_code,
+                mmsDepartmentId: mmsId,
             });
         }
 
+        // 부모 부서 설정
         if (parentDepartment) {
             department.parent = parentDepartment;
-        }
-
-        // 하위 부서가 있으면 재귀적으로 처리
-        if (departmentData.child_departments && departmentData.child_departments.length > 0) {
-            for (const childDepartment of departmentData.child_departments) {
-                await this.createOrUpdateDepartment(childDepartment, department);
+        } else if (mmsDepartments.parent_department_id) {
+            // 부모 부서 ID가 있으면 찾아서 설정
+            const parentDept = await this.findDepartmentByMMSDepartmentId(
+                mmsDepartments.parent_department_id,
+                queryRunner,
+            );
+            if (parentDept) {
+                department.parent = parentDept;
             }
         }
 
-        const savedDepartment = await this.departmentRepository.save(department);
-        this.logger.log(`MMS 부서 생성: ${savedDepartment.departmentName}`);
+        // 평면화된 데이터를 사용하므로 재귀 처리 제거
+        // 상위-하위 관계는 별도로 처리해야 함
+
+        const savedDepartment = await repository.save(department);
         return savedDepartment;
     }
 
     /**
      * 부서 삭제
      */
-    async removeDepartment(departmentId: string): Promise<void> {
-        if (!departmentId || departmentId.trim().length === 0) {
+    async removeDepartment(departmentId: string, queryRunner?: QueryRunner): Promise<void> {
+        if (!departmentId) {
             throw new BadRequestException('부서 ID가 필요합니다.');
         }
 
-        const department = await this.findDepartmentById(departmentId);
+        const department = await this.findDepartmentById(departmentId, queryRunner);
+
         if (!department) {
             throw new NotFoundException('부서를 찾을 수 없습니다.');
         }
 
-        await this.departmentRepository.remove(department);
-        this.logger.log(`부서 삭제 완료: ${department.departmentName}`);
+        const repository = queryRunner
+            ? queryRunner.manager.getRepository(DepartmentInfoEntity)
+            : this.departmentRepository;
+        await repository.remove(department);
     }
 
     /**

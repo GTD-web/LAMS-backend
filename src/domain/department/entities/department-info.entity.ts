@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { DepartmentEmployeeEntity } from '../../../domain/department-employee/entities/department-employee.entity';
 import { UserEntity } from '../../../domain/user/entities/user.entity';
+import { UserDepartmentAuthorityEntity } from 'src/domain/user-department-authority/entities/user-department-authority.entity';
 
 @Entity()
 export class DepartmentInfoEntity {
@@ -27,23 +28,26 @@ export class DepartmentInfoEntity {
     @Column({ nullable: true })
     mmsDepartmentId: string;
 
-    @ManyToMany(() => UserEntity, (user) => user.accessableDepartments, {
-        cascade: true,
-        eager: true,
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
-    })
-    @JoinTable({ name: 'accessAuthorities' })
-    accessAuthorities: UserEntity[];
+    // @ManyToMany(() => UserEntity, (user) => user.accessableDepartments, {
+    //     cascade: true,
+    //     eager: true,
+    //     onDelete: 'CASCADE',
+    //     onUpdate: 'CASCADE',
+    // })
+    // @JoinTable({ name: 'accessAuthorities' })
+    // accessAuthorities: UserEntity[];
 
-    @ManyToMany(() => UserEntity, (user) => user.reviewableDepartments, {
-        cascade: true,
-        eager: true,
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
-    })
-    @JoinTable({ name: 'reviewAuthorities' })
-    reviewAuthorities: UserEntity[];
+    // @ManyToMany(() => UserEntity, (user) => user.reviewableDepartments, {
+    //     cascade: true,
+    //     eager: true,
+    //     onDelete: 'CASCADE',
+    //     onUpdate: 'CASCADE',
+    // })
+    // @JoinTable({ name: 'reviewAuthorities' })
+    // reviewAuthorities: UserEntity[];
+
+    @OneToMany(() => UserDepartmentAuthorityEntity, (auth) => auth.department)
+    userAuthorities: UserDepartmentAuthorityEntity[];
 
     @Column({ default: false })
     isExclude: boolean;

@@ -3,8 +3,6 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    JoinColumn,
-    ManyToOne,
     OneToMany,
     OneToOne,
     PrimaryGeneratedColumn,
@@ -13,7 +11,6 @@ import {
 import { DataSnapshotChildInfoEntity } from './data-snapshot-child.entity';
 import { DataSnapshotApprovalRequestInfoEntity } from './data-snapshot-approval-request-info.entity';
 import { DateHelper } from '../../../common/utils/helpers/date.helper';
-import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
 
 export enum SnapshotType {
     DAILY = 'DAILY',
@@ -47,9 +44,9 @@ export class DataSnapshotInfoEntity {
     })
     dataSnapshotChildInfoList: DataSnapshotChildInfoEntity[];
     /* TODO: 추후 제거 예정 - 2025-01-07*/
-    @ManyToOne(() => DepartmentInfoEntity, { eager: true, cascade: true })
-    @JoinColumn({ name: 'departmentId' })
-    department: DepartmentInfoEntity;
+    // @ManyToOne(() => DepartmentInfoEntity, { eager: true, cascade: true })
+    // @JoinColumn({ name: 'departmentId' })
+    // department: DepartmentInfoEntity;
 
     @OneToOne(() => DataSnapshotApprovalRequestInfoEntity, (approvalRequest) => approvalRequest.dataSnapshot)
     approvalRequest: DataSnapshotApprovalRequestInfoEntity;
@@ -60,11 +57,6 @@ export class DataSnapshotInfoEntity {
     @UpdateDateColumn()
     updatedAt: string;
 
-    updateSnapshot(dto: any) {
-        this.snapshotName = dto.snapshotName;
-        this.description = dto.snapshotDescription;
-    }
-
     @AfterLoad()
     afterLoadFunction() {
         this.createdAt = DateHelper.toKoreanDateTime(this.createdAt);
@@ -72,33 +64,5 @@ export class DataSnapshotInfoEntity {
         if (this.dataSnapshotChildInfoList) {
             this.dataSnapshotChildInfoList.sort((a, b) => a.employeeName.localeCompare(b.employeeName, 'ko'));
         }
-    }
-
-    static createSnapshot({
-        snapshotName,
-        description,
-        snapshotType,
-        yyyy,
-        mm,
-        department,
-        dataSnapshotChildInfoList,
-    }: {
-        snapshotName: string;
-        description: string;
-        snapshotType: SnapshotType;
-        yyyy: string;
-        mm: string;
-        department: DepartmentInfoEntity;
-        dataSnapshotChildInfoList: DataSnapshotChildInfoEntity[];
-    }) {
-        const snapshot = new DataSnapshotInfoEntity();
-        snapshot.snapshotName = snapshotName;
-        snapshot.description = description;
-        snapshot.snapshotType = snapshotType;
-        snapshot.yyyy = yyyy;
-        snapshot.mm = mm;
-        snapshot.department = department;
-        snapshot.dataSnapshotChildInfoList = dataSnapshotChildInfoList;
-        return snapshot;
     }
 }

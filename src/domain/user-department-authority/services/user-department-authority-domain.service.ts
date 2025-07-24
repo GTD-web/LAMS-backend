@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, QueryRunner } from 'typeorm';
 import { UserDepartmentAuthorityEntity } from '../entities/user-department-authority.entity';
 import { AuthorityType } from '../enum/authority-type.enum';
 import { UserEntity } from '../../../domain/user/entities/user.entity';
@@ -165,5 +165,12 @@ export class UserDepartmentAuthorityDomainService {
         this.logger.debug(`부서 검토 권한자 존재 여부: ${hasReviewers ? '있음' : '없음'} (${count}명)`);
 
         return hasReviewers;
+    }
+
+    async removeUserDepartmentAuthorities(departmentId: string, queryRunner?: QueryRunner): Promise<void> {
+        const repository = queryRunner
+            ? queryRunner.manager.getRepository(UserDepartmentAuthorityEntity)
+            : this.userDepartmentAuthorityRepository;
+        await repository.delete({ departmentId });
     }
 }
