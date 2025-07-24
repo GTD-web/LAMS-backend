@@ -1,35 +1,13 @@
-import * as dayjs from 'dayjs';
-import * as utc from 'dayjs/plugin/utc';
-import * as timezone from 'dayjs/plugin/timezone';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
-let isPluginsLoaded = false;
+// 플러그인 즉시 로드
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
-function loadPlugins() {
-    if (isPluginsLoaded) return;
-
-    try {
-        // DayJS 인스턴스가 존재하는지 확인
-        if (dayjs && typeof dayjs.extend === 'function') {
-            dayjs.extend(utc);
-            dayjs.extend(timezone);
-
-            // 기본 타임존 설정 (tz가 존재하는 경우에만)
-            if (dayjs.tz && typeof dayjs.tz.setDefault === 'function') {
-                dayjs.tz.setDefault('Asia/Seoul');
-            }
-
-            isPluginsLoaded = true;
-        } else {
-            console.warn('DayJS instance or extend method not available');
-        }
-    } catch (error) {
-        console.warn('Failed to load dayjs plugins:', error);
-        // 플러그인 로딩 실패 시에도 계속 진행
-    }
-}
-
-// 플러그인 로드 시도
-loadPlugins();
+// 기본 타임존 설정
+dayjs.tz.setDefault('Asia/Seoul');
 
 /**
  * 날짜 포맷 헬퍼 클래스
