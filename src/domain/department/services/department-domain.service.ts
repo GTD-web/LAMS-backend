@@ -65,106 +65,6 @@ export class DepartmentDomainService {
             order: { createdAt: 'DESC' },
         });
     }
-    async findAllChildrenDepartments(departmentId: string): Promise<DepartmentInfoEntity[]> {
-        // 모든 부서를 한 번에 조회하여 메모리에서 계층구조 구성 (성능 최적화)
-        const allDepartments = await this.departmentRepository.find();
-        this.logger.debug(`전체 부서 수: ${allDepartments.length}`);
-
-        // 시작 부서 찾기
-        const targetDepartment = allDepartments.find((dept) => dept.departmentId === departmentId);
-        if (!targetDepartment) {
-            throw new Error(`Department with ID ${departmentId} not found`);
-        }
-        this.logger.debug(`시작 부서: ${targetDepartment.departmentName} (ID: ${departmentId})`);
-
-        // 부서 ID별 맵 생성
-        const departmentMap = new Map<string, DepartmentInfoEntity>();
-        allDepartments.forEach((dept) => departmentMap.set(dept.departmentId, dept));
-
-        // 부서 계층구조 로깅
-        allDepartments.forEach((dept) => {
-            this.logger.debug(
-                `부서: ${dept.departmentName} (ID: ${dept.departmentId}, Parent: ${dept.parentDepartmentId})`,
-            );
-        });
-
-        // 재귀적으로 모든 하위 부서 수집
-        const allChildrenDepartments: DepartmentInfoEntity[] = [];
-        this.collectAllChildrenFromMemory(departmentId, departmentMap, allChildrenDepartments);
-
-        this.logger.debug(`수집된 하위 부서 수: ${allChildrenDepartments.length}`);
-        allChildrenDepartments.forEach((dept) => {
-            this.logger.debug(`수집된 부서: ${dept.departmentName} (ID: ${dept.departmentId})`);
-        });
-
-        return allChildrenDepartments;
-    }
-
-    /**
-     * 메모리에서 재귀적으로 모든 하위 부서를 수집하는 헬퍼 함수 (성능 최적화)
-     */
-    private collectAllChildrenFromMemory(
-        parentDepartmentId: string,
-        departmentMap: Map<string, DepartmentInfoEntity>,
-        collectedDepartments: DepartmentInfoEntity[],
-    ): void {
-        // 현재 부서 추가
-        const currentDepartment = departmentMap.get(parentDepartmentId);
-        if (currentDepartment) {
-            // 이미 수집된 부서인지 확인 (중복 방지)
-            const alreadyExists = collectedDepartments.some(
-                (dept) => dept.departmentId === currentDepartment.departmentId,
-            );
-
-            if (!alreadyExists) {
-                collectedDepartments.push(currentDepartment);
-            }
-        }
-
-        // 모든 부서에서 현재 부서를 부모로 하는 하위 부서들 찾기
-        for (const [departmentId, department] of departmentMap) {
-            if (department.parentDepartmentId === parentDepartmentId) {
-                // 재귀적으로 하위 부서들 수집
-                this.collectAllChildrenFromMemory(departmentId, departmentMap, collectedDepartments);
-            }
-        }
-    }
-
-    /**
-     * 범용 계층구조 평면화 함수
-     */
-    private flattenHierarchy<T>(items: T[], getChildren: (item: T) => T[] | undefined): T[] {
-        const flattened: T[] = [];
-
-        const flatten = (item: T) => {
-            flattened.push(item);
-            const children = getChildren(item);
-            if (children && children.length > 0) {
-                children.forEach((child) => flatten(child));
-            }
-        };
-
-        items.forEach((item) => flatten(item));
-        return flattened;
-    }
-
-    /**
-     * MMS 부서 데이터를 평면화하는 함수 (재사용 가능한 유틸리티)
-     */
-    flattenMMSDepartments(departments: MMSDepartmentResponseDto[]): MMSDepartmentResponseDto[] {
-        return this.flattenHierarchy(departments, (dept) => dept.child_departments);
-    }
-
-    /**
-     * 평면화된 MMS 부서 데이터를 부모 부서부터 생성하기 위해 정렬
-     */
-    sortDepartmentsByHierarchy(departments: MMSDepartmentResponseDto[]): MMSDepartmentResponseDto[] {
-        return departments.sort((a, b) => {
-            if (!a.parent_department_id && b.parent_department_id) return -1;
-            if (a.parent_department_id && !b.parent_department_id) return 1;
-            return 0;
-        });
-    }
 
     /**
      * 페이지네이션된 부서 목록 조회
@@ -206,6 +106,21 @@ export class DepartmentDomainService {
 
         this.logger.log(`부서 제외 여부 변경: ${updatedDepartment.departmentName} -> ${updatedDepartment.isExclude}`);
         return updatedDepartment;
+    }
+
+    /**
+     * 부서의 평면화된 하위 부서 ID를 JSON 필드에 업데이트
+     */
+    async updateDepartmentFlattenedIds(
+        departmentId: string,
+        flattenedIds: { departmentIds: string[]; mmsDepartmentIds: string[] },
+        queryRunner?: QueryRunner,
+    ): Promise<void> {
+        const repository = queryRunner
+            ? queryRunner.manager.getRepository(DepartmentInfoEntity)
+            : this.departmentRepository;
+
+        await repository.update({ departmentId }, { flattenedChildrenIds: flattenedIds });
     }
 
     /**

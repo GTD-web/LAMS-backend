@@ -3,15 +3,12 @@ import {
     CreateDateColumn,
     Entity,
     JoinColumn,
-    JoinTable,
-    ManyToMany,
     ManyToOne,
     OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
 import { DepartmentEmployeeEntity } from '../../../domain/department-employee/entities/department-employee.entity';
-import { UserEntity } from '../../../domain/user/entities/user.entity';
 import { UserDepartmentAuthorityEntity } from 'src/domain/user-department-authority/entities/user-department-authority.entity';
 
 @Entity()
@@ -27,6 +24,12 @@ export class DepartmentInfoEntity {
 
     @Column({ nullable: true })
     mmsDepartmentId: string;
+
+    @Column({ type: 'jsonb', nullable: true })
+    flattenedChildrenIds: {
+        departmentIds: string[];
+        mmsDepartmentIds: string[];
+    };
 
     // @ManyToMany(() => UserEntity, (user) => user.accessableDepartments, {
     //     cascade: true,
