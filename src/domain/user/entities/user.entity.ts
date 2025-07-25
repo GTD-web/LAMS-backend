@@ -13,11 +13,6 @@ import { ApprovalRequestBaseInfoEntity } from '../../../domain/approval/entities
 // UserDepartmentAuthorityEntity import 제거 (관계 제거)
 import { ApprovalStepInfoEntity } from '../../../domain/approval/entities/approval-step-info.entity';
 
-export enum LamsUserRole {
-    ATTENDANCE_ADMIN = 'ATTENDANCE_ADMIN',
-    ATTENDANCE_USER = 'ATTENDANCE_USER',
-}
-
 @Entity()
 @TableInheritance({ column: { type: 'varchar', name: 'type' } })
 export class UserEntity {

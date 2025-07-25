@@ -10,12 +10,12 @@ export class UserSeedService {
 
     constructor(
         @InjectRepository(UserEntity)
-        private readonly lamsUserRepository: Repository<UserEntity>,
+        private readonly userRepository: Repository<UserEntity>,
     ) {}
 
     async seedAdminUser(): Promise<void> {
         try {
-            const existingAdmin = await this.lamsUserRepository.findOne({
+            const existingAdmin = await this.userRepository.findOne({
                 where: { username: 'admin' },
             });
 
@@ -28,15 +28,10 @@ export class UserSeedService {
             adminUser.username = 'admin';
             adminUser.password = 'fnalfmdjemals';
             adminUser.email = 'admin@lams.space';
-            adminUser.roles = [
-                UserRole.SYSTEM_ADMIN,
-                UserRole.ATTENDANCE_ADMIN,
-                UserRole.PROJECT_ADMIN,
-                UserRole.LRIM_ADMIN,
-            ];
+            adminUser.roles = [UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN, UserRole.PROJECT_ADMIN];
             adminUser.isActive = true;
 
-            await this.lamsUserRepository.save(adminUser);
+            await this.userRepository.save(adminUser);
 
             this.logger.log('Admin user seeded successfully');
             this.logger.log(`Username: admin`);

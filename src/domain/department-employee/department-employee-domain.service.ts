@@ -82,7 +82,6 @@ export class DepartmentEmployeeDomainService {
         const departmentEmployees = await this.departmentEmployeeRepository.find({
             where: { departmentId: In(uniqueDepartmentIds) },
         });
-
         // 중복 직원 ID 제거
         const uniqueEmployeeIds = [...new Set(departmentEmployees.map((de) => de.employeeId))];
         return uniqueEmployeeIds;

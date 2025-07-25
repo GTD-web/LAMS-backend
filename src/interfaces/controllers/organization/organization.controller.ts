@@ -20,11 +20,13 @@ import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../../domain/user/enum/user.enum';
 import { PaginationQueryDto } from '../../../common/dtos/pagination/pagination-query.dto';
 import { PaginatedResponseDto } from '../../../common/dtos/pagination/pagination-response.dto';
-import { SyncOrganizationResponseDto } from '../../dto/organization/responses/sync-organization-response.dto';
-import { DepartmentResponseDto } from '../../dto/organization/responses/department-response.dto';
-import { EmployeeResponseDto } from '../../dto/organization/responses/employee-response.dto';
 import { ErrorResponseDto } from '../../../common/dtos/common/error-response.dto';
-import { EmployeeFilterQueryDto } from '../../dto/organization/requests/employee-filter-query.dto';
+import { EmployeeFilterQueryDto } from './dto/employee-filter-query.dto';
+import { DepartmentResponseDto } from '../../../business/organization/dto/department-response.dto';
+import { EmployeeResponseDto } from '../../../business/organization/dto/employee-response.dto';
+import { SyncOrganizationResponseDto } from '../../../business/organization/dto/sync-organization-response.dto';
+import { DepartmentWithEmployeesResponseDto } from '../../../contexts/organization/dto/department-with-employees-response.dto';
+import { EmployeeWithDepartmentResponseDto } from '../../../contexts/organization/dto/employee-with-department-response.dto';
 
 /**
  * 조직관리 컨트롤러

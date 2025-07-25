@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { HolidayInfoEntity } from '../../../../domain/holiday/entities/holiday-info.entity';
+import { HolidayInfoEntity } from '../../../domain/holiday/entities/holiday-info.entity';
 
 /**
  * 공휴일 응답 DTO
