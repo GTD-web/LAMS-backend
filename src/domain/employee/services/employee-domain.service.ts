@@ -1,9 +1,12 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, IsNull, ILike, QueryRunner, In, Not } from 'typeorm';
 import { EmployeeInfoEntity } from '../entities/employee-info.entity';
 import { MMSEmployeeData } from '../interfaces/mms-employee-data.interface';
 import { EmployeeFilterQueryDto } from '../../../interfaces/dto/organization/requests/employee-filter-query.dto';
+import { PaginatedResponseDto } from 'src/common/dtos/pagination/pagination-response.dto';
+import { plainToInstance } from 'class-transformer';
+import { EmployeeResponseDto } from 'src/interfaces/dto/organization/responses/employee-response.dto';
 
 /**
  * 직원 도메인 서비스
@@ -218,15 +221,57 @@ export class EmployeeDomainService {
         }
     }
 
+    // /**
+    //  * 직원 ID 목록으로 직원 정보 조회 및 필터링
+    //  */
+    // async findEmployeesByIdsWithFiltering(
+    //     employeeIds: string[],
+    //     filterQuery?: EmployeeFilterQueryDto,
+    // ): Promise<EmployeeInfoEntity[]> {
+    //     if (!employeeIds || employeeIds.length === 0) {
+    //         return [];
+    //     }
+
+    //     // 기본 조건: 직원 ID 목록
+    //     let whereConditions: any = {
+    //         employeeId: In(employeeIds),
+    //     };
+
+    //     // 필터링 옵션 적용
+    //     if (filterQuery?.status === 'resigned') {
+    //         whereConditions.quitedAt = Not(IsNull());
+    //     } else if (filterQuery?.status === 'active') {
+    //         whereConditions.quitedAt = IsNull();
+    //     }
+
+    //     if (filterQuery?.excludeFromCalculation) {
+    //         whereConditions.isExcludedFromCalculation = true;
+    //     }
+
+    //     const employees = await this.employeeRepository.find({
+    //         where: whereConditions,
+    //     });
+
+    //     // 중복 제거 (혹시 모를 중복 데이터 방지)
+    //     const uniqueEmployees = employees.filter(
+    //         (employee, index, self) => index === self.findIndex((e) => e.employeeId === employee.employeeId),
+    //     );
+
+    //     return uniqueEmployees;
+    // }
+
     /**
-     * 직원 ID 목록으로 직원 정보 조회 및 필터링
+     * 직원 ID 목록으로 페이지네이션된 직원 정보 조회 및 필터링 (Domain에서 페이지네이션 처리)
      */
-    async findEmployeesByIdsWithFiltering(
+    async findPaginatedEmployeesByIdsWithFiltering(
         employeeIds: string[],
+        paginationQuery: { page?: number; limit?: number },
         filterQuery?: EmployeeFilterQueryDto,
-    ): Promise<EmployeeInfoEntity[]> {
+    ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
+        const { page = 1, limit = 10 } = paginationQuery;
+
         if (!employeeIds || employeeIds.length === 0) {
-            return [];
+            return PaginatedResponseDto.create([], page, limit, 0);
         }
 
         // 기본 조건: 직원 ID 목록
@@ -247,13 +292,12 @@ export class EmployeeDomainService {
 
         const employees = await this.employeeRepository.find({
             where: whereConditions,
+            skip: (page - 1) * limit,
+            take: limit,
         });
+        const employeeDtos = employees.map((employee) => plainToInstance(EmployeeResponseDto, employee));
+        const totalCount = await this.employeeRepository.count({ where: whereConditions });
 
-        // 중복 제거 (혹시 모를 중복 데이터 방지)
-        const uniqueEmployees = employees.filter(
-            (employee, index, self) => index === self.findIndex((e) => e.employeeId === employee.employeeId),
-        );
-
-        return uniqueEmployees;
+        return PaginatedResponseDto.create(employeeDtos, page, limit, totalCount);
     }
 }

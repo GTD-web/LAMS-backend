@@ -276,7 +276,6 @@ export class OrganizationContextService {
         mmsDepartmentIds: string[];
     } | null> {
         const department = await this.departmentDomainService.findDepartmentById(departmentId);
-        console.log('department:', department);
         if (!department || !department.flattenedChildrenIds) {
             this.logger.warn(`부서 ${departmentId}의 평면화된 하위 부서 정보가 없습니다. 실시간 조회로 대체합니다.`);
 
@@ -405,43 +404,67 @@ export class OrganizationContextService {
         }
     }
 
-    /**
-     * 부서에 해당하는 직원 페이지네이션된 목록을 조회한다 (Context에서 Domain 조합)
-     */
-    async 해당부서들의_직원을_페이지네이션된_목록으로_조회한다(
-        departments: DepartmentInfoEntity[],
+    async 해당부서의_직원을_페이지네이션된_목록으로_조회한다(
+        departmentId: string,
         paginationQuery: PaginationQueryDto,
         employeeFilterQuery?: EmployeeFilterQueryDto,
     ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
-        const { page = 1, limit = 10 } = paginationQuery;
-        const departmentIds = departments.map((department) => department.departmentId);
+        const flattenedIds = await this.부서의_평면화된_하위부서_ID목록을_JSON으로_조회한다(departmentId);
 
-        // 1. Department-Employee Domain에서 직원 ID 목록 조회
-        const employeeIds = await this.departmentEmployeeDomainService.findEmployeeIdsByDepartmentIds(departmentIds);
-
-        if (employeeIds.length === 0) {
-            const meta = new PaginationMetaDto(page, limit, 0);
-            return new PaginatedResponseDto([], meta);
+        if (!flattenedIds) {
+            throw new Error(`부서 ${departmentId}의 하위 부서 정보를 찾을 수 없습니다.`);
         }
 
-        // 2. Employee Domain에서 직원 정보 조회 및 필터링
-        const employees = await this.employeeDomainService.findEmployeesByIdsWithFiltering(
+        const employeeIds = await this.departmentEmployeeDomainService.findEmployeeIdsByDepartmentIds(
+            flattenedIds.departmentIds,
+        );
+
+        const employees = await this.employeeDomainService.findPaginatedEmployeesByIdsWithFiltering(
             employeeIds,
+            paginationQuery,
             employeeFilterQuery,
         );
 
-        // 3. Context에서 페이지네이션 처리
-        const totalCount = employees.length;
-        const startIndex = (page - 1) * limit;
-        const endIndex = startIndex + limit;
-
-        const paginatedEmployees = employees
-            .slice(startIndex, endIndex)
-            .map((employee) => plainToInstance(EmployeeResponseDto, employee));
-
-        const meta = new PaginationMetaDto(page, limit, totalCount);
-        return new PaginatedResponseDto(paginatedEmployees, meta);
+        return employees;
     }
+
+    /**
+     * 부서에 해당하는 직원 페이지네이션된 목록을 조회한다 (Context에서 Domain 조합)
+     */
+    // async 해당부서들의_직원을_페이지네이션된_목록으로_조회한다(
+    //     departments: DepartmentInfoEntity[],
+    //     paginationQuery: PaginationQueryDto,
+    //     employeeFilterQuery?: EmployeeFilterQueryDto,
+    // ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
+    //     const { page = 1, limit = 10 } = paginationQuery;
+    //     const departmentIds = departments.map((department) => department.departmentId);
+
+    //     // 1. Department-Employee Domain에서 직원 ID 목록 조회
+    //     const employeeIds = await this.departmentEmployeeDomainService.findEmployeeIdsByDepartmentIds(departmentIds);
+
+    //     if (employeeIds.length === 0) {
+    //         const meta = new PaginationMetaDto(page, limit, 0);
+    //         return new PaginatedResponseDto([], meta);
+    //     }
+
+    //     // 2. Employee Domain에서 직원 정보 조회 및 필터링
+    //     const employees = await this.employeeDomainService.findEmployeesByIdsWithFiltering(
+    //         employeeIds,
+    //         employeeFilterQuery,
+    //     );
+
+    //     // 3. Context에서 페이지네이션 처리
+    //     const totalCount = employees.length;
+    //     const startIndex = (page - 1) * limit;
+    //     const endIndex = startIndex + limit;
+
+    //     const paginatedEmployees = employees
+    //         .slice(startIndex, endIndex)
+    //         .map((employee) => plainToInstance(EmployeeResponseDto, employee));
+
+    //     const meta = new PaginationMetaDto(page, limit, totalCount);
+    //     return new PaginatedResponseDto(paginatedEmployees, meta);
+    // }
 
     /**
      * 직원들의 연차 정보를 갱신해서 보여준다

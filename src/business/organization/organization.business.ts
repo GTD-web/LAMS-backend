@@ -155,23 +155,9 @@ export class OrganizationBusinessService {
         paginationQuery: PaginationQueryDto,
         employeeFilterQuery?: EmployeeFilterQueryDto,
     ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
-        // 1. 부서의 평면화된 하위 부서 ID 목록을 JSON으로 조회한다 (성능 최적화)
-        const flattenedIds = await this.organizationContextService.부서의_평면화된_하위부서_ID목록을_JSON으로_조회한다(
+        // 1. 해당 부서들의 직원을 페이지네이션된 목록으로 조회한다
+        const result = await this.organizationContextService.해당부서의_직원을_페이지네이션된_목록으로_조회한다(
             departmentId,
-        );
-
-        if (!flattenedIds) {
-            throw new Error(`부서 ${departmentId}의 하위 부서 정보를 찾을 수 없습니다.`);
-        }
-
-        // JSON에서 조회한 부서 ID들로 부서 엔티티들을 조회
-        const departments = await this.organizationContextService.부서_ID들로_부서_목록을_조회한다(
-            flattenedIds.departmentIds,
-        );
-
-        // 2. 해당 부서들의 직원을 페이지네이션된 목록으로 조회한다
-        const result = await this.organizationContextService.해당부서들의_직원을_페이지네이션된_목록으로_조회한다(
-            departments,
             paginationQuery,
             employeeFilterQuery,
         );
