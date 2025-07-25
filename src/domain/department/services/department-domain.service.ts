@@ -51,6 +51,21 @@ export class DepartmentDomainService {
     }
 
     /**
+     * 부서 ID 목록으로 부서 정보 조회
+     */
+    async findDepartmentsByIds(departmentIds: string[], queryRunner?: QueryRunner): Promise<DepartmentInfoEntity[]> {
+        if (!departmentIds || departmentIds.length === 0) {
+            return [];
+        }
+
+        const repository = queryRunner
+            ? queryRunner.manager.getRepository(DepartmentInfoEntity)
+            : this.departmentRepository;
+
+        return await repository.findByIds(departmentIds);
+    }
+
+    /**
      * 부서 목록 조회
      */
     async findAllDepartments(queryRunner?: QueryRunner, isExclude?: boolean): Promise<DepartmentInfoEntity[]> {

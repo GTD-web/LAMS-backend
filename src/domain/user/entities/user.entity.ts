@@ -13,7 +13,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { ApprovalRequestBaseInfoEntity } from '../../../domain/approval/entities/approval-request-info.entity';
-import { UserDepartmentAuthorityEntity } from '../../user-department-authority/entities/user-department-authority.entity';
+// UserDepartmentAuthorityEntity import 제거 (관계 제거)
 import { ApprovalStepInfoEntity } from '../../../domain/approval/entities/approval-step-info.entity';
 import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
 
@@ -74,8 +74,7 @@ export class UserEntity {
     // @ManyToMany(() => DepartmentInfoEntity, (department) => department.reviewAuthorities)
     // reviewableDepartments: DepartmentInfoEntity[];
 
-    @OneToMany(() => UserDepartmentAuthorityEntity, (auth) => auth.user)
-    departmentAuthorities: UserDepartmentAuthorityEntity[];
+    // UserDepartmentAuthorityEntity와의 관계 제거 (단순 ID 필드 사용)
 
     @OneToMany(() => ApprovalRequestBaseInfoEntity, (request) => request.requester)
     requests: ApprovalRequestBaseInfoEntity[];

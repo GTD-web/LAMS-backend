@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { DepartmentEmployeeEntity } from '../../../domain/department-employee/entities/department-employee.entity';
 import { UserEntity } from '../../../domain/user/entities/user.entity';
-import { UserDepartmentAuthorityEntity } from 'src/domain/user-department-authority/entities/user-department-authority.entity';
+// UserDepartmentAuthorityEntity import 제거 (관계 제거)
 
 @Entity()
 export class DepartmentInfoEntity {
@@ -46,8 +46,7 @@ export class DepartmentInfoEntity {
     // @JoinTable({ name: 'reviewAuthorities' })
     // reviewAuthorities: UserEntity[];
 
-    @OneToMany(() => UserDepartmentAuthorityEntity, (auth) => auth.department)
-    userAuthorities: UserDepartmentAuthorityEntity[];
+    // UserDepartmentAuthorityEntity와의 관계 제거 (단순 ID 필드 사용)
 
     @Column({ default: false })
     isExclude: boolean;
