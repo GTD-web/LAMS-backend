@@ -26,28 +26,7 @@ export class DepartmentInfoEntity {
     @Column({ type: 'jsonb', nullable: true })
     flattenedChildrenIds: {
         departmentIds: string[];
-        mmsDepartmentIds: string[];
     };
-
-    // @ManyToMany(() => UserEntity, (user) => user.accessableDepartments, {
-    //     cascade: true,
-    //     eager: true,
-    //     onDelete: 'CASCADE',
-    //     onUpdate: 'CASCADE',
-    // })
-    // @JoinTable({ name: 'accessAuthorities' })
-    // accessAuthorities: UserEntity[];
-
-    // @ManyToMany(() => UserEntity, (user) => user.reviewableDepartments, {
-    //     cascade: true,
-    //     eager: true,
-    //     onDelete: 'CASCADE',
-    //     onUpdate: 'CASCADE',
-    // })
-    // @JoinTable({ name: 'reviewAuthorities' })
-    // reviewAuthorities: UserEntity[];
-
-    // UserDepartmentAuthorityEntity와의 관계 제거 (단순 ID 필드 사용)
 
     @Column({ default: false })
     isExclude: boolean;

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AttendanceTypeEntity } from '../../../../domain/attendance-type/entities/attendance-type.entity';
+import { AttendanceTypeEntity } from '../../../domain/attendance-type/entities/attendance-type.entity';
 
 /**
  * 근무 유형 응답 DTO

@@ -3,10 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, IsNull, ILike, QueryRunner, In, Not } from 'typeorm';
 import { EmployeeInfoEntity } from '../entities/employee-info.entity';
 import { MMSEmployeeData } from '../interfaces/mms-employee-data.interface';
-import { EmployeeFilterQueryDto } from '../../../interfaces/dto/organization/requests/employee-filter-query.dto';
+import { EmployeeFilterQueryDto } from '../../../interfaces/controllers/organization/dto/employee-filter-query.dto';
 import { PaginatedResponseDto } from 'src/common/dtos/pagination/pagination-response.dto';
 import { plainToInstance } from 'class-transformer';
-import { EmployeeResponseDto } from 'src/interfaces/dto/organization/responses/employee-response.dto';
+import { EmployeeResponseDto } from '../../../business/organization/dto/employee-response.dto';
 
 /**
  * 직원 도메인 서비스
@@ -44,7 +44,6 @@ export class EmployeeDomainService {
     async findEmployeeById(employeeId: string): Promise<EmployeeInfoEntity | null> {
         return await this.employeeRepository.findOne({
             where: { employeeId },
-            relations: ['department'],
         });
     }
 
@@ -60,7 +59,6 @@ export class EmployeeDomainService {
             : this.employeeRepository;
         return await repository.findOne({
             where: { employeeNumber },
-            relations: ['departments', 'departments.department'],
         });
     }
 
@@ -70,7 +68,6 @@ export class EmployeeDomainService {
     async searchEmployees(searchTerm: string): Promise<EmployeeInfoEntity[]> {
         return await this.employeeRepository.find({
             where: [{ employeeName: Like(`%${searchTerm}%`) }, { employeeNumber: Like(`%${searchTerm}%`) }],
-            relations: ['department'],
             order: { employeeName: 'ASC' },
         });
     }
@@ -82,7 +79,6 @@ export class EmployeeDomainService {
         const employees = await this.employeeRepository.find({
             where: { employeeNumber: ILike(`%${employeeNumber}%`) },
             order: { employeeName: 'ASC' },
-            relations: ['department'],
         });
 
         this.logger.log(`사원번호 검색 완료: ${employees.length}명 조회`);

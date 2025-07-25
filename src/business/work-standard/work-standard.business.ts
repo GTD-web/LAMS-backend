@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { WorkStandardContextService } from '../../contexts/work-standard/work-standard-context.service';
-import { AttendanceTypeResponseDto } from '../../interfaces/dto/work-standard/responses/attendance-type-response.dto';
-import { AttendanceTypeListResponseDto } from '../../interfaces/dto/work-standard/responses/attendance-type-list-response.dto';
-import { HolidayResponseDto } from '../../interfaces/dto/work-standard/responses/holiday-response.dto';
-import { HolidayListResponseDto } from '../../interfaces/dto/work-standard/responses/holiday-list-response.dto';
-import { CreateAttendanceTypeDto } from '../../interfaces/dto/work-standard/requests/create-attendance-type.dto';
-import { UpdateAttendanceTypeDto } from '../../interfaces/dto/work-standard/requests/update-attendance-type.dto';
-import { CreateHolidayDto } from '../../interfaces/dto/work-standard/requests/create-holiday.dto';
-import { UpdateHolidayDto } from '../../interfaces/dto/work-standard/requests/update-holiday.dto';
+import { AttendanceTypeResponseDto } from './dto/attendance-type-response.dto';
+import { AttendanceTypeListResponseDto } from './dto/attendance-type-list-response.dto';
+import { HolidayResponseDto } from './dto/holiday-response.dto';
+import { HolidayListResponseDto } from './dto/holiday-list-response.dto';
+import { CreateAttendanceTypeDto } from '../../interfaces/controllers/work-standard/dto/create-attendance-type.dto';
+import { UpdateAttendanceTypeDto } from '../../interfaces/controllers/work-standard/dto/update-attendance-type.dto';
+import { CreateHolidayDto } from '../../interfaces/controllers/work-standard/dto/create-holiday.dto';
+import { UpdateHolidayDto } from '../../interfaces/controllers/work-standard/dto/update-holiday.dto';
 
 /**
  * 근무 기준 비즈니스 서비스

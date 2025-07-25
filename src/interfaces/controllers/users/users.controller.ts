@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Delete, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Query, Body, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
     ApiParam,
     ApiQuery,
+    ApiBody,
     ApiBearerAuth,
     ApiOkResponse,
     ApiCreatedResponse,
@@ -11,6 +12,7 @@ import {
     ApiUnauthorizedResponse,
     ApiForbiddenResponse,
     ApiNotFoundResponse,
+    ApiConflictResponse,
 } from '@nestjs/swagger';
 import { UserBusinessService } from '../../../business/user/user.business';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -25,6 +27,7 @@ import { AuthorityType } from '../../../domain/user-department-authority/enum/au
 import { GetUser } from '../../../common/decorators/get-user.decorator';
 import { UserEntity } from '../../../domain/user/entities/user.entity';
 import { UserWithDepartmentAuthorityResponseDto } from '../../../business/user/dto/user-with-department-authority-response.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 /**
  * 사용자 관리 컨트롤러
@@ -37,6 +40,40 @@ import { UserWithDepartmentAuthorityResponseDto } from '../../../business/user/d
 @ApiBearerAuth()
 export class UsersController {
     constructor(private readonly userBusinessService: UserBusinessService) {}
+
+    @Post()
+    @Roles(UserRole.SYSTEM_ADMIN)
+    @ApiOperation({
+        summary: '사용자 생성',
+        description: '새로운 사용자를 생성합니다.',
+    })
+    @ApiBody({
+        type: CreateUserDto,
+        description: '사용자 생성 데이터',
+    })
+    @ApiCreatedResponse({
+        description: '사용자 생성 성공',
+        type: UserResponseDto,
+    })
+    @ApiBadRequestResponse({
+        description: '잘못된 요청 데이터',
+        type: ErrorResponseDto,
+    })
+    @ApiUnauthorizedResponse({
+        description: '인증 실패',
+        type: ErrorResponseDto,
+    })
+    @ApiForbiddenResponse({
+        description: '접근 권한 없음 - 시스템 관리자 권한 필요',
+        type: ErrorResponseDto,
+    })
+    @ApiConflictResponse({
+        description: '이미 존재하는 이메일',
+        type: ErrorResponseDto,
+    })
+    async createUser(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
+        return await this.userBusinessService.createUser(createUserDto);
+    }
 
     @Get()
     @Roles(UserRole.SYSTEM_ADMIN, UserRole.ATTENDANCE_ADMIN)

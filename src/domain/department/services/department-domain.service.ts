@@ -1,10 +1,10 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere, FindManyOptions, ILike, QueryRunner } from 'typeorm';
+import { Repository, FindOptionsWhere, FindManyOptions, ILike, QueryRunner, In } from 'typeorm';
 import { DepartmentInfoEntity } from '../entities/department-info.entity';
 import { MMSDepartmentResponseDto } from '../../../interfaces/controllers/organization/dto/mms-department-import.dto';
 import { PaginationMetaDto, PaginatedResponseDto } from '../../../common/dtos/pagination/pagination-response.dto';
-import { DepartmentResponseDto } from '../../../interfaces/dto/organization/responses/department-response.dto';
+import { DepartmentResponseDto } from '../../../business/organization/dto/department-response.dto';
 import { plainToInstance } from 'class-transformer';
 
 /**
@@ -31,7 +31,6 @@ export class DepartmentDomainService {
             : this.departmentRepository;
         return await repository.findOne({
             where: { departmentId },
-            relations: ['employees', 'employees.employee', 'children'],
         });
     }
 
@@ -62,7 +61,7 @@ export class DepartmentDomainService {
             ? queryRunner.manager.getRepository(DepartmentInfoEntity)
             : this.departmentRepository;
 
-        return await repository.findByIds(departmentIds);
+        return await repository.findBy({ departmentId: In(departmentIds) });
     }
 
     /**
@@ -95,7 +94,6 @@ export class DepartmentDomainService {
             order: { createdAt: 'DESC' },
             skip: (page - 1) * limit,
             take: limit,
-            relations: ['employees', 'employees.employee'],
         };
         const [departments, total] = await this.departmentRepository.findAndCount(findOptions);
 
@@ -128,7 +126,7 @@ export class DepartmentDomainService {
      */
     async updateDepartmentFlattenedIds(
         departmentId: string,
-        flattenedIds: { departmentIds: string[]; mmsDepartmentIds: string[] },
+        flattenedIds: { departmentIds: string[] },
         queryRunner?: QueryRunner,
     ): Promise<void> {
         const repository = queryRunner
@@ -302,7 +300,6 @@ export class DepartmentDomainService {
             order: { departmentName: 'ASC' },
             skip: offset,
             take: limit,
-            relations: ['employees', 'employees.employee'],
         };
 
         // 총 개수와 데이터 조회

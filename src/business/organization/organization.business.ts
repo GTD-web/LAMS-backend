@@ -2,14 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { OrganizationContextService } from '../../contexts/organization/organization-context.service';
-import { DepartmentResponseDto } from '../../interfaces/dto/organization/responses/department-response.dto';
-import { EmployeeResponseDto } from '../../interfaces/dto/organization/responses/employee-response.dto';
-import { SyncOrganizationResponseDto } from '../../interfaces/dto/organization/responses/sync-organization-response.dto';
+import { DepartmentResponseDto } from './dto/department-response.dto';
+import { EmployeeResponseDto } from './dto/employee-response.dto';
+import { SyncOrganizationResponseDto } from './dto/sync-organization-response.dto';
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
 import { plainToInstance } from 'class-transformer';
 import { UserDepartmentAuthorityContext } from '../../contexts/user-department-authority/user-department-authority-context';
 import { PaginatedResponseDto } from 'src/common/dtos/pagination/pagination-response.dto';
-import { EmployeeFilterQueryDto } from '../../interfaces/dto/organization/requests/employee-filter-query.dto';
+import { EmployeeFilterQueryDto } from '../../interfaces/controllers/organization/dto/employee-filter-query.dto';
 
 /**
  * 조직관리 비즈니스 서비스
@@ -110,6 +110,7 @@ export class OrganizationBusinessService {
             // 트랜잭션 롤백
             await queryRunner.rollbackTransaction();
             this.logger.error(`조직 동기화 실패: ${error.message}`, error.stack);
+            throw error; // 에러를 다시 던져서 적절한 HTTP 에러 응답이 반환되도록 함
         } finally {
             // QueryRunner 해제
             await queryRunner.release();

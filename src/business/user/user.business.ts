@@ -7,6 +7,8 @@ import { AuthorityType } from '../../domain/user-department-authority/enum/autho
 import { UserDepartmentAuthorityContext } from '../../contexts/user-department-authority/user-department-authority-context';
 import { UserWithDepartmentAuthorityResponseDto } from './dto/user-with-department-authority-response.dto';
 import { UserRole } from '../../domain/user/enum/user.enum';
+import { CreateUserDto } from '../../interfaces/controllers/users/dto/create-user.dto';
+import { plainToInstance } from 'class-transformer';
 
 /**
  * 사용자 비즈니스 서비스
@@ -19,6 +21,14 @@ export class UserBusinessService {
         private readonly userContextService: UserContextService,
         private readonly userDepartmentAuthorityContext: UserDepartmentAuthorityContext,
     ) {}
+
+    /**
+     * 사용자 생성
+     */
+    async createUser(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+        const createdUser = await this.userContextService.사용자를_생성한다(createUserDto);
+        return plainToInstance(UserResponseDto, createdUser);
+    }
 
     /**
      * 사용자 목록 조회

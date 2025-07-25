@@ -15,14 +15,14 @@ import {
     ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { WorkStandardBusinessService } from '../../../business/work-standard/work-standard.business';
-import { AttendanceTypeResponseDto } from '../../dto/work-standard/responses/attendance-type-response.dto';
-import { AttendanceTypeListResponseDto } from '../../dto/work-standard/responses/attendance-type-list-response.dto';
-import { HolidayResponseDto } from '../../dto/work-standard/responses/holiday-response.dto';
-import { HolidayListResponseDto } from '../../dto/work-standard/responses/holiday-list-response.dto';
-import { CreateAttendanceTypeDto } from '../../dto/work-standard/requests/create-attendance-type.dto';
-import { UpdateAttendanceTypeDto } from '../../dto/work-standard/requests/update-attendance-type.dto';
-import { CreateHolidayDto } from '../../dto/work-standard/requests/create-holiday.dto';
-import { UpdateHolidayDto } from '../../dto/work-standard/requests/update-holiday.dto';
+import { AttendanceTypeResponseDto } from '../../../business/work-standard/dto/attendance-type-response.dto';
+import { AttendanceTypeListResponseDto } from '../../../business/work-standard/dto/attendance-type-list-response.dto';
+import { HolidayResponseDto } from '../../../business/work-standard/dto/holiday-response.dto';
+import { HolidayListResponseDto } from '../../../business/work-standard/dto/holiday-list-response.dto';
+import { CreateAttendanceTypeDto } from './dto/create-attendance-type.dto';
+import { UpdateAttendanceTypeDto } from './dto/update-attendance-type.dto';
+import { CreateHolidayDto } from './dto/create-holiday.dto';
+import { UpdateHolidayDto } from './dto/update-holiday.dto';
 import { ErrorResponseDto } from '../../../common/dtos/common/error-response.dto';
 
 @ApiTags('work-standard')

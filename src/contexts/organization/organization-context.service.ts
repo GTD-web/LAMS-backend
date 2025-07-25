@@ -10,9 +10,9 @@ import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-quer
 import { MMSDepartmentResponseDto } from '../../interfaces/controllers/organization/dto/mms-department-import.dto';
 import { MMSEmployeeResponseDto } from '../../interfaces/controllers/organization/dto/mms-employee-import.dto';
 import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
-import { DepartmentResponseDto } from '../../interfaces/dto/organization/responses/department-response.dto';
-import { EmployeeResponseDto } from '../../interfaces/dto/organization/responses/employee-response.dto';
-import { EmployeeFilterQueryDto } from 'src/interfaces/dto/organization/requests/employee-filter-query.dto';
+import { DepartmentResponseDto } from '../../business/organization/dto/department-response.dto';
+import { EmployeeResponseDto } from '../../business/organization/dto/employee-response.dto';
+import { EmployeeFilterQueryDto } from '../../interfaces/controllers/organization/dto/employee-filter-query.dto';
 
 /**
  * 조직 컨텍스트 서비스
@@ -35,9 +35,7 @@ export class OrganizationContextService {
      */
     async getDepartmentsFromMMS(): Promise<MMSDepartmentResponseDto[]> {
         try {
-            console.log('process.env.MMS_BASE_URL:', process.env.MMS_BASE_URL);
             const department = await axios.get(`${process.env.MMS_BASE_URL}/api/departments?hierarchy=true`);
-            this.logger.debug(`MMS에서 가져온 부서 데이터:`, JSON.stringify(department.data, null, 2));
             return department.data;
         } catch (error) {
             this.logger.error('MMS 부서 데이터 조회 실패', error);
@@ -272,7 +270,6 @@ export class OrganizationContextService {
      */
     async 부서의_평면화된_하위부서_ID목록을_JSON으로_조회한다(departmentId: string): Promise<{
         departmentIds: string[];
-        mmsDepartmentIds: string[];
     } | null> {
         const department = await this.departmentDomainService.findDepartmentById(departmentId);
         if (!department || !department.flattenedChildrenIds) {
@@ -313,9 +310,6 @@ export class OrganizationContextService {
         // 평면화된 ID 목록 생성
         const flattenedIds = {
             departmentIds: allChildrenDepartments.map((dept) => dept.departmentId),
-            mmsDepartmentIds: allChildrenDepartments
-                .map((dept) => dept.mmsDepartmentId)
-                .filter((id) => id !== null && id !== undefined),
         };
 
         // JSON 필드 업데이트
@@ -409,7 +403,7 @@ export class OrganizationContextService {
         employeeFilterQuery?: EmployeeFilterQueryDto,
     ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
         const flattenedIds = await this.부서의_평면화된_하위부서_ID목록을_JSON으로_조회한다(departmentId);
-
+        console.log('flattenedIds:', flattenedIds);
         if (!flattenedIds) {
             throw new Error(`부서 ${departmentId}의 하위 부서 정보를 찾을 수 없습니다.`);
         }
