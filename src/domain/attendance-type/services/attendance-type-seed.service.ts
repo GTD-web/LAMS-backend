@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AttendanceTypeEntity } from '../entities/attendance-type.entity';
+import { Cron } from '@nestjs/schedule';
 
 /**
  * 근무 유형 시드 도메인 서비스
@@ -20,6 +21,7 @@ export class AttendanceTypeSeedService {
     /**
      * 기본 근무 유형 데이터 시드
      */
+    @Cron('0 0 0 1 1 *')
     async seedDefaultAttendanceTypes(): Promise<void> {
         this.logger.log('근무 유형 시드 데이터 초기화 시작');
 

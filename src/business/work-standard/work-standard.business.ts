@@ -14,7 +14,6 @@ import {
     AttendanceTypeExistsResponseDto,
 } from './dto/attendance-type-seed-response.dto';
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
-import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 
 /**
  * 근무 기준 비즈니스 서비스
@@ -22,8 +21,6 @@ import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-re
  */
 @Injectable()
 export class WorkStandardBusinessService {
-    private readonly logger = new Logger(WorkStandardBusinessService.name);
-
     constructor(private readonly workStandardContextService: WorkStandardContextService) {}
 
     // ==================== 근무 유형 관련 메서드 ====================
