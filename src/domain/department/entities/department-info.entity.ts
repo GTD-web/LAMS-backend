@@ -68,9 +68,6 @@ export class DepartmentInfoEntity {
     @OneToMany(() => DepartmentInfoEntity, (department) => department.parent)
     children: DepartmentInfoEntity[];
 
-    @OneToMany(() => DepartmentEmployeeEntity, (employee) => employee.department)
-    employees: DepartmentEmployeeEntity[];
-
     @CreateDateColumn()
     createdAt: Date;
 

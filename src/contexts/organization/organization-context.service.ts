@@ -9,10 +9,11 @@ import { EmployeeInfoEntity } from '../../domain/employee/entities/employee-info
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
 import { MMSDepartmentResponseDto } from '../../interfaces/controllers/organization/dto/mms-department-import.dto';
 import { MMSEmployeeResponseDto } from '../../interfaces/controllers/organization/dto/mms-employee-import.dto';
-import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
+import { PaginatedResponseDto, PaginationMetaDto } from '../../common/dtos/pagination/pagination-response.dto';
 import { DepartmentResponseDto } from '../../interfaces/dto/organization/responses/department-response.dto';
 import { EmployeeResponseDto } from '../../interfaces/dto/organization/responses/employee-response.dto';
 import { EmployeeFilterQueryDto } from 'src/interfaces/dto/organization/requests/employee-filter-query.dto';
+import { plainToInstance } from 'class-transformer';
 
 /**
  * 조직 컨텍스트 서비스
@@ -181,15 +182,23 @@ export class OrganizationContextService {
      */
     async 직원_부서_중간테이블_데이터를_삭제_갱신한다(
         employee: EmployeeInfoEntity,
-        departmentId: string,
+        mmsDepartmentId: string,
         queryRunner?: QueryRunner,
     ): Promise<boolean> {
-        const department = await this.departmentDomainService.getDepartmentByMMSDepartmentId(departmentId, queryRunner);
+        const department = await this.departmentDomainService.findDepartmentByMMSDepartmentId(
+            mmsDepartmentId,
+            queryRunner,
+        );
 
-        // 도메인 서비스에서 효율적 업데이트 수행
+        if (!department) {
+            this.logger.warn(`MMS 부서 ID ${mmsDepartmentId}에 해당하는 부서를 찾을 수 없습니다.`);
+            return false;
+        }
+
+        // 도메인 서비스에서 효율적 업데이트 수행 (ID만 전달)
         return await this.departmentEmployeeDomainService.updateEmployeeDepartmentRelation(
-            employee,
-            department,
+            employee.employeeId,
+            department.departmentId,
             queryRunner,
         );
     }
@@ -397,24 +406,41 @@ export class OrganizationContextService {
     }
 
     /**
-     * 부서에 해당하는 직원 페이지네이션된 목록을 조회한다
+     * 부서에 해당하는 직원 페이지네이션된 목록을 조회한다 (Context에서 Domain 조합)
      */
     async 해당부서들의_직원을_페이지네이션된_목록으로_조회한다(
         departments: DepartmentInfoEntity[],
         paginationQuery: PaginationQueryDto,
         employeeFilterQuery?: EmployeeFilterQueryDto,
     ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
+        const { page = 1, limit = 10 } = paginationQuery;
         const departmentIds = departments.map((department) => department.departmentId);
 
-        // 도메인에서 페이지네이션까지 처리
-        const paginationResult = await this.departmentEmployeeDomainService.findPaginatedEmployeesByDepartmentIds(
-            departmentIds,
-            paginationQuery,
+        // 1. Department-Employee Domain에서 직원 ID 목록 조회
+        const employeeIds = await this.departmentEmployeeDomainService.findEmployeeIdsByDepartmentIds(departmentIds);
+
+        if (employeeIds.length === 0) {
+            const meta = new PaginationMetaDto(page, limit, 0);
+            return new PaginatedResponseDto([], meta);
+        }
+
+        // 2. Employee Domain에서 직원 정보 조회 및 필터링
+        const employees = await this.employeeDomainService.findEmployeesByIdsWithFiltering(
+            employeeIds,
             employeeFilterQuery,
         );
 
-        // 응답 DTO 생성
-        return paginationResult;
+        // 3. Context에서 페이지네이션 처리
+        const totalCount = employees.length;
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+
+        const paginatedEmployees = employees
+            .slice(startIndex, endIndex)
+            .map((employee) => plainToInstance(EmployeeResponseDto, employee));
+
+        const meta = new PaginationMetaDto(page, limit, totalCount);
+        return new PaginatedResponseDto(paginatedEmployees, meta);
     }
 
     /**
