@@ -1,7 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, FindOptionsOrder } from 'typeorm';
 import { AttendanceTypeEntity } from '../entities/attendance-type.entity';
+import { PaginationQueryDto } from '../../../common/dtos/pagination/pagination-query.dto';
+import { PaginatedResponseDto, PaginationMetaDto } from '../../../common/dtos/pagination/pagination-response.dto';
 
 /**
  * 근무 유형 도메인 서비스
@@ -25,29 +27,57 @@ export class AttendanceTypeDomainService {
     }
 
     /**
+     * 근무 유형 ID로 조회 (예외처리)
+     */
+    async getAttendanceTypeById(attendanceTypeId: string): Promise<AttendanceTypeEntity> {
+        const attendanceType = await this.attendanceTypeRepository.findOne({
+            where: { attendanceTypeId },
+        });
+
+        if (!attendanceType) {
+            throw new NotFoundException('해당 ID의 근무 유형을 찾을 수 없습니다.');
+        }
+
+        return attendanceType;
+    }
+
+    /**
      * 근무 유형 목록 조회 (페이지네이션)
      */
-    async findAttendanceTypes(
-        page: number = 1,
-        limit: number = 10,
+    async findPaginatedAttendanceTypes(
+        paginationQuery: PaginationQueryDto,
         where?: FindOptionsWhere<AttendanceTypeEntity>,
         order?: FindOptionsOrder<AttendanceTypeEntity>,
-    ): Promise<{ attendanceTypes: AttendanceTypeEntity[]; total: number }> {
+    ): Promise<PaginatedResponseDto<AttendanceTypeEntity>> {
+        const { page, limit } = paginationQuery;
         const skip = (page - 1) * limit;
-        const take = limit;
 
-        const [attendanceTypes, total] = await Promise.all([
-            this.attendanceTypeRepository.find({ where, order, skip, take }),
-            this.attendanceTypeRepository.count({ where }),
-        ]);
+        const [attendanceTypes, total] = await this.attendanceTypeRepository.findAndCount({
+            where,
+            order: order || { createdAt: 'DESC' },
+            skip,
+            take: limit,
+        });
 
-        return { attendanceTypes, total };
+        const meta = new PaginationMetaDto(page, limit, total);
+        return new PaginatedResponseDto(attendanceTypes, meta);
     }
 
     /**
      * 근무 유형 생성
      */
     async createAttendanceType(attendanceTypeData: Partial<AttendanceTypeEntity>): Promise<AttendanceTypeEntity> {
+        // 제목 중복 검사
+        if (attendanceTypeData.title) {
+            const existingType = await this.attendanceTypeRepository.findOne({
+                where: { title: attendanceTypeData.title },
+            });
+
+            if (existingType) {
+                throw new ConflictException('이미 존재하는 근무 유형 제목입니다.');
+            }
+        }
+
         const newAttendanceType = this.attendanceTypeRepository.create(attendanceTypeData);
         return await this.attendanceTypeRepository.save(newAttendanceType);
     }
@@ -59,16 +89,38 @@ export class AttendanceTypeDomainService {
         attendanceTypeId: string,
         updateData: Partial<AttendanceTypeEntity>,
     ): Promise<AttendanceTypeEntity> {
+        // 존재하는 근무 유형인지 확인
+        const existingType = await this.getAttendanceTypeById(attendanceTypeId);
+
+        // 제목 중복 검사 (자신 제외)
+        if (updateData.title && updateData.title !== existingType.title) {
+            const duplicateType = await this.attendanceTypeRepository.findOne({
+                where: { title: updateData.title },
+            });
+
+            if (duplicateType) {
+                throw new ConflictException('이미 존재하는 근무 유형 제목입니다.');
+            }
+        }
+
         await this.attendanceTypeRepository.update(attendanceTypeId, updateData);
-        return await this.findAttendanceTypeById(attendanceTypeId);
+        return await this.getAttendanceTypeById(attendanceTypeId);
     }
 
     /**
      * 근무 유형 삭제
      */
     async deleteAttendanceType(attendanceTypeId: string): Promise<boolean> {
+        // 존재하는 근무 유형인지 확인
+        await this.getAttendanceTypeById(attendanceTypeId);
+
         const result = await this.attendanceTypeRepository.delete(attendanceTypeId);
-        return result.affected > 0;
+
+        if (result.affected === 0) {
+            throw new BadRequestException('근무 유형 삭제에 실패했습니다.');
+        }
+
+        return true;
     }
 
     /**

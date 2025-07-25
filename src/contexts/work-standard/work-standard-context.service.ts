@@ -1,8 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AttendanceTypeDomainService } from '../../domain/attendance-type/services/attendance-type-domain.service';
+import { AttendanceTypeSeedService } from '../../domain/attendance-type/services/attendance-type-seed.service';
 import { HolidayDomainService } from '../../domain/holiday/services/holiday-domain.service';
+import { HolidayCronService } from '../../domain/holiday/services/holiday-cron.service';
 import { AttendanceTypeEntity } from '../../domain/attendance-type/entities/attendance-type.entity';
 import { HolidayInfoEntity } from '../../domain/holiday/entities/holiday-info.entity';
+import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
+import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 
 /**
  * 근무 기준 Context 서비스
@@ -14,7 +18,9 @@ export class WorkStandardContextService {
 
     constructor(
         private readonly attendanceTypeDomainService: AttendanceTypeDomainService,
+        private readonly attendanceTypeSeedService: AttendanceTypeSeedService,
         private readonly holidayDomainService: HolidayDomainService,
+        private readonly holidayCronService: HolidayCronService,
     ) {}
 
     // ==================== 근무 유형 관련 메서드 ====================
@@ -23,29 +29,17 @@ export class WorkStandardContextService {
      * 페이지네이션된 근무 유형 목록 조회
      */
     async 페이지네이션된_근무_유형_목록_조회한다(
-        limit: number,
-        page: number,
-    ): Promise<{
-        attendanceTypes: AttendanceTypeEntity[];
-        total: number;
-        page: number;
-        limit: number;
-    }> {
-        const { attendanceTypes, total } = await this.attendanceTypeDomainService.findAttendanceTypes(
-            page,
-            limit,
-            undefined,
-            { createdAt: 'DESC' },
+        paginationQuery: PaginationQueryDto,
+    ): Promise<PaginatedResponseDto<AttendanceTypeEntity>> {
+        const result = await this.attendanceTypeDomainService.findPaginatedAttendanceTypes(paginationQuery, undefined, {
+            createdAt: 'DESC',
+        });
+
+        this.logger.log(
+            `근무 유형 목록 조회 완료: ${result.data.length}개 (페이지: ${result.meta.page}, 제한: ${result.meta.limit})`,
         );
 
-        this.logger.log(`근무 유형 목록 조회 완료: ${attendanceTypes.length}개 (페이지: ${page}, 제한: ${limit})`);
-
-        return {
-            attendanceTypes,
-            total,
-            page,
-            limit,
-        };
+        return result;
     }
 
     /**
@@ -60,6 +54,15 @@ export class WorkStandardContextService {
             this.logger.warn(`근무 유형을 찾을 수 없음: ${attendanceTypeId}`);
         }
 
+        return attendanceType;
+    }
+
+    /**
+     * 근무 유형 ID로 조회 (예외처리)
+     */
+    async 근무_유형_ID로_조회_예외처리한다(attendanceTypeId: string): Promise<AttendanceTypeEntity> {
+        const attendanceType = await this.attendanceTypeDomainService.getAttendanceTypeById(attendanceTypeId);
+        this.logger.log(`근무 유형 조회 완료: ${attendanceType.title} (ID: ${attendanceTypeId})`);
         return attendanceType;
     }
 
@@ -128,26 +131,18 @@ export class WorkStandardContextService {
      */
     async 페이지네이션된_연도별_휴일_목록_조회한다(
         year: number,
-        limit: number,
-        page: number,
-    ): Promise<{
-        holidays: HolidayInfoEntity[];
-        total: number;
-        page: number;
-        limit: number;
-        year: number;
-    }> {
-        const { holidays, total } = await this.holidayDomainService.findHolidaysByYear(year, page, limit, {
+        paginationQuery: PaginationQueryDto,
+    ): Promise<PaginatedResponseDto<HolidayInfoEntity> & { year: number }> {
+        const result = await this.holidayDomainService.findPaginatedHolidaysByYear(year, paginationQuery, {
             holidayDate: 'ASC',
         });
 
-        this.logger.log(`${year}년 휴일 목록 조회 완료: ${holidays.length}개 (페이지: ${page}, 제한: ${limit})`);
+        this.logger.log(
+            `${year}년 휴일 목록 조회 완료: ${result.data.length}개 (페이지: ${result.meta.page}, 제한: ${result.meta.limit})`,
+        );
 
         return {
-            holidays,
-            total,
-            page,
-            limit,
+            ...result,
             year,
         };
     }
@@ -156,14 +151,8 @@ export class WorkStandardContextService {
      * 휴일 ID를 체크한다
      */
     async 휴일_ID를_체크한다(holidayId: string): Promise<HolidayInfoEntity> {
-        const holiday = await this.holidayDomainService.findHolidayById(holidayId);
-
-        if (!holiday) {
-            throw new Error(`휴일을 찾을 수 없습니다: ${holidayId}`);
-        }
-
+        const holiday = await this.holidayDomainService.getHolidayById(holidayId);
         this.logger.log(`휴일 ID 체크 완료: ${holiday.holidayName} (ID: ${holidayId})`);
-
         return holiday;
     }
 
@@ -264,11 +253,64 @@ export class WorkStandardContextService {
         this.logger.log(`월간 이벤트 요약 업데이트 예정: ${year}-${month}`);
     }
 
+    // ==================== 휴일 동기화 관련 메서드 ====================
+
     /**
-     * SEED 데이터 초기화 설정한다
+     * 연도별 휴일 동기화를 실행한다
      */
-    async SEED_데이터_초기화_설정한다(): Promise<void> {
-        // TODO: SEED 데이터 초기화 로직 구현
-        this.logger.log('SEED 데이터 초기화 설정 완료');
+    async 연도별_휴일_동기화를_실행한다(year?: string): Promise<HolidayInfoEntity[]> {
+        const targetYear = year || new Date().getFullYear().toString();
+        return await this.holidayDomainService.syncHolidaysByYear(targetYear);
+    }
+
+    /**
+     * 현재 연도 휴일 동기화 (Cron 작업)
+     */
+    async 현재_연도_휴일_동기화_작업을_실행한다(): Promise<void> {
+        await this.holidayCronService.syncCurrentYearHolidays();
+    }
+
+    /**
+     * 다음 연도 휴일 동기화 (Cron 작업)
+     */
+    async 다음_연도_휴일_동기화_작업을_실행한다(): Promise<void> {
+        await this.holidayCronService.syncNextYearHolidays();
+    }
+
+    /**
+     * 수동 휴일 동기화
+     */
+    async 수동_휴일_동기화를_실행한다(year?: string): Promise<void> {
+        await this.holidayCronService.manualSyncHolidays(year);
+    }
+
+    // ==================== 근무 유형 시드 관련 메서드 ====================
+
+    /**
+     * 근무 유형 시드 데이터를 초기화한다
+     */
+    async 근무_유형_시드_데이터를_초기화한다(): Promise<void> {
+        await this.attendanceTypeSeedService.seedDefaultAttendanceTypes();
+    }
+
+    /**
+     * 근무 유형 시드 데이터를 재초기화한다
+     */
+    async 근무_유형_시드_데이터를_재초기화한다(): Promise<void> {
+        await this.attendanceTypeSeedService.resetAttendanceTypeSeeds();
+    }
+
+    /**
+     * 근무 유형 개수를 조회한다
+     */
+    async 근무_유형_개수를_조회한다(): Promise<number> {
+        return await this.attendanceTypeSeedService.getAttendanceTypeCount();
+    }
+
+    /**
+     * 특정 근무 유형의 존재 여부를 확인한다
+     */
+    async 근무_유형_존재_여부를_확인한다(title: string): Promise<boolean> {
+        return await this.attendanceTypeSeedService.isAttendanceTypeExists(title);
     }
 }
