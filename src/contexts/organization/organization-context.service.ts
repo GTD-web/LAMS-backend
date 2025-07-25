@@ -9,11 +9,10 @@ import { EmployeeInfoEntity } from '../../domain/employee/entities/employee-info
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
 import { MMSDepartmentResponseDto } from '../../interfaces/controllers/organization/dto/mms-department-import.dto';
 import { MMSEmployeeResponseDto } from '../../interfaces/controllers/organization/dto/mms-employee-import.dto';
-import { PaginatedResponseDto, PaginationMetaDto } from '../../common/dtos/pagination/pagination-response.dto';
+import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 import { DepartmentResponseDto } from '../../interfaces/dto/organization/responses/department-response.dto';
 import { EmployeeResponseDto } from '../../interfaces/dto/organization/responses/employee-response.dto';
 import { EmployeeFilterQueryDto } from 'src/interfaces/dto/organization/requests/employee-filter-query.dto';
-import { plainToInstance } from 'class-transformer';
 
 /**
  * 조직 컨텍스트 서비스
@@ -427,44 +426,6 @@ export class OrganizationContextService {
 
         return employees;
     }
-
-    /**
-     * 부서에 해당하는 직원 페이지네이션된 목록을 조회한다 (Context에서 Domain 조합)
-     */
-    // async 해당부서들의_직원을_페이지네이션된_목록으로_조회한다(
-    //     departments: DepartmentInfoEntity[],
-    //     paginationQuery: PaginationQueryDto,
-    //     employeeFilterQuery?: EmployeeFilterQueryDto,
-    // ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
-    //     const { page = 1, limit = 10 } = paginationQuery;
-    //     const departmentIds = departments.map((department) => department.departmentId);
-
-    //     // 1. Department-Employee Domain에서 직원 ID 목록 조회
-    //     const employeeIds = await this.departmentEmployeeDomainService.findEmployeeIdsByDepartmentIds(departmentIds);
-
-    //     if (employeeIds.length === 0) {
-    //         const meta = new PaginationMetaDto(page, limit, 0);
-    //         return new PaginatedResponseDto([], meta);
-    //     }
-
-    //     // 2. Employee Domain에서 직원 정보 조회 및 필터링
-    //     const employees = await this.employeeDomainService.findEmployeesByIdsWithFiltering(
-    //         employeeIds,
-    //         employeeFilterQuery,
-    //     );
-
-    //     // 3. Context에서 페이지네이션 처리
-    //     const totalCount = employees.length;
-    //     const startIndex = (page - 1) * limit;
-    //     const endIndex = startIndex + limit;
-
-    //     const paginatedEmployees = employees
-    //         .slice(startIndex, endIndex)
-    //         .map((employee) => plainToInstance(EmployeeResponseDto, employee));
-
-    //     const meta = new PaginationMetaDto(page, limit, totalCount);
-    //     return new PaginatedResponseDto(paginatedEmployees, meta);
-    // }
 
     /**
      * 직원들의 연차 정보를 갱신해서 보여준다

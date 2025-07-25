@@ -65,93 +65,6 @@ export class EmployeeDomainService {
     }
 
     /**
-     * 직원 검색 (복합 조건)
-     */
-    // async searchEmployeesWithCriteria(searchCriteria: {
-    //     employeeName?: string;
-    //     employeeNumber?: string;
-    //     isExcludedFromCalculation?: boolean;
-    //     isActive?: boolean;
-    //     keyword?: string;
-    //     limit?: number;
-    //     page?: number;
-    // }): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
-    //     const {
-    //         employeeName,
-    //         employeeNumber,
-    //         isExcludedFromCalculation,
-    //         isActive,
-    //         keyword,
-    //         limit = 10,
-    //         page = 1,
-    //     } = searchCriteria;
-
-    //     // 검색 조건 구성
-    //     const whereConditions: FindOptionsWhere<EmployeeInfoEntity>[] = [];
-
-    //     // 키워드 통합 검색이 있는 경우
-    //     if (keyword) {
-    //         const keywordConditions: FindOptionsWhere<EmployeeInfoEntity> = {
-    //             employeeName: ILike(`%${keyword}%`),
-    //         };
-    //         if (isExcludedFromCalculation !== undefined) {
-    //             keywordConditions.isExcludedFromCalculation = isExcludedFromCalculation;
-    //         }
-    //         whereConditions.push(keywordConditions);
-
-    //         // 사원번호로도 검색
-    //         const numberConditions: FindOptionsWhere<EmployeeInfoEntity> = {
-    //             employeeNumber: ILike(`%${keyword}%`),
-    //         };
-    //         if (isExcludedFromCalculation !== undefined) {
-    //             numberConditions.isExcludedFromCalculation = isExcludedFromCalculation;
-    //         }
-
-    //         whereConditions.push(numberConditions);
-    //     } else {
-    //         // 개별 필드 검색
-    //         const individualConditions: FindOptionsWhere<EmployeeInfoEntity> = {};
-
-    //         if (employeeName) {
-    //             individualConditions.employeeName = ILike(`%${employeeName}%`);
-    //         }
-    //         if (employeeNumber) {
-    //             individualConditions.employeeNumber = ILike(`%${employeeNumber}%`);
-    //         }
-
-    //         if (isExcludedFromCalculation !== undefined) {
-    //             individualConditions.isExcludedFromCalculation = isExcludedFromCalculation;
-    //         }
-
-    //         if (Object.keys(individualConditions).length > 0) {
-    //             whereConditions.push(individualConditions);
-    //         }
-
-    //         if (isActive !== undefined) {
-    //             individualConditions.quitedAt = isActive ? IsNull() : Not(IsNull());
-    //         }
-    //     }
-
-    //     // 검색 조건이 없으면 전체 조회
-    //     const findOptions: FindManyOptions<EmployeeInfoEntity> = {
-    //         where: whereConditions.length > 0 ? whereConditions : undefined,
-    //         order: { employeeName: 'ASC' },
-    //         skip: (page - 1) * limit,
-    //         take: limit,
-    //         relations: ['department'],
-    //     };
-
-    //     // 총 개수와 데이터 조회
-    //     const [employees, total] = await this.employeeRepository.findAndCount(findOptions);
-    //     const meta = new PaginationMetaDto(page, limit, total);
-    //     const employeeDtos = employees.map((employee) => plainToInstance(EmployeeResponseDto, employee));
-    //     const paginatedResult = new PaginatedResponseDto(employeeDtos, meta);
-
-    //     this.logger.log(`직원 검색 완료: ${employees.length}명 조회 (총 ${total}명)`);
-    //     return paginatedResult;
-    // }
-
-    /**
      * 기존 직원 검색 메서드 (하위 호환성 유지)
      */
     async searchEmployees(searchTerm: string): Promise<EmployeeInfoEntity[]> {
@@ -220,45 +133,6 @@ export class EmployeeDomainService {
             return await this.saveEmployee(newEmployee, queryRunner);
         }
     }
-
-    // /**
-    //  * 직원 ID 목록으로 직원 정보 조회 및 필터링
-    //  */
-    // async findEmployeesByIdsWithFiltering(
-    //     employeeIds: string[],
-    //     filterQuery?: EmployeeFilterQueryDto,
-    // ): Promise<EmployeeInfoEntity[]> {
-    //     if (!employeeIds || employeeIds.length === 0) {
-    //         return [];
-    //     }
-
-    //     // 기본 조건: 직원 ID 목록
-    //     let whereConditions: any = {
-    //         employeeId: In(employeeIds),
-    //     };
-
-    //     // 필터링 옵션 적용
-    //     if (filterQuery?.status === 'resigned') {
-    //         whereConditions.quitedAt = Not(IsNull());
-    //     } else if (filterQuery?.status === 'active') {
-    //         whereConditions.quitedAt = IsNull();
-    //     }
-
-    //     if (filterQuery?.excludeFromCalculation) {
-    //         whereConditions.isExcludedFromCalculation = true;
-    //     }
-
-    //     const employees = await this.employeeRepository.find({
-    //         where: whereConditions,
-    //     });
-
-    //     // 중복 제거 (혹시 모를 중복 데이터 방지)
-    //     const uniqueEmployees = employees.filter(
-    //         (employee, index, self) => index === self.findIndex((e) => e.employeeId === employee.employeeId),
-    //     );
-
-    //     return uniqueEmployees;
-    // }
 
     /**
      * 직원 ID 목록으로 페이지네이션된 직원 정보 조회 및 필터링 (Domain에서 페이지네이션 처리)
