@@ -8,16 +8,18 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConfig } from './common/configs/jwt.config';
 import { SeedModule } from './common/seeds/seed.module';
 import { OrganizationInterfaceModule } from './interfaces/controllers/organization/organization-interface.module';
-import databaseConfig, { JWT_CONFIG } from './common/configs/env.config';
+import databaseConfig, { JWT_CONFIG, SUPABASE_CONFIG } from './common/configs/env.config';
 import { WorkStandardInterfaceModule } from './interfaces/controllers/work-standard/work-standard-interface.module';
 import { UsersInterfaceModule } from './interfaces/controllers/users/users-interface.module';
 import { AuthInterfaceModule } from './interfaces/controllers/auth/auth-interface.module';
+import { FileInterfaceModule } from './interfaces/controllers/file/file-interface.module';
+import { ExcelInterfaceModule } from './interfaces/controllers/excel/excel-interface.module';
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            load: [databaseConfig, JWT_CONFIG],
+            load: [databaseConfig, JWT_CONFIG, SUPABASE_CONFIG],
         }),
         TypeOrmModule.forRootAsync({
             inject: [ConfigService],
@@ -33,6 +35,8 @@ import { AuthInterfaceModule } from './interfaces/controllers/auth/auth-interfac
         UsersInterfaceModule,
         OrganizationInterfaceModule,
         WorkStandardInterfaceModule,
+        FileInterfaceModule,
+        ExcelInterfaceModule,
     ],
     controllers: [AppController],
     providers: [AppService],

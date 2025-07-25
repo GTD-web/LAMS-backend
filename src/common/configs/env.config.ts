@@ -20,3 +20,13 @@ export const JWT_CONFIG = registerAs('jwt', () => {
         expiresIn: process.env.JWT_EXPIRES_IN,
     };
 });
+
+export const SUPABASE_CONFIG = registerAs('supabase', () => {
+    return {
+        url: process.env.SUPABASE_URL,
+        anonKey: process.env.SUPABASE_ANON_KEY,
+        serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+        bucketName: process.env.S3_BUCKET_NAME || 'lams-bucket',
+        endpoint: process.env.S3_ENDPOINT,
+    };
+});

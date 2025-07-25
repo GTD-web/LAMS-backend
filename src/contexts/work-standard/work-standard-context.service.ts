@@ -271,13 +271,6 @@ export class WorkStandardContextService {
     }
 
     /**
-     * 다음 연도 휴일 동기화 (Cron 작업)
-     */
-    async 다음_연도_휴일_동기화_작업을_실행한다(): Promise<void> {
-        await this.holidayCronService.syncNextYearHolidays();
-    }
-
-    /**
      * 수동 휴일 동기화
      */
     async 수동_휴일_동기화를_실행한다(year?: string): Promise<void> {

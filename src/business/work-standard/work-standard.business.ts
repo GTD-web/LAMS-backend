@@ -21,6 +21,8 @@ import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-quer
  */
 @Injectable()
 export class WorkStandardBusinessService {
+    private readonly logger = new Logger(WorkStandardBusinessService.name);
+
     constructor(private readonly workStandardContextService: WorkStandardContextService) {}
 
     // ==================== 근무 유형 관련 메서드 ====================
