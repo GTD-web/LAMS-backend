@@ -8,8 +8,6 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
-import { DepartmentEmployeeEntity } from '../../../domain/department-employee/entities/department-employee.entity';
-import { UserDepartmentAuthorityEntity } from 'src/domain/user-department-authority/entities/user-department-authority.entity';
 
 @Entity()
 export class DepartmentInfoEntity {
