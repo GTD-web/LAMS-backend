@@ -5,11 +5,4 @@ export enum UserRole {
     PROJECT_ADMIN = 'PROJECT_ADMIN',
     PROJECT_USER = 'PROJECT_USER',
     SYSTEM_USER = 'SYSTEM_USER',
-    LRIM_USER = 'LRIM_USER',
-    LRIM_ADMIN = 'LRIM_ADMIN',
-}
-
-export enum SystemRole {
-    SYSTEM_ADMIN = 'SYSTEM_ADMIN',
-    SYSTEM_USER = 'SYSTEM_USER',
 }

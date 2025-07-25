@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException, Logger, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AuthPayloadDto } from '../../interfaces/dto/auth/responses/auth-payload.dto';
+import { AuthPayloadDto } from '../../interfaces/controllers/auth/dto/auth-payload.dto';
 import { UserRole } from '../../domain/user/enum/user.enum';
-import { LoginResponseDto } from '../../interfaces/dto/auth/responses/login-response.dto';
+import { LoginResponseDto } from '../../interfaces/controllers/auth/dto/login-response.dto';
 import { UserEntity } from '../../domain/user/entities/user.entity';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from '../user/dto/user-response.dto';
@@ -69,7 +69,6 @@ export class AuthBusinessService {
             newPassword,
         );
 
-        this.logger.log(`비밀번호 변경 성공: ${updatedUser.email}`);
         return plainToInstance(UserResponseDto, updatedUser);
     }
 }

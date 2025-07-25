@@ -1,13 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { WorkStandardContextService } from '../../contexts/work-standard/work-standard-context.service';
-import { AttendanceTypeResponseDto } from '../../interfaces/dto/work-standard/responses/attendance-type-response.dto';
-import { AttendanceTypeListResponseDto } from '../../interfaces/dto/work-standard/responses/attendance-type-list-response.dto';
-import { HolidayResponseDto } from '../../interfaces/dto/work-standard/responses/holiday-response.dto';
-import { HolidayListResponseDto } from '../../interfaces/dto/work-standard/responses/holiday-list-response.dto';
-import { CreateAttendanceTypeDto } from '../../interfaces/dto/work-standard/requests/create-attendance-type.dto';
-import { UpdateAttendanceTypeDto } from '../../interfaces/dto/work-standard/requests/update-attendance-type.dto';
-import { CreateHolidayDto } from '../../interfaces/dto/work-standard/requests/create-holiday.dto';
-import { UpdateHolidayDto } from '../../interfaces/dto/work-standard/requests/update-holiday.dto';
+import { AttendanceTypeResponseDto } from './dto/attendance-type-response.dto';
+import { AttendanceTypeListResponseDto } from './dto/attendance-type-list-response.dto';
+import { HolidayResponseDto } from './dto/holiday-response.dto';
+import { HolidayListResponseDto } from './dto/holiday-list-response.dto';
+import { CreateAttendanceTypeDto } from '../../interfaces/controllers/work-standard/dto/create-attendance-type.dto';
+import { UpdateAttendanceTypeDto } from '../../interfaces/controllers/work-standard/dto/update-attendance-type.dto';
+import { CreateHolidayDto } from '../../interfaces/controllers/work-standard/dto/create-holiday.dto';
+import { UpdateHolidayDto } from '../../interfaces/controllers/work-standard/dto/update-holiday.dto';
+import { HolidaySyncResponseDto, ManualHolidaySyncResponseDto } from './dto/holiday-sync-response.dto';
+import {
+    AttendanceTypeSeedResponseDto,
+    AttendanceTypeExistsResponseDto,
+} from './dto/attendance-type-seed-response.dto';
+import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
 
 /**
  * 근무 기준 비즈니스 서비스
@@ -15,31 +21,21 @@ import { UpdateHolidayDto } from '../../interfaces/dto/work-standard/requests/up
  */
 @Injectable()
 export class WorkStandardBusinessService {
-    private readonly logger = new Logger(WorkStandardBusinessService.name);
-
     constructor(private readonly workStandardContextService: WorkStandardContextService) {}
-
-    /**
-     * SEED 데이터 초기화
-     */
-    async initializeSeedData(): Promise<void> {
-        await this.workStandardContextService.SEED_데이터_초기화_설정한다();
-        this.logger.log('SEED 데이터 초기화 완료');
-    }
 
     // ==================== 근무 유형 관련 메서드 ====================
 
     /**
      * 페이지네이션된 근무 유형 목록 조회
      */
-    async getAttendanceTypeList(limit: number, page: number): Promise<AttendanceTypeListResponseDto> {
-        const result = await this.workStandardContextService.페이지네이션된_근무_유형_목록_조회한다(limit, page);
+    async getAttendanceTypeList(paginationQuery: PaginationQueryDto): Promise<AttendanceTypeListResponseDto> {
+        const result = await this.workStandardContextService.페이지네이션된_근무_유형_목록_조회한다(paginationQuery);
 
         return new AttendanceTypeListResponseDto({
-            attendanceTypes: AttendanceTypeResponseDto.fromEntities(result.attendanceTypes),
-            total: result.total,
-            page: result.page,
-            limit: result.limit,
+            attendanceTypes: AttendanceTypeResponseDto.fromEntities(result.data),
+            total: result.meta.total,
+            page: result.meta.page,
+            limit: result.meta.limit,
         });
     }
 
@@ -72,9 +68,9 @@ export class WorkStandardBusinessService {
     /**
      * 근무 유형 ID로 조회
      */
-    async getAttendanceTypeById(attendanceTypeId: string): Promise<AttendanceTypeResponseDto | null> {
-        const entity = await this.workStandardContextService.근무_유형_ID로_조회한다(attendanceTypeId);
-        return entity ? AttendanceTypeResponseDto.fromEntity(entity) : null;
+    async getAttendanceTypeById(attendanceTypeId: string): Promise<AttendanceTypeResponseDto> {
+        const entity = await this.workStandardContextService.근무_유형_ID로_조회_예외처리한다(attendanceTypeId);
+        return AttendanceTypeResponseDto.fromEntity(entity);
     }
 
     /**
@@ -90,18 +86,17 @@ export class WorkStandardBusinessService {
     /**
      * 페이지네이션된 연도별 공휴일 목록 조회
      */
-    async getHolidayList(year: number, limit: number, page: number): Promise<HolidayListResponseDto> {
+    async getHolidayList(year: number, paginationQuery: PaginationQueryDto): Promise<HolidayListResponseDto> {
         const result = await this.workStandardContextService.페이지네이션된_연도별_휴일_목록_조회한다(
             year,
-            limit,
-            page,
+            paginationQuery,
         );
 
         return new HolidayListResponseDto({
-            holidays: HolidayResponseDto.fromEntities(result.holidays),
-            total: result.total,
-            page: result.page,
-            limit: result.limit,
+            holidays: HolidayResponseDto.fromEntities(result.data),
+            total: result.meta.total,
+            page: result.meta.page,
+            limit: result.meta.limit,
             year: result.year,
         });
     }
@@ -167,5 +162,74 @@ export class WorkStandardBusinessService {
         }
 
         return isDeleted;
+    }
+
+    // ==================== 휴일 동기화 관련 메서드 ====================
+
+    /**
+     * 연도별 휴일 동기화
+     */
+    async syncHolidaysByYear(year?: string): Promise<HolidaySyncResponseDto> {
+        const syncedHolidays = await this.workStandardContextService.연도별_휴일_동기화를_실행한다(year);
+        const targetYear = year || new Date().getFullYear().toString();
+
+        return new HolidaySyncResponseDto({
+            message: `${targetYear}년 휴일 동기화가 완료되었습니다.`,
+            syncedCount: syncedHolidays.length,
+            year: targetYear,
+        });
+    }
+
+    /**
+     * 수동 휴일 동기화
+     */
+    async manualSyncHolidays(year?: string): Promise<ManualHolidaySyncResponseDto> {
+        await this.workStandardContextService.수동_휴일_동기화를_실행한다(year);
+        const targetYear = year || new Date().getFullYear().toString();
+
+        return new ManualHolidaySyncResponseDto({
+            message: `${targetYear}년 휴일 동기화가 완료되었습니다.`,
+            year: targetYear,
+        });
+    }
+
+    // ==================== 근무 유형 시드 관련 메서드 ====================
+
+    /**
+     * 근무 유형 시드 데이터 초기화
+     */
+    async initializeAttendanceTypeSeeds(): Promise<AttendanceTypeSeedResponseDto> {
+        await this.workStandardContextService.근무_유형_시드_데이터를_초기화한다();
+        const count = await this.workStandardContextService.근무_유형_개수를_조회한다();
+
+        return new AttendanceTypeSeedResponseDto({
+            message: '근무 유형 시드 데이터 초기화가 완료되었습니다.',
+            count,
+        });
+    }
+
+    /**
+     * 근무 유형 시드 데이터 재초기화
+     */
+    async resetAttendanceTypeSeeds(): Promise<AttendanceTypeSeedResponseDto> {
+        await this.workStandardContextService.근무_유형_시드_데이터를_재초기화한다();
+        const count = await this.workStandardContextService.근무_유형_개수를_조회한다();
+
+        return new AttendanceTypeSeedResponseDto({
+            message: '근무 유형 시드 데이터 재초기화가 완료되었습니다.',
+            count,
+        });
+    }
+
+    /**
+     * 근무 유형 존재 여부 확인
+     */
+    async checkAttendanceTypeExists(title: string): Promise<AttendanceTypeExistsResponseDto> {
+        const exists = await this.workStandardContextService.근무_유형_존재_여부를_확인한다(title);
+
+        return new AttendanceTypeExistsResponseDto({
+            title,
+            exists,
+        });
     }
 }

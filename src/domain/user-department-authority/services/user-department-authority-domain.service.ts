@@ -1,11 +1,8 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, QueryRunner } from 'typeorm';
 import { UserDepartmentAuthorityEntity } from '../entities/user-department-authority.entity';
 import { AuthorityType } from '../enum/authority-type.enum';
-import { UserEntity } from '../../../domain/user/entities/user.entity';
-import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
-import { UserDepartmentAuthorityDto } from '../dto/user-department-authority.dto';
 
 /**
  * 사용자-부서 권한 도메인 서비스
@@ -20,18 +17,14 @@ export class UserDepartmentAuthorityDomainService {
     ) {}
 
     /**
-     * 권한 부여
+     * 권한 부여 (단순 ID 사용)
      */
-    async grantAuthority(
-        user: UserEntity,
-        department: DepartmentInfoEntity,
-        authorityType: AuthorityType,
-    ): Promise<boolean> {
+    async grantAuthority(userId: string, departmentId: string, authorityType: AuthorityType): Promise<boolean> {
         // 기존 권한이 있는지 확인
         const existingAuthority = await this.userDepartmentAuthorityRepository.findOne({
             where: {
-                userId: user.userId,
-                departmentId: department.departmentId,
+                userId,
+                departmentId,
                 authorityType,
             },
         });
@@ -41,8 +34,8 @@ export class UserDepartmentAuthorityDomainService {
         }
 
         const newAuthority = this.userDepartmentAuthorityRepository.create({
-            user: user,
-            department: department,
+            userId,
+            departmentId,
             authorityType,
         });
 
@@ -72,65 +65,66 @@ export class UserDepartmentAuthorityDomainService {
     }
 
     /**
-     * 사용자의 모든 부서 권한 조회 (활성/비활성 포함)
+     * 사용자의 모든 부서 권한 조회 (단순 ID 반환)
      */
-    async findAllUserDepartmentAuthorities(userId: string): Promise<UserDepartmentAuthorityDto> {
+    async findAllUserDepartmentAuthorities(userId: string): Promise<{
+        accessableDepartmentIds: string[];
+        reviewableDepartmentIds: string[];
+    }> {
         const authorities = await this.userDepartmentAuthorityRepository.find({
             where: { userId },
-            relations: ['department'],
             order: { createdAt: 'DESC' },
         });
 
-        const accessableDepartments = authorities
+        const accessableDepartmentIds = authorities
             .filter((authority) => authority.authorityType === AuthorityType.ACCESS)
-            .map((authority) => authority.department);
+            .map((authority) => authority.departmentId);
 
-        const reviewableDepartments = authorities
+        const reviewableDepartmentIds = authorities
             .filter((authority) => authority.authorityType === AuthorityType.REVIEW)
-            .map((authority) => authority.department);
+            .map((authority) => authority.departmentId);
 
-        return new UserDepartmentAuthorityDto(accessableDepartments, reviewableDepartments);
+        return { accessableDepartmentIds, reviewableDepartmentIds };
     }
 
     /**
-     * 부서의 모든 권한 사용자 조회 (활성/비활성 포함)
+     * 부서의 모든 권한 사용자 조회 (단순 엔티티 반환)
      */
     async findAllDepartmentAuthorities(departmentId: string): Promise<UserDepartmentAuthorityEntity[]> {
         return await this.userDepartmentAuthorityRepository.find({
             where: { departmentId },
-            relations: ['department', 'user', 'grantedBy'],
             order: { createdAt: 'DESC' },
         });
     }
 
     /**
-     * 사용자의 접근 가능한 부서 목록 조회
+     * 사용자의 접근 가능한 부서 ID 목록 조회
      */
-    async getUserAccessibleDepartment(userId: string): Promise<DepartmentInfoEntity[]> {
+    async getUserAccessibleDepartmentIds(userId: string): Promise<string[]> {
         const authorities = await this.userDepartmentAuthorityRepository.find({
             where: { userId, authorityType: AuthorityType.ACCESS },
             select: ['departmentId'],
         });
 
-        const departments = authorities.map((auth) => auth.department);
-        this.logger.debug(`접근 가능한 부서 수: ${departments.length}개`);
+        const departmentIds = authorities.map((auth) => auth.departmentId);
+        this.logger.debug(`접근 가능한 부서 수: ${departmentIds.length}개`);
 
-        return departments;
+        return departmentIds;
     }
 
     /**
-     * 사용자의 검토 가능한 부서 목록 조회
+     * 사용자의 검토 가능한 부서 ID 목록 조회
      */
-    async getUserReviewableDepartment(userId: string): Promise<DepartmentInfoEntity[]> {
+    async getUserReviewableDepartmentIds(userId: string): Promise<string[]> {
         const authorities = await this.userDepartmentAuthorityRepository.find({
             where: { userId, authorityType: AuthorityType.REVIEW },
             select: ['departmentId'],
         });
 
-        const departments = authorities.map((auth) => auth.department);
-        this.logger.debug(`검토 가능한 부서 수: ${departments.length}개`);
+        const departmentIds = authorities.map((auth) => auth.departmentId);
+        this.logger.debug(`검토 가능한 부서 수: ${departmentIds.length}개`);
 
-        return departments;
+        return departmentIds;
     }
 
     /**
@@ -165,5 +159,12 @@ export class UserDepartmentAuthorityDomainService {
         this.logger.debug(`부서 검토 권한자 존재 여부: ${hasReviewers ? '있음' : '없음'} (${count}명)`);
 
         return hasReviewers;
+    }
+
+    async removeUserDepartmentAuthorities(departmentId: string, queryRunner?: QueryRunner): Promise<void> {
+        const repository = queryRunner
+            ? queryRunner.manager.getRepository(UserDepartmentAuthorityEntity)
+            : this.userDepartmentAuthorityRepository;
+        await repository.delete({ departmentId });
     }
 }

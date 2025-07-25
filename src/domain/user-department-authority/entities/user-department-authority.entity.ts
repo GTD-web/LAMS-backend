@@ -1,30 +1,20 @@
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-    Unique,
-} from 'typeorm';
-import { DepartmentInfoEntity } from '../../../domain/department/entities/department-info.entity';
-import { UserEntity } from '../../../domain/user/entities/user.entity';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { AuthorityType } from '../enum/authority-type.enum';
 
 /**
  * 사용자-부서 권한 관리 엔티티
  * - 사용자의 부서별 접근 권한과 검토 권한을 관리
+ * - 단순 ID 필드만 사용
  */
 @Entity('user_department_authorities')
 export class UserDepartmentAuthorityEntity {
     @PrimaryGeneratedColumn('uuid')
     authorityId: string;
 
-    @Column({ type: 'uuid' })
+    @Column({ type: 'uuid', comment: '부서 ID' })
     departmentId: string;
 
-    @Column({ type: 'uuid' })
+    @Column({ type: 'uuid', comment: '사용자 ID' })
     userId: string;
 
     @Column({
@@ -39,13 +29,4 @@ export class UserDepartmentAuthorityEntity {
 
     @UpdateDateColumn()
     updatedAt: Date;
-
-    // 관계 설정
-    @ManyToOne(() => DepartmentInfoEntity, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'departmentId' })
-    department: DepartmentInfoEntity;
-
-    @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'userId' })
-    user: UserEntity;
 }

@@ -7,6 +7,8 @@ import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-re
 import { plainToInstance } from 'class-transformer';
 
 import { UserEntity } from '../../domain/user/entities/user.entity';
+import { CreateUserDto } from '../../interfaces/controllers/users/dto/create-user.dto';
+import { UserRole } from '../../domain/user/enum/user.enum';
 
 /**
  * 통합 사용자 컨텍스트 서비스
@@ -66,5 +68,20 @@ export class UserContextService {
      */
     async findUserById(userId: string): Promise<UserEntity> {
         return await this.userDomainService.findUserById(userId);
+    }
+
+    /**
+     * 사용자를 생성한다
+     */
+    async 사용자를_생성한다(createUserDto: CreateUserDto): Promise<UserEntity> {
+        const userData = {
+            username: createUserDto.username,
+            email: createUserDto.email,
+            password: createUserDto.password,
+            roles: createUserDto.roles ?? [UserRole.ATTENDANCE_USER, UserRole.SYSTEM_USER],
+            isActive: createUserDto.isActive ?? true,
+        };
+
+        return await this.userDomainService.createUser(userData);
     }
 }

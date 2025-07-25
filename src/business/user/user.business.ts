@@ -1,13 +1,14 @@
 import { UserContextService } from '../../contexts/user/user-context.service';
 import { UserResponseDto } from './dto/user-response.dto';
 import { PaginationQueryDto } from '../../common/dtos/pagination/pagination-query.dto';
-import { UserEntity } from '../../domain/user/entities/user.entity';
 import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 import { Injectable } from '@nestjs/common';
 import { AuthorityType } from '../../domain/user-department-authority/enum/authority-type.enum';
 import { UserDepartmentAuthorityContext } from '../../contexts/user-department-authority/user-department-authority-context';
 import { UserWithDepartmentAuthorityResponseDto } from './dto/user-with-department-authority-response.dto';
 import { UserRole } from '../../domain/user/enum/user.enum';
+import { CreateUserDto } from '../../interfaces/controllers/users/dto/create-user.dto';
+import { plainToInstance } from 'class-transformer';
 
 /**
  * 사용자 비즈니스 서비스
@@ -22,6 +23,14 @@ export class UserBusinessService {
     ) {}
 
     /**
+     * 사용자 생성
+     */
+    async createUser(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+        const createdUser = await this.userContextService.사용자를_생성한다(createUserDto);
+        return plainToInstance(UserResponseDto, createdUser);
+    }
+
+    /**
      * 사용자 목록 조회
      */
     async getUserList(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<UserResponseDto>> {
@@ -34,6 +43,7 @@ export class UserBusinessService {
     async getUserByIdWithDepartmentAuthority(userId: string): Promise<UserWithDepartmentAuthorityResponseDto> {
         const user = await this.userContextService.findUserById(userId);
 
+        // 사용자가 없으면 빈 값 반환
         if (!user) {
             return null;
         }

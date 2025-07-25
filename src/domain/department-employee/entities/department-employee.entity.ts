@@ -1,15 +1,13 @@
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { DepartmentInfoEntity } from '../../department/entities/department-info.entity';
-import { EmployeeInfoEntity } from '../../employee/entities/employee-info.entity';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class DepartmentEmployeeEntity {
     @PrimaryGeneratedColumn('uuid')
     departmentEmployeeId: string;
 
-    @ManyToOne(() => DepartmentInfoEntity, (department) => department.employees)
-    department: DepartmentInfoEntity;
+    @Column({ type: 'uuid' })
+    departmentId: string;
 
-    @ManyToOne(() => EmployeeInfoEntity, (employee) => employee.department)
-    employee: EmployeeInfoEntity;
+    @Column({ type: 'uuid' })
+    employeeId: string;
 }

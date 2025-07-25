@@ -9,14 +9,14 @@ export default registerAs('database', () => {
         port: parseInt(process.env.POSTGRES_PORT, 10) || 5432,
         username: process.env.POSTGRES_USER || 'admin',
         password: process.env.POSTGRES_PASSWORD || '1234',
-        database: process.env.POSTGRES_DATABASE || 'attendance-server',
-        url: process.env.POSTGRES_URL,
+        database: process.env.POSTGRES_DB || 'attendance-server',
+        schema: process.env.POSTGRES_SCHEMA || 'public',
     };
 });
 
 export const JWT_CONFIG = registerAs('jwt', () => {
     return {
-        secret: process.env.SUPABASE_JWT_SECRET,
+        secret: process.env.GLOBAL_SECRET,
         expiresIn: process.env.JWT_EXPIRES_IN,
     };
 });

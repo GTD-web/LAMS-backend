@@ -13,7 +13,6 @@ import {
 import { AuthBusinessService } from '../../../business/auth/auth.business';
 import { Public } from '../../../common/decorators/public.decorator';
 import { GetUser } from '../../../common/decorators/get-user.decorator';
-import { LoginResponseDto } from '../../dto/auth/responses/login-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserResponseDto } from '../../../business/user/dto/user-response.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -21,6 +20,7 @@ import { RolesGuard } from '../../../common/guards/roles.guard';
 import { ErrorResponseDto } from '../../../common/dtos/common/error-response.dto';
 import { UserEntity } from '../../../domain/user/entities/user.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 /**
  * 인증 컨트롤러

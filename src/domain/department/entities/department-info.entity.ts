@@ -3,15 +3,11 @@ import {
     CreateDateColumn,
     Entity,
     JoinColumn,
-    JoinTable,
-    ManyToMany,
     ManyToOne,
     OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
-import { DepartmentEmployeeEntity } from '../../../domain/department-employee/entities/department-employee.entity';
-import { UserEntity } from '../../../domain/user/entities/user.entity';
 
 @Entity()
 export class DepartmentInfoEntity {
@@ -27,23 +23,10 @@ export class DepartmentInfoEntity {
     @Column({ nullable: true })
     mmsDepartmentId: string;
 
-    @ManyToMany(() => UserEntity, (user) => user.accessableDepartments, {
-        cascade: true,
-        eager: true,
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
-    })
-    @JoinTable({ name: 'accessAuthorities' })
-    accessAuthorities: UserEntity[];
-
-    @ManyToMany(() => UserEntity, (user) => user.reviewableDepartments, {
-        cascade: true,
-        eager: true,
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
-    })
-    @JoinTable({ name: 'reviewAuthorities' })
-    reviewAuthorities: UserEntity[];
+    @Column({ type: 'jsonb', nullable: true })
+    flattenedChildrenIds: {
+        departmentIds: string[];
+    };
 
     @Column({ default: false })
     isExclude: boolean;
@@ -60,9 +43,6 @@ export class DepartmentInfoEntity {
 
     @OneToMany(() => DepartmentInfoEntity, (department) => department.parent)
     children: DepartmentInfoEntity[];
-
-    @OneToMany(() => DepartmentEmployeeEntity, (employee) => employee.department)
-    employees: DepartmentEmployeeEntity[];
 
     @CreateDateColumn()
     createdAt: Date;

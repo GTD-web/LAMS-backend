@@ -58,9 +58,9 @@ export class UserDomainService {
     /**
      * 사용자 인증 검증
      */
-    async validateUserCredentials(email: string, password: string): Promise<UserEntity | null> {
+    async validateUserCredentials(email: string, password: string): Promise<UserEntity> {
         const user = await this.userRepository.findOne({
-            where: { email: email.toLowerCase().trim() },
+            where: { email: email },
         });
 
         if (!user) {
@@ -71,7 +71,6 @@ export class UserDomainService {
             throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
         }
 
-        this.logger.log(`로그인 성공: ${user.email}`);
         return user;
     }
 
@@ -114,7 +113,6 @@ export class UserDomainService {
         const user = this.userRepository.create(userData);
         const savedUser = await this.userRepository.save(user);
 
-        this.logger.log(`사용자 생성 완료: ${savedUser.email}`);
         return savedUser;
     }
 

@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AttendanceTypeResponseDto } from './attendance-type-response.dto';
-
 /**
  * 근무 유형 목록 응답 DTO
  */
