@@ -13,6 +13,7 @@ import { WorkStandardInterfaceModule } from './interfaces/controllers/work-stand
 import { UsersInterfaceModule } from './interfaces/controllers/users/users-interface.module';
 import { AuthInterfaceModule } from './interfaces/controllers/auth/auth-interface.module';
 import { FileInterfaceModule } from './interfaces/controllers/file/file-interface.module';
+import { ExcelInterfaceModule } from './interfaces/controllers/excel/excel-interface.module';
 
 @Module({
     imports: [
@@ -35,6 +36,7 @@ import { FileInterfaceModule } from './interfaces/controllers/file/file-interfac
         OrganizationInterfaceModule,
         WorkStandardInterfaceModule,
         FileInterfaceModule,
+        ExcelInterfaceModule,
     ],
     controllers: [AppController],
     providers: [AppService],
