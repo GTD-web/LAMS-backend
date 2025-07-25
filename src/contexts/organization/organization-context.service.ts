@@ -12,7 +12,6 @@ import { MMSEmployeeResponseDto } from '../../interfaces/controllers/organizatio
 import { PaginatedResponseDto } from '../../common/dtos/pagination/pagination-response.dto';
 import { DepartmentResponseDto } from '../../interfaces/dto/organization/responses/department-response.dto';
 import { EmployeeResponseDto } from '../../interfaces/dto/organization/responses/employee-response.dto';
-import { EmployeeSearchOptions } from '../../domain/department-employee/interfaces/employee-search-options.interface';
 import { EmployeeFilterQueryDto } from 'src/interfaces/dto/organization/requests/employee-filter-query.dto';
 
 /**
@@ -65,8 +64,8 @@ export class OrganizationContextService {
     ): Promise<DepartmentInfoEntity[]> {
         const existingDepartments = await this.departmentDomainService.findAllDepartments(undefined, queryRunner);
 
-        // MMS 부서 데이터를 평면화 (domain 서비스 활용)
-        const flattenedMMSDepartments = this.departmentDomainService.flattenMMSDepartments(mmsDepartments);
+        // MMS 부서 데이터를 평면화
+        const flattenedMMSDepartments = this.flattenMMSDepartments(mmsDepartments);
 
         // 디버깅을 위한 로그 추가
         this.logger.debug(`기존 부서 수: ${existingDepartments.length}`);
@@ -118,20 +117,34 @@ export class OrganizationContextService {
         queryRunner?: QueryRunner,
     ): Promise<void> {
         // MMS 부서 데이터를 평면화하여 모든 부서 처리
-        const flattenedMMSDepartments = this.departmentDomainService.flattenMMSDepartments(mmsDepartments);
+        const flattenedMMSDepartments = this.flattenMMSDepartments(mmsDepartments);
 
         this.logger.debug(`업데이트할 MMS 부서 수: ${flattenedMMSDepartments.length}`);
 
         // 부모 부서부터 생성하기 위해 정렬
-        const sortedDepartments = this.departmentDomainService.sortDepartmentsByHierarchy(flattenedMMSDepartments);
+        const sortedDepartments = this.sortDepartmentsByHierarchy(flattenedMMSDepartments);
 
         // 평면화된 MMS 부서 데이터로 업데이트/생성
+        const updatedDepartmentIds = new Set<string>();
+
         for (const mmsDept of sortedDepartments) {
             this.logger.debug(
                 `부서 업데이트/생성: ${mmsDept.department_name} (_id: ${mmsDept._id}, id: ${mmsDept.id}, parent: ${mmsDept.parent_department_id})`,
             );
-            await this.departmentDomainService.createOrUpdateDepartment(mmsDept, undefined, queryRunner);
+            const updatedDepartment = await this.departmentDomainService.createOrUpdateDepartment(
+                mmsDept,
+                undefined,
+                queryRunner,
+            );
+
+            // 업데이트된 부서 ID 수집
+            if (updatedDepartment) {
+                updatedDepartmentIds.add(updatedDepartment.departmentId);
+            }
         }
+
+        // 업데이트된 부서들의 상위 부서들의 평면화된 ID를 업데이트
+        await this.업데이트된_부서들의_상위부서_평면화_ID를_업데이트한다(Array.from(updatedDepartmentIds), queryRunner);
 
         // MMS에 없는 부서 삭제
         this.logger.debug(`삭제할 부서 수: ${differentDepartments.length}`);
@@ -142,7 +155,7 @@ export class OrganizationContextService {
     }
 
     /**
-     * 직원을 업데이트한다 (도메인으로 위임)
+     * 직원을 업데이트한다
      */
     async MMS데이터와_비교_직원을_업데이트한다(
         mmsEmployee: MMSEmployeeResponseDto,
@@ -168,15 +181,23 @@ export class OrganizationContextService {
      */
     async 직원_부서_중간테이블_데이터를_삭제_갱신한다(
         employee: EmployeeInfoEntity,
-        departmentId: string,
+        mmsDepartmentId: string,
         queryRunner?: QueryRunner,
     ): Promise<boolean> {
-        const department = await this.departmentDomainService.getDepartmentByMMSDepartmentId(departmentId, queryRunner);
+        const department = await this.departmentDomainService.findDepartmentByMMSDepartmentId(
+            mmsDepartmentId,
+            queryRunner,
+        );
 
-        // 도메인 서비스에서 효율적 업데이트 수행
+        if (!department) {
+            this.logger.warn(`MMS 부서 ID ${mmsDepartmentId}에 해당하는 부서를 찾을 수 없습니다.`);
+            return false;
+        }
+
+        // 도메인 서비스에서 효율적 업데이트 수행 (ID만 전달)
         return await this.departmentEmployeeDomainService.updateEmployeeDepartmentRelation(
-            employee,
-            department,
+            employee.employeeId,
+            department.departmentId,
             queryRunner,
         );
     }
@@ -247,24 +268,163 @@ export class OrganizationContextService {
     }
 
     /**
-     * 부서에 해당하는 직원 페이지네이션된 목록을 조회한다
+     * JSON 필드를 활용하여 부서의 평면화된 하위 부서 ID 목록을 조회한다 (성능 최적화)
      */
-    async 해당부서들의_직원을_페이지네이션된_목록으로_조회한다(
-        departments: DepartmentInfoEntity[],
+    async 부서의_평면화된_하위부서_ID목록을_JSON으로_조회한다(departmentId: string): Promise<{
+        departmentIds: string[];
+        mmsDepartmentIds: string[];
+    } | null> {
+        const department = await this.departmentDomainService.findDepartmentById(departmentId);
+        if (!department || !department.flattenedChildrenIds) {
+            this.logger.warn(`부서 ${departmentId}의 평면화된 하위 부서 정보가 없습니다. 실시간 조회로 대체합니다.`);
+
+            // JSON 필드가 없으면 실시간으로 조회하여 업데이트
+            await this.부서의_평면화된_하위부서_ID를_업데이트한다(departmentId);
+
+            // 다시 조회
+            const updatedDepartment = await this.departmentDomainService.findDepartmentById(departmentId);
+            return updatedDepartment?.flattenedChildrenIds || null;
+        }
+
+        return department.flattenedChildrenIds;
+    }
+
+    /**
+     * 부서의 평면화된 하위 부서 ID들을 JSON 필드에 업데이트 (기존 collectAllChildrenFromMemory 재활용)
+     */
+    async 부서의_평면화된_하위부서_ID를_업데이트한다(departmentId: string, queryRunner?: QueryRunner): Promise<void> {
+        // 기존 로직 재활용: 모든 부서를 한 번에 조회 (성능 최적화)
+        const allDepartments = await this.departmentDomainService.findAllDepartments();
+
+        // 시작 부서 찾기
+        const targetDepartment = allDepartments.find((dept) => dept.departmentId === departmentId);
+        if (!targetDepartment) {
+            throw new Error(`Department with ID ${departmentId} not found`);
+        }
+
+        // 부서 ID별 맵 생성 (O(1) 접근)
+        const departmentMap = new Map<string, DepartmentInfoEntity>();
+        allDepartments.forEach((dept) => departmentMap.set(dept.departmentId, dept));
+
+        // 기존 collectAllChildrenFromMemory 함수 재활용
+        const allChildrenDepartments: DepartmentInfoEntity[] = [];
+        this.collectAllChildrenFromMemory(departmentId, departmentMap, allChildrenDepartments);
+
+        // 평면화된 ID 목록 생성
+        const flattenedIds = {
+            departmentIds: allChildrenDepartments.map((dept) => dept.departmentId),
+            mmsDepartmentIds: allChildrenDepartments
+                .map((dept) => dept.mmsDepartmentId)
+                .filter((id) => id !== null && id !== undefined),
+        };
+
+        // JSON 필드 업데이트
+        await this.departmentDomainService.updateDepartmentFlattenedIds(departmentId, flattenedIds, queryRunner);
+
+        this.logger.debug(
+            `부서 ${departmentId}의 평면화된 하위 부서 ID 업데이트 완료: ${JSON.stringify(flattenedIds)}`,
+        );
+    }
+
+    /**
+     * 모든 부서의 평면화된 하위 부서 ID들을 일괄 업데이트
+     */
+    async 모든_부서의_평면화된_하위부서_ID를_업데이트한다(queryRunner?: QueryRunner): Promise<void> {
+        const allDepartments = await this.departmentDomainService.findAllDepartments();
+
+        this.logger.debug(`${allDepartments.length}개 부서의 평면화된 하위 부서 ID 업데이트 시작`);
+
+        for (const department of allDepartments) {
+            await this.부서의_평면화된_하위부서_ID를_업데이트한다(department.departmentId, queryRunner);
+        }
+
+        this.logger.debug('모든 부서의 평면화된 하위 부서 ID 업데이트 완료');
+    }
+
+    /**
+     * 부서 ID들로 부서 목록을 조회한다
+     */
+    async 부서_ID들로_부서_목록을_조회한다(departmentIds: string[]): Promise<DepartmentInfoEntity[]> {
+        if (!departmentIds || departmentIds.length === 0) {
+            return [];
+        }
+
+        const allDepartments = await this.departmentDomainService.findAllDepartments();
+        return allDepartments.filter((dept) => departmentIds.includes(dept.departmentId));
+    }
+
+    /**
+     * 업데이트된 부서들의 상위 부서들의 평면화된 ID를 업데이트한다
+     */
+    async 업데이트된_부서들의_상위부서_평면화_ID를_업데이트한다(
+        updatedDepartmentIds: string[],
+        queryRunner?: QueryRunner,
+    ): Promise<void> {
+        if (!updatedDepartmentIds || updatedDepartmentIds.length === 0) {
+            return;
+        }
+
+        // 모든 부서를 조회하여 상위 부서들을 찾는다
+        const allDepartments = await this.departmentDomainService.findAllDepartments();
+        const affectedParentIds = new Set<string>();
+
+        // 업데이트된 부서들의 모든 상위 부서 ID를 수집
+        for (const updatedId of updatedDepartmentIds) {
+            this.collectAllParentDepartmentIds(updatedId, allDepartments, affectedParentIds);
+        }
+
+        this.logger.debug(`평면화 ID 업데이트 대상 상위 부서 수: ${affectedParentIds.size}`);
+
+        // 영향받은 상위 부서들의 평면화된 ID를 업데이트
+        for (const parentId of affectedParentIds) {
+            await this.부서의_평면화된_하위부서_ID를_업데이트한다(parentId, queryRunner);
+        }
+    }
+
+    /**
+     * 특정 부서의 모든 상위 부서 ID들을 재귀적으로 수집
+     */
+    private collectAllParentDepartmentIds(
+        departmentId: string,
+        allDepartments: DepartmentInfoEntity[],
+        collectedParentIds: Set<string>,
+    ): void {
+        const department = allDepartments.find((dept) => dept.departmentId === departmentId);
+        if (!department) {
+            return;
+        }
+
+        // 현재 부서도 포함 (자신의 하위부서 목록도 업데이트해야 함)
+        collectedParentIds.add(departmentId);
+
+        // 상위 부서가 있다면 재귀적으로 수집
+        if (department.parentDepartmentId) {
+            this.collectAllParentDepartmentIds(department.parentDepartmentId, allDepartments, collectedParentIds);
+        }
+    }
+
+    async 해당부서의_직원을_페이지네이션된_목록으로_조회한다(
+        departmentId: string,
         paginationQuery: PaginationQueryDto,
         employeeFilterQuery?: EmployeeFilterQueryDto,
     ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
-        const departmentIds = departments.map((department) => department.departmentId);
+        const flattenedIds = await this.부서의_평면화된_하위부서_ID목록을_JSON으로_조회한다(departmentId);
 
-        // 도메인에서 페이지네이션까지 처리
-        const paginationResult = await this.departmentEmployeeDomainService.findPaginatedEmployeesByDepartmentIds(
-            departmentIds,
+        if (!flattenedIds) {
+            throw new Error(`부서 ${departmentId}의 하위 부서 정보를 찾을 수 없습니다.`);
+        }
+
+        const employeeIds = await this.departmentEmployeeDomainService.findEmployeeIdsByDepartmentIds(
+            flattenedIds.departmentIds,
+        );
+
+        const employees = await this.employeeDomainService.findPaginatedEmployeesByIdsWithFiltering(
+            employeeIds,
             paginationQuery,
             employeeFilterQuery,
         );
 
-        // 응답 DTO 생성
-        return paginationResult;
+        return employees;
     }
 
     /**
@@ -283,5 +443,41 @@ export class OrganizationContextService {
 
     async findDepartmentById(departmentId: string): Promise<DepartmentInfoEntity> {
         return await this.departmentDomainService.findDepartmentById(departmentId);
+    }
+
+    /**
+     * 범용 계층구조 평면화 함수
+     */
+    private flattenHierarchy<T>(items: T[], getChildren: (item: T) => T[] | undefined): T[] {
+        const flattened: T[] = [];
+
+        const flatten = (item: T) => {
+            flattened.push(item);
+            const children = getChildren(item);
+            if (children && children.length > 0) {
+                children.forEach((child) => flatten(child));
+            }
+        };
+
+        items.forEach((item) => flatten(item));
+        return flattened;
+    }
+
+    /**
+     * MMS 부서 데이터를 평면화하는 함수 (재사용 가능한 유틸리티)
+     */
+    flattenMMSDepartments(departments: MMSDepartmentResponseDto[]): MMSDepartmentResponseDto[] {
+        return this.flattenHierarchy(departments, (dept) => dept.child_departments);
+    }
+
+    /**
+     * 평면화된 MMS 부서 데이터를 부모 부서부터 생성하기 위해 정렬
+     */
+    sortDepartmentsByHierarchy(departments: MMSDepartmentResponseDto[]): MMSDepartmentResponseDto[] {
+        return departments.sort((a, b) => {
+            if (!a.parent_department_id && b.parent_department_id) return -1;
+            if (a.parent_department_id && !b.parent_department_id) return 1;
+            return 0;
+        });
     }
 }

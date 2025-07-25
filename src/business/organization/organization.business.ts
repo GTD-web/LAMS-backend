@@ -10,7 +10,6 @@ import { plainToInstance } from 'class-transformer';
 import { UserDepartmentAuthorityContext } from '../../contexts/user-department-authority/user-department-authority-context';
 import { PaginatedResponseDto } from 'src/common/dtos/pagination/pagination-response.dto';
 import { EmployeeFilterQueryDto } from '../../interfaces/dto/organization/requests/employee-filter-query.dto';
-import { EmployeeSearchOptions } from '../../domain/department-employee/interfaces/employee-search-options.interface';
 
 /**
  * 조직관리 비즈니스 서비스
@@ -46,7 +45,7 @@ export class OrganizationBusinessService {
                 mmsDepartments,
                 queryRunner,
             );
-            console.log('differentDepartments:', differentDepartments);
+
             // 2. 해당 부서의 권한을 가진 데이터를 삭제한다.
             await this.userDepartmentAuthorityContext.해당_부서의_권한을_가진_데이터를_삭제한다(
                 differentDepartments,
@@ -110,7 +109,7 @@ export class OrganizationBusinessService {
         } catch (error) {
             // 트랜잭션 롤백
             await queryRunner.rollbackTransaction();
-            this.logger.error(`Entity 관계 설정 오류: ${error.message}`, error.stack);
+            this.logger.error(`조직 동기화 실패: ${error.message}`, error.stack);
         } finally {
             // QueryRunner 해제
             await queryRunner.release();
@@ -156,12 +155,9 @@ export class OrganizationBusinessService {
         paginationQuery: PaginationQueryDto,
         employeeFilterQuery?: EmployeeFilterQueryDto,
     ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
-        // 1. 부서의 속한 모든 부서 목록을 조회한다
-        const departments = await this.organizationContextService.부서의_속한_모든_부서_목록을_조회한다(departmentId);
-
-        // 2. 해당 부서들의 직원을 페이지네이션된 목록으로 조회한다
-        const result = await this.organizationContextService.해당부서들의_직원을_페이지네이션된_목록으로_조회한다(
-            departments,
+        // 1. 해당 부서들의 직원을 페이지네이션된 목록으로 조회한다
+        const result = await this.organizationContextService.해당부서의_직원을_페이지네이션된_목록으로_조회한다(
+            departmentId,
             paginationQuery,
             employeeFilterQuery,
         );

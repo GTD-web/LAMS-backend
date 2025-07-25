@@ -1,7 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { DailyEventSummaryEntity } from '../../../domain/attendance/daily-attendance/entities/daily-event-summary.entity';
-import { DepartmentEmployeeEntity } from '../../../domain/department-employee/entities/department-employee.entity';
 
 @Entity()
 export class EmployeeInfoEntity {
@@ -76,9 +75,6 @@ export class EmployeeInfoEntity {
         required: false,
     })
     isExcludedFromCalculation: boolean;
-
-    @OneToMany(() => DepartmentEmployeeEntity, (employee) => employee.employee)
-    departments: DepartmentEmployeeEntity[];
 
     // /**
     //  * 직원이 현재 재직 중인지 확인
