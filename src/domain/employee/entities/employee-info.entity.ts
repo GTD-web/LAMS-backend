@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { DailyEventSummaryEntity } from '../../../domain/attendance/daily-attendance/entities/daily-event-summary.entity';
+import { DailyEventSummaryEntity } from '../../daily-attendance/entities/daily-event-summary.entity';
 
 @Entity()
 export class EmployeeInfoEntity {
