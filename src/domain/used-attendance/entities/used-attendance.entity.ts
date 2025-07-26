@@ -1,4 +1,4 @@
-import { EmployeeInfoEntity } from '../../../../domain/employee/entities/employee-info.entity';
+import { EmployeeInfoEntity } from '../../employee/entities/employee-info.entity';
 import {
     Column,
     CreateDateColumn,
@@ -8,7 +8,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
-import { AttendanceTypeEntity } from '../../../attendance-type/entities/attendance-type.entity';
+import { AttendanceTypeEntity } from '../../attendance-type/entities/attendance-type.entity';
 @Entity()
 export class UsedAttendanceEntity {
     @PrimaryGeneratedColumn('uuid')
